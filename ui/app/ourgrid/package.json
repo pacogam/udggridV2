@@ -1,0 +1,35 @@
+{
+  "name": "ourgrid-app",
+  "version": "1.0.0",
+  "description": "OurGrid App",
+  "author": "OpenRemote",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "scripts": {
+    "clean": "npx tsc -b --clean && npx shx rm -rf dist",
+    "modelBuild": "npx orutil build",
+    "modelWatch": "npx orutil watch",
+    "build": "npx cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production",
+    "serve": "npx tsc -b --clean && npx shx rm -rf dist && npx orutil build && npx cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack serve --mode development",
+    "serveNoModelBuild": "npx tsc -b --clean && npx cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack serve --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@lit-labs/motion": "^1.0.3",
+    "@material/chips": "^14.0.0",
+    "@material/circular-progress": "^14.0.0",
+    "@openremote/manager": "workspace:*",
+    "@openremote/or-app": "workspace:*",
+    "countup.js": "^2.8.0",
+    "keen-slider": "^6.8.6",
+    "lit": "^2.0.2"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.22.7",
+    "@openremote/util": "workspace:*",
+    "file-loader": "^6.2.0"
+  }
+}

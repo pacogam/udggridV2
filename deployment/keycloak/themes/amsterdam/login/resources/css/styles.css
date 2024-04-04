@@ -1,0 +1,251 @@
+:root {
+    --app-primary-color: #F44F1A;
+    --app-secondary-color: #F9F5F2;
+    --app-background-color: #4F2D39;
+    --input-background-color: transparent;
+    --fadein-offset: 0s;
+
+    /* Animation duration. Gathered from material spec: https://m2.material.io/design/motion/speed.html#duration */
+    --og-duration-small: 100ms;
+    --og-duration-medium-entry: 250ms;
+    --og-duration-medium-exit: 200ms;
+    --og-duration-large-entry: 300ms;
+    --og-duration-large-exit: 300ms;
+
+    /* Easing properties. Gathered from material spec: https://m2.material.io/design/motion/speed.html#easing */
+    --og-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --og-easing-entry: cubic-bezier(0.0, 0.0, 0.2, 1);
+    --og-easing-exit: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: var(--app-background-color);
+    color: #F9F5F2;
+}
+
+#outer-wrapper {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+#wrapper {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#header-wrapper {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+#header-wrapper > div {
+    overflow: hidden;
+    display: inline-block;
+}
+
+#logo {
+    pointer-events: none;
+    margin-right: 0.3em;
+    float: left;
+}
+
+#logo svg {
+    width: 4em;
+    height: 4em;
+}
+
+#header {
+    font-weight: bold;
+    margin: 0;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#sub-header {
+    margin-top: 0.3em;
+    display: inline-block;
+}
+
+i.material-icons {
+    vertical-align: middle;
+    margin-right: 0.2em;
+}
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(MaterialIcons-Regular.eot); /* For IE6-8 */
+    src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(MaterialIcons-Regular.woff2) format('woff2'),
+    url(MaterialIcons-Regular.woff) format('woff'),
+    url(MaterialIcons-Regular.ttf) format('truetype');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px; /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+.row .col {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.col .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#remember-field {
+    padding: 0 0.75rem;
+}
+
+/*.row {
+    margin-bottom: 30px;
+}*/
+
+.card-panel {
+    background: rgba(217, 217, 217, 0.10);
+}
+
+.text-title {
+    font-size: 50px;
+    font-weight: 900;
+    color: var(--app-secondary-color);
+}
+
+.input-field:not(#remember-field) {
+    background: rgba(217, 217, 217, 0.05);
+    border-radius: 4px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-field>label {
+    -webkit-transform: translateY(15px);
+    transform: translateY(15px);
+}
+
+.input-field > label.active {
+    color: #9e9e9e !important;
+}
+
+.input-field>label:not(.label-icon).active {
+    -webkit-transform: translateY(-20px) scale(0.8);
+    transform: translateY(-20px) scale(0.8);
+}
+
+.input-field > input {
+    background-color: var(--input-background-color) !important;
+    margin: 4px 0 !important;
+    color: var(--app-secondary-color) !important;
+}
+.input-field > input:not(.invalid) {
+    border-bottom: 1px solid transparent !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.input-field .helper-text {
+    position: absolute;
+    width: 100%;
+}
+
+.btn {
+    width: 100%;
+    border-radius: 28px;
+    background-color: var(--app-primary-color) !important;
+}
+
+[type="checkbox"] + span:not(.lever):before {
+    border: 2px solid #9e9e9e;
+}
+
+[type="checkbox"] + span {
+    color: var(--app-secondary-color);
+}
+
+.fadein-image {
+    -webkit-animation: fade-in-image var(--og-duration-medium-entry) var(--og-easing-entry) var(--fadein-offset) both;
+    animation: fade-in-image var(--og-duration-medium-entry) var(--og-easing-entry) var(--fadein-offset) both;
+}
+
+@-webkit-keyframes fade-in-image {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes fade-in-image {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.fadein-animation {
+    -webkit-animation: fade-in-frames var(--og-duration-medium-entry) var(--og-easing-entry) var(--fadein-offset) both;
+    animation: fade-in-frames var(--og-duration-medium-entry) var(--og-easing-entry) var(--fadein-offset) both;
+}
+
+@-webkit-keyframes fade-in-frames {
+    0% {
+        -webkit-transform: /*scale(0.8)*/ translateY(20px);
+        transform: /*scale(0.8)*/ translateY(20px);
+        opacity: 0;
+    }
+    /*30% {
+        opacity: 1;
+    }*/
+    100% {
+        -webkit-transform: /*scale(1)*/ translateY(0);
+        transform: /*scale(1)*/ translateY(0);
+        opacity: 1;
+    }
+}
+@keyframes fade-in-frames{
+    0% {
+        -webkit-transform: /*scale(0.8)*/ translateY(20px);
+        transform: /*scale(0.8)*/ translateY(20px);
+        opacity: 0;
+    }
+    /*30% {
+        opacity: 1;
+    }*/
+    100% {
+        -webkit-transform: /*scale(1)*/ translateY(0);
+        transform: /*scale(1)*/ translateY(0);
+        opacity: 1;
+    }
+}

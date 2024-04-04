@@ -1,0 +1,13 @@
+apply plugin: "java-library"
+
+dependencies {
+    api resolveProject(":agent")
+    api project(":model")
+
+    // https://mvnrepository.com/artifact/com.rabbitmq/amqp-client
+    implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.16.0'
+}
+
+task installDist {
+    dependsOn jar
+}

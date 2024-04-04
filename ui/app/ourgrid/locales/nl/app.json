@@ -1,0 +1,186 @@
+{
+  "appName": "OurGrid",
+  "home": "Home",
+  "menu": "Menu",
+  "intro": "Introductie",
+  "houseCharacteristics": "Mijn huis",
+  "privacyStatement": "Privacy",
+  "continue": "Verder",
+  "remove": "Verwijderen",
+  "save": "Opslaan",
+  "success": "Opgeslagen",
+  "tryAgain": "Try again",
+  "saved": "bespaard",
+  "calendar": {
+    "lastWeek": "[Afgelopen] dddd",
+    "lastDay": "[Gisteren]",
+    "sameDay": "[Vandaag]",
+    "sameElse": "[Afgelopen] dddd",
+    "nextDay": "[Morgen]"
+  },
+  "page-account": {
+    "heading": "Jouw Account",
+    "username": "Gebruikersnaam",
+    "email": "Email adres",
+    "changePassword": "Wachtwoord wijzigen",
+    "deleteAccount": "Account verwijderen",
+    "deleteAccountConfirm": "Hiermee verwijder je hele account, en alle data die eraan gekoppeld is.\n\nDit kan niet worden teruggedraaid."
+  },
+  "page-privacy": {
+    "heading": "Privacy verklaring",
+    "accept": "Accepteer"
+  },
+  "challenge": {
+    "point": "punt",
+    "points": "punten",
+    "percentOfPointsEarned": "% van de punten verdiend"
+  },
+  "error": {
+    "districtAssetDataFailed": "Kon data van de wijk niet ophalen.",
+    "districtAssetDataPermission": "Je hebt geen toestemming on de data van de wijk in te zien.",
+    "historicalAssetData": "Fout tijdens het ophalen van sensordata uit het verleden.",
+    "historicalDistrictData": "Fout tijdens het ophalen van wijkdata uit het verleden.",
+    "challengeDataFailed": "Kon lijst aan uitdagingen niet laden.",
+    "setupCodeInvalid": "This device code is invalid.",
+    "setupDeviceNotFound": "Dit apparaat bestaat niet.",
+    "setupDeviceAlreadyLinked": "Dit apparaat is al verbonden met een andere gebruiker.",
+    "setupDeviceServerError": "We hebben je meter gevonden, maar er was een onbekende fout op de server. Probeer de app te herstarten.",
+    "unknown": "Onbekende error",
+    "userAssetFailed": "Kon data van de sensor niet vinden.",
+    "userAssetDataFailed": "Kon data van de sensor niet ophalen.",
+    "userAssetDataPermission": "Je hebt geen toestemming om de data van de sensor te lezen.",
+    "challengeAssetDataFailed": "Kon uitdagingen niet ophalen.",
+    "challengeAssetDataPermission": "Je hebt geen toestemming om de data van uitdagingen te lezen.",
+    "peakPointsAssetDataFailed": "Kon data van de pieken niet ophalen",
+    "peakPointsAssetDataPermission": "Je hebt geen toestemming om de data van pieken te lezen."
+  },
+  "onboarding": {
+    "introText1": "Welkom bij OurGrid. Door middel van uitdagingen en nuttige tips helpen wij je bewust te maken van je electriciteitsverbruik en moedigen we je aan je verbruik te optimaliseren.",
+    "introText2": "Doe mee met onze gemeenschap van energiebewuste gebruikers en maak een verschil voor de toekomst!",
+    "page2-heading": "Piekverbruik",
+    "page2-text1": "De meeste mensen gebruiken 's ochtends en 's avonds de meeste electriciteit. Maar hun zonnepanelen leveren juist overdag het meest.",
+    "page2-text2": "Dit leidt tot grote verschillen en piekbelastingen op het electriciteitsnet, hier is het netwerk niet voor gemaakt.",
+    "page2-text3": "Het spreiden van je verbruik is belangrijk om het netwerk te ontlasten en duurzamer gebruik te bevorderen.",
+    "page3-heading": "Actueel verbruik",
+    "page3-text": "Door de aangesloten dongle krijg je live inzicht in je eigen verbruik. Als het netwerk overbelast dreigt te raken zal je scherm rood kleuren."
+  },
+  "panel_tips": {
+    "heading": "Tips",
+    "subtitle": "Manieren om te besparen",
+    "text1": "Even niet koken",
+    "text2": "Auto laden uitstellen",
+    "text3": "Een wasje draaien",
+    "text4": "Verwarming omlaag",
+    "text5": "Even geen water koken"
+  },
+  "panel_characteristics": {
+    "SOLAR_PANELS": "Zonnepanelen",
+    "ELECTRIC_VEHICLE": "Elektrische auto",
+    "VEHICLE_CHARGER": "Auto oplader",
+    "HEAT_PUMP": "Warmte pomp",
+    "question_solarPanels": "Ik heb zonnepanelen.",
+    "question_electricVehicle": "Ik heb een elektrische auto.",
+    "question_vehicleCharger": "Ik heb een laadpaal.",
+    "question_heatPump": "Ik heb een warmtepomp.",
+    "select_electricVehicleBrand": "Kies het automerk",
+    "select_vehicleChargerBrand": "Kies merk van de laadpaal",
+    "select_heatPumpBrand": "Kies merk van de warmtepomp.",
+    "notApplicable": "Niet van toepassing."
+  },
+  "panel_deviceInfo": {
+    "yourDevice": "Jouw meter",
+    "noDeviceFound": "Geen apparaat verbonden",
+    "noDeviceText": "Stel een apparaat in",
+    "version": "Versie",
+    "unknownModel": "Onbekend model",
+    "unknownID": "Onbekend dongle ID",
+    "unknownVersion": "Onbekende versie",
+    "buttonText": "Stel apparaat in",
+    "refreshData": "Eigenschappen",
+    "removePromptText": "Je apparaat word losgekoppeld van je huishouden."
+  },
+  "panel_peakUsage": {
+    "heading": "Onze wijk heeft piekbelasting!"
+  },
+  "panel_peakNotification": {
+    "heading": "Onze wijk verwacht piekbelasting!",
+    "buttonText": "Doe mee aan uitdaging",
+    "joinedText": "Je doet mee!",
+    "startingSoon": "Uitdaging start binnenkort",
+    "startingInFewSeconds": "Uitdaging start bijna",
+    "startingInFewMinutes": "Uitdaging start over {{time}}",
+    "alreadyJoined": "Je doet al mee aan de uitdaging!",
+    "primaryText": "Help mee door nu energie te besparen. Gebruik tijdens deze uitdaging maximaal ",
+    "wattToSpare": "{{value}}",
+    "maxEarnings": "maximaal {{points}} punten"
+  },
+  "panel_earnings": {
+    "totalPoints": "Totaal aantal punten",
+    "exchangeRate": "Wisselkoers",
+    "expectedEarnings": "Verwachte opbrengst",
+    "perPoint": "per punt"
+  },
+  "panel_trophies": {
+    "heading": "Prijzenkast",
+    "totalPoints": "Totaal aantal punten",
+    "challengesJoined": "Uitdagingen",
+    "pointsEarned": "punten verdiend",
+    "noChallengesFound": "Geen uitdagingen gevonden",
+    "totalPeaksAvoided": "Pieken vermeden",
+    "peakPointsEarned": "punten verdiend",
+    "noPeaksFound": "Geen pieken gevonden",
+    "loadMore": "Meer laden"
+  },
+  "panel_usageHistory": {
+    "heading": "Historisch verbruik",
+    "subtitle": "met voorspelde netwerkbelasting"
+  },
+  "panel_challengeComplete": {
+    "heading": "Uitdaging voltooid!",
+    "subtitle": "Bedankt voor het deelnemen aan deze uitdaging.",
+    "pointsEarned": "{{value}} punten verdiend",
+    "minutesJoined": "{{value}} minuten meegedaan",
+    "action": "Uitdaging afsluiten"
+  },
+  "setup": {
+    "page1-heading": "Mijn huis",
+    "page1-text": "Met deze informatie kunnen we gepersonalizeerde tips geven.",
+    "page1-action": "Verder",
+    "page2-heading": "Installatie",
+    "page2-text": "Verbind je apparaat door de gekopieerde code uit de Dongle Connect App hier te plakken:",
+    "page2-inputlabel": "Plak code hier",
+    "page2-action": "Verifiëren",
+    "page3-heading": "Installatie",
+    "page3-text": "Verbinden naar je apparaat...",
+    "page3-action": "Verbinden...",
+    "page4-heading": "Gelukt!",
+    "page4-text": "Je apparaat is nu gekoppeld met de OurGrid App!",
+    "page4-action": "Afronden"
+  },
+  "vehicleBrands": {
+    "TESLA": "Tesla",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "other": "Anders"
+  },
+  "goToVehicleBrandApp_vehicleBrands": {
+    "TESLA": "Ga naar je Tesla app",
+    "VOLKSWAGEN_ID": "Ga naar je Volkswagen app"
+  },
+  "vehicleChargerBrands": {
+    "TESLA": "Tesla",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "other": "Anders"
+  },
+  "heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Resideo / Honeywell",
+    "TOON": "Toon",
+    "NEST": "Nest",
+    "other": "Anders"
+  },
+  "goToHeatPumpBrandApp_heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Ga naar je Resideo app",
+    "TOON": "Ga naar je Toon app",
+    "NEST": "Ga naar je Nest app"
+  },
+  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met de gemeente Amsterdam, OpenRemote, Resourcefully, Universiteit Utrecht en Universiteit van Gerona. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd."
+}
