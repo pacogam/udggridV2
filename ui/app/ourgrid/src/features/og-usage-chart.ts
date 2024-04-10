@@ -174,8 +174,8 @@ export class OgUsageChart extends OrChart {
 
         // If the 'list of assets' (only the meter asset) has been changed, cancel update.
         if(changedProps.has('assets') && changedProps.get('assets') !== undefined) {
-            this._data = null;
-            this._loadData();
+            /*this._data = null;
+            this._loadData();*/
             cancelUpdate = true;
         }
 

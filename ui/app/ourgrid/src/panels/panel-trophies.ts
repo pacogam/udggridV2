@@ -130,6 +130,7 @@ export class PanelTrophies extends OgDataPanel {
         const activeChallengePoints = this.meterAsset?.attributes?.[Constants.CHALLENGE_POINTS_ATTRIBUTE]?.value || 0;
         const challengesJoined = this.meterAsset?.attributes?.[Constants.CHALLENGE_JOINED_ATTRIBUTE]?.value || 0;
         const peakPoints = this.meterAsset?.attributes?.[Constants.METER_PEAK_POINTS_ATTRIBUTE]?.value || 0;
+        const peakPointsPerDay = this.peakPointsAsset?.attributes?.[Constants.METER_PEAK_DAY_POINTS_ATTRIBUTE]?.value || 1;
         return html`
             <div id="content-wrapper">
                 <div class="content-container" ${animate()}>
@@ -145,7 +146,7 @@ export class PanelTrophies extends OgDataPanel {
                 </div>
                 <div class="content-container" ${animate()}>
                     ${getStatisticTemplate('images/green-star.svg', true, html`
-                        <span class="text-heading2">${this.peakTrophies.length}</span>
+                        <span class="text-heading2">${peakPoints * peakPointsPerDay}</span>
                         <span class="text-primary"><or-translate value="panel_trophies.totalPeaksAvoided"></or-translate></span>
                     `, html`
                         <span class="text-primary">${peakPoints}</span>

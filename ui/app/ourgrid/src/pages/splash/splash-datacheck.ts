@@ -1,14 +1,14 @@
-import {customElement} from 'lit/decorators.js';
-import {html, TemplateResult} from 'lit';
-import {Asset, ClientRole, User} from '@openremote/model';
-import {isAxiosError} from '@openremote/rest';
-import {i18next} from '@openremote/or-translate';
-import manager from '@openremote/core';
-import {GridAppStateKeyed, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData} from '../../util/og-state';
-import {InputType} from '@openremote/or-mwc-components/or-mwc-input';
-import {Store} from '@reduxjs/toolkit';
-import {OgPageProvider} from '../util/og-page';
-import {OgSplashPage, SplashStatus} from '../util/og-splash-page';
+import {customElement} from "lit/decorators.js";
+import {html, TemplateResult} from "lit";
+import {Asset, ClientRole, User} from "@openremote/model";
+import {isAxiosError} from "@openremote/rest";
+import {i18next} from "@openremote/or-translate";
+import manager from "@openremote/core";
+import {GridAppStateKeyed, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData} from "../../util/og-state";
+import {InputType} from "@openremote/or-mwc-components/or-mwc-input";
+import {Store} from "@reduxjs/toolkit";
+import {OgPageProvider} from "../util/og-page";
+import {OgSplashPage, SplashStatus} from "../util/og-splash-page";
 
 export class NeedsOnboardingError extends Error {}
 
@@ -26,7 +26,7 @@ export class NoPeakPointsAssetError extends Error {}
 
 export function splashDataCheckProvider(store: Store<GridAppStateKeyed>): OgPageProvider<GridAppStateKeyed> {
     return {
-        name: 'splash-datacheck',
+        name: "splash-datacheck",
         routes: [],
         hideHeader: true,
         pageCreator: () => new SplashDatacheck(store)
@@ -35,11 +35,11 @@ export function splashDataCheckProvider(store: Store<GridAppStateKeyed>): OgPage
 
 const MINIMUM_WAIT = 1500; // 1.5 seconds of wait
 
-@customElement('page-splash-datacheck')
+@customElement("page-splash-datacheck")
 export class SplashDatacheck extends OgSplashPage {
 
     // Static asset name to use when fetching district asset
-    protected RESCHOOL_DISTRICT_NAME = 'Sporenburg';
+    protected RESCHOOL_DISTRICT_NAME = "Sporenburg";
 
     // Objects used during check
     protected user?: User;
@@ -59,7 +59,7 @@ export class SplashDatacheck extends OgSplashPage {
     }
 
     get name(): string {
-        return 'Checking data...';
+        return "Checking data...";
     }
 
     connectedCallback() {
@@ -82,7 +82,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     willUpdate(changedProps: Map<string, any>) {
         super.willUpdate(changedProps);
-        if(changedProps.has('status') && this.status === SplashStatus.SUCCESS) {
+        if(changedProps.has("status") && this.status === SplashStatus.SUCCESS) {
             this.resolvePromise();
         }
     }
@@ -121,12 +121,12 @@ export class SplashDatacheck extends OgSplashPage {
         // Execute necessary checks
         try {
 
-            if(localStorage.getItem('completedOnboarding') == null) {
-                throw new NeedsOnboardingError('Requires onboarding');
+            if(localStorage.getItem("completedOnboarding") == null) {
+                throw new NeedsOnboardingError("Requires onboarding");
             }
 
-            if(localStorage.getItem('acceptedPrivacy') == null) {
-                throw new RequiresPrivacyConfirmationError('Requires privacy confirmation');
+            if(localStorage.getItem("acceptedPrivacy") == null) {
+                throw new RequiresPrivacyConfirmationError("Requires privacy confirmation");
             }
 
             const minWaitPromise = new Promise(resolve => setTimeout(resolve, MINIMUM_WAIT));
@@ -149,11 +149,11 @@ export class SplashDatacheck extends OgSplashPage {
             this.status = SplashStatus.SUCCESS;
 
         } catch (e) {
-            console.error(e);
-            this.status = SplashStatus.FAILED;
-
+            console.warn(e);
             if(e instanceof NoAssetLinkedError || e instanceof NeedsOnboardingError || e instanceof RequiresPrivacyConfirmationError) {
                 this.rejectPromise(e);
+            } else {
+                this.status = SplashStatus.FAILED;
             }
         }
     }
@@ -170,14 +170,14 @@ export class SplashDatacheck extends OgSplashPage {
         } catch (e) {
             if(isAxiosError(e)) {
                 if(e.response.status === 403) {
-                    this.statusText = i18next.t('error.userDataPermission');
+                    this.statusText = i18next.t("error.userDataPermission");
                 } else {
-                    this.statusText = i18next.t('error.userDataFailed');
+                    this.statusText = i18next.t("error.userDataFailed");
                 }
             } else if(e instanceof NoUserDataError) {
                 this.statusText = e.message;
             } else {
-                this.statusText = i18next.t('error.unknown');
+                this.statusText = i18next.t("error.unknown");
             }
             throw e;
         }
@@ -187,7 +187,7 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.user) {
             const userData = (await manager.rest.api.UserResource.getCurrent()).data;
             if(!userData?.id) {
-                throw new NoUserDataError(i18next.t('error.userDataFailed'));
+                throw new NoUserDataError(i18next.t("error.userDataFailed"));
             }
             // Add additional delay if necessary
             if(delay !== undefined) {
@@ -207,7 +207,7 @@ export class SplashDatacheck extends OgSplashPage {
     //
 
     protected async verifyUserRoles(delay?: number): Promise<void> {
-        const needsRestrictedRole = !manager.hasRealmRole('restricted_user');
+        const needsRestrictedRole = !manager.hasRealmRole("restricted_user");
         const needsReadAssetsRole = !manager.hasRole(ClientRole.READ_ASSETS);
         if(needsRestrictedRole || needsReadAssetsRole) {
             try {
@@ -220,7 +220,7 @@ export class SplashDatacheck extends OgSplashPage {
                     await manager.rest.api.UserRolesResource.correctUserRoles();
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
-                    this.statusText = i18next.t('error.unknown');
+                    this.statusText = i18next.t("error.unknown");
                     throw e;
                 }
             }
@@ -239,16 +239,16 @@ export class SplashDatacheck extends OgSplashPage {
         } catch (e) {
             if(isAxiosError(e)) {
                 if(e.response.status === 403) {
-                    throw new NoAssetLinkedError(i18next.t('error.userAssetDataPermission'));
+                    throw new NoAssetLinkedError(i18next.t("error.userAssetDataPermission"));
                 } else {
-                    this.statusText = i18next.t('error.userAssetDataFailed');
+                    this.statusText = i18next.t("error.userAssetDataFailed");
                 }
 
             } else if(e instanceof NoAssetLinkedError) {
                 this.statusText = e.message;
 
             } else {
-                this.statusText = i18next.t('error.unknown');
+                this.statusText = i18next.t("error.unknown");
             }
             throw e;
         }
@@ -257,11 +257,11 @@ export class SplashDatacheck extends OgSplashPage {
     protected async fetchUserAsset(userId: string, delay?: number): Promise<Asset> {
         if(!this.userAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
-                types: ['ReschoolMeterAsset'],
+                types: ["ReschoolMeterAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
-                throw new NoAssetLinkedError(i18next.t('error.userAssetFailed'));
+                throw new NoAssetLinkedError(i18next.t("error.userAssetFailed"));
             }
             // Add additional delay if necessary
             if(delay !== undefined) {
@@ -292,8 +292,8 @@ export class SplashDatacheck extends OgSplashPage {
                     await this.linkDistrict(this.RESCHOOL_DISTRICT_NAME);
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
-                    this.statusText = i18next.t('error.unknown');
-                    throw new Error('Unknown error during checking the district link');
+                    this.statusText = i18next.t("error.unknown");
+                    throw new Error("Unknown error during checking the district link");
                 }
             }
         }
@@ -303,8 +303,8 @@ export class SplashDatacheck extends OgSplashPage {
         try {
             await manager.rest.api.UserDistrictResource.linkDistrict({ assetName: districtName });
         } catch (e) {
-            this.statusText = i18next.t('error.unknown');
-            throw new Error('Unknown error when linking the district.');
+            this.statusText = i18next.t("error.unknown");
+            throw new Error("Unknown error when linking the district.");
         }
     }
 
@@ -320,14 +320,14 @@ export class SplashDatacheck extends OgSplashPage {
         } catch (e) {
             if(isAxiosError(e)) {
                 if(e.response.status === 403) {
-                    this.statusText = i18next.t('error.districtAssetDataPermission');
+                    this.statusText = i18next.t("error.districtAssetDataPermission");
                 } else {
-                    this.statusText = i18next.t('error.districtAssetDataFailed');
+                    this.statusText = i18next.t("error.districtAssetDataFailed");
                 }
             } else if(e instanceof NoDistrictAssetError) {
                 this.statusText = e.message;
             } else {
-                this.statusText = i18next.t('error.unknown');
+                this.statusText = i18next.t("error.unknown");
             }
             throw e;
         }
@@ -336,11 +336,11 @@ export class SplashDatacheck extends OgSplashPage {
     protected async fetchDistrictAsset(userId: string, delay = true): Promise<Asset> {
         if(!this.districtAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
-                types: ['ReschoolDistrictAsset'],
+                types: ["ReschoolDistrictAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
-                throw new NoDistrictAssetError(i18next.t('error.districtAssetDataFailed'));
+                throw new NoDistrictAssetError(i18next.t("error.districtAssetDataFailed"));
             }
             // Add additional delay if necessary
             if(delay) {
@@ -361,13 +361,13 @@ export class SplashDatacheck extends OgSplashPage {
     protected async checkChallengeAssetId(districtAsset: Asset): Promise<string> {
         if(!this.challengeAsset) {
             if(districtAsset?.attributes) {
-                const attr = districtAsset.attributes['challengesAssetId'];
+                const attr = districtAsset.attributes["challengesAssetId"];
                 if(attr?.value) {
                     return attr.value;
                 }
             }
-            this.statusText = i18next.t('error.unknown');
-            throw new Error('Unknown error during retrieval of the challenges.');
+            this.statusText = i18next.t("error.unknown");
+            throw new Error("Unknown error during retrieval of the challenges.");
         } else {
             return this.challengeAsset.id;
         }
@@ -391,8 +391,8 @@ export class SplashDatacheck extends OgSplashPage {
                     await this.linkChallengeAsset(challengeAssetId);
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
-                    this.statusText = i18next.t('error.unknown');
-                    throw new Error('Unknown error during checking the challenges.');
+                    this.statusText = i18next.t("error.unknown");
+                    throw new Error("Unknown error during checking the challenges.");
                 }
             }
         }
@@ -402,8 +402,8 @@ export class SplashDatacheck extends OgSplashPage {
         try {
             await manager.rest.api.UserChallengesResource.linkChallengesAsset({ assetId: challengeAssetId });
         } catch (e) {
-            this.statusText = i18next.t('error.unknown');
-            throw new Error('Unknown error when linking the challenges.');
+            this.statusText = i18next.t("error.unknown");
+            throw new Error("Unknown error when linking the challenges.");
         }
     }
 
@@ -419,14 +419,14 @@ export class SplashDatacheck extends OgSplashPage {
         } catch (e) {
             if (isAxiosError(e)) {
                 if (e.response.status === 403) {
-                    this.statusText = i18next.t('error.challengeAssetDataPermission');
+                    this.statusText = i18next.t("error.challengeAssetDataPermission");
                 } else {
-                    this.statusText = i18next.t('error.challengeAssetDataFailed');
+                    this.statusText = i18next.t("error.challengeAssetDataFailed");
                 }
             } else if (e instanceof NoChallengeAssetError) {
                 this.statusText = e.message;
             } else {
-                this.statusText = i18next.t('error.unknown');
+                this.statusText = i18next.t("error.unknown");
             }
             throw e;
         }
@@ -436,11 +436,11 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.challengeAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [challengeId],
-                types: ['OurGridChallengesAsset'],
+                types: ["OurGridChallengesAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
-                throw new NoChallengeAssetError(i18next.t('error.challengeAssetDataFailed'));
+                throw new NoChallengeAssetError(i18next.t("error.challengeAssetDataFailed"));
             }
             // Add additional delay if necessary
             if(delay !== undefined) {
@@ -457,13 +457,13 @@ export class SplashDatacheck extends OgSplashPage {
     protected async checkPeakPointsAssetId(districtAsset: Asset): Promise<string> {
         if(!this.peakPointsAsset) {
             if(districtAsset?.attributes) {
-                const attr = districtAsset.attributes['peaksAssetId'];
+                const attr = districtAsset.attributes["peaksAssetId"];
                 if(attr?.value) {
                     return attr.value;
                 }
             }
-            this.statusText = i18next.t('error.unknown');
-            throw new Error('Unknown error during retrieval of the peak points.');
+            this.statusText = i18next.t("error.unknown");
+            throw new Error("Unknown error during retrieval of the peak points.");
         } else {
             return this.peakPointsAsset.id;
         }
@@ -481,8 +481,8 @@ export class SplashDatacheck extends OgSplashPage {
                     await this.linkPeakPointsAsset(peakPointsAssetId);
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
-                    this.statusText = i18next.t('error.unknown');
-                    throw new Error('Unknown error during checking the peak points.');
+                    this.statusText = i18next.t("error.unknown");
+                    throw new Error("Unknown error during checking the peak points.");
                 }
             }
         }
@@ -493,8 +493,8 @@ export class SplashDatacheck extends OgSplashPage {
             await manager.rest.api.UserPeakPointsResource.linkPeakPointsAsset({ assetId: peakPointsAssetId });
         } catch (e) {
             console.error(e);
-            this.statusText = i18next.t('error.unknown');
-            throw new Error('Unknown error when linking the peak points.');
+            this.statusText = i18next.t("error.unknown");
+            throw new Error("Unknown error when linking the peak points.");
         }
     }
 
@@ -505,14 +505,14 @@ export class SplashDatacheck extends OgSplashPage {
         } catch (e) {
             if (isAxiosError(e)) {
                 if (e.response.status === 403) {
-                    this.statusText = i18next.t('error.peakPointsAssetDataPermission');
+                    this.statusText = i18next.t("error.peakPointsAssetDataPermission");
                 } else {
-                    this.statusText = i18next.t('error.peakPointsAssetDataFailed');
+                    this.statusText = i18next.t("error.peakPointsAssetDataFailed");
                 }
             } else if (e instanceof NoPeakPointsAssetError) {
                 this.statusText = e.message;
             } else {
-                this.statusText = i18next.t('error.unknown');
+                this.statusText = i18next.t("error.unknown");
             }
             throw e;
         }
@@ -522,11 +522,11 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.peakPointsAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [peakPointsId],
-                types: ['OurGridPeaksAsset'],
+                types: ["OurGridPeaksAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
-                throw new NoPeakPointsAssetError(i18next.t('error.peakPointsAssetDataFailed'));
+                throw new NoPeakPointsAssetError(i18next.t("error.peakPointsAssetDataFailed"));
             }
             // Add additional delay if necessary
             if(delay !== undefined) {
