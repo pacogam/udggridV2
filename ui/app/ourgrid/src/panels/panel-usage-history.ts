@@ -52,6 +52,17 @@ export class PanelUsageHistory extends OgDataPanel {
         ];
     }
 
+    protected firstUpdated(changedProps: PropertyValues) {
+        super.firstUpdated(changedProps);
+
+        // Update min/max values based on first and last date;
+        if(this.options) {
+            const startDate = Array.from(this.options[0])[0][1](undefined)[0];
+            const endDate = Array.from(this.options[this.options.length - 1])[0][1](undefined)[1];
+            this.tryUpdateChartValues(this.meterAsset.id, Constants.METER_POWER_ATTRIBUTE, [startDate, endDate]);
+        }
+    }
+
     protected async getPanelContent(): Promise<TemplateResult> {
         const nowMs = new Date().getTime();
         return html`
@@ -68,7 +79,6 @@ export class PanelUsageHistory extends OgDataPanel {
                         const key = isSameDay ? nowMs : index;
                         return html`
                             ${guard([key], () => html`
-                                ${guard([key], () => this.tryUpdateChartValues(this.meterAsset.id, Constants.METER_POWER_ATTRIBUTE, startEndValue))}
                                 <og-usage-chart slot="${index}" id="${key}" .timePresetOptions="${option}" style="pointer-events: none;"
                                                 .assets="${this.meterAsset ? [this.meterAsset] : []}" .districtAsset="${this.districtAsset}"
                                 ></og-usage-chart>

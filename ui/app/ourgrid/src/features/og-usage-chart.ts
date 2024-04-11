@@ -9,6 +9,7 @@ import {getStateColorByPowerValue, OgStateColor} from '../util/util';
 import {showSnackbar} from '../components/og-snackbar';
 import {i18next} from '@openremote/or-translate';
 import { when } from 'lit/directives/when.js';
+import {GenericAxiosResponse} from "@openremote/rest";
 
 // Custom ChartJS plugin that fills the background based on district data.
 // It fills the canvas with a RED or GREEN stateColor based on the power value.
@@ -238,38 +239,16 @@ export class OgUsageChart extends OrChart {
     protected async _loadAttributeData(asset: Asset, attribute: Attribute<any>, color: string | undefined, from: number, to: number, predicted: boolean, label: string | undefined): Promise<any> {
         let data;
         try {
-            data = super._loadAttributeData(asset, attribute, color, from, to, predicted, label);
+            /*data = super._loadAttributeData(asset, attribute, color, from, to, predicted, label);*/
+            data = this._loadPowerAttributeData(asset, attribute, color, from, to, predicted, label);
         } catch (e) {
             console.error(e);
             showSnackbar(undefined, i18next.t('error.historicalAssetData'));
         }
         if (!predicted && this.districtAsset) {
-            const datapoints: ValueDatapoint<any>[][] = [];
+            let datapoints: ValueDatapoint<any>[][] = [];
             try {
-                const response = await manager.rest.api.AssetDatapointResource.getDatapoints(this.districtAsset.id, 'powerImportPercentage', {
-                    type: 'interval',
-                    interval: '1 hour',
-                    formula: AssetDatapointIntervalQueryFormula.AVG,
-                    gapFill: true,
-                    fromTimestamp: from,
-                    toTimestamp: to
-                });
-                datapoints.push(response.data);
-                const responsePredicted = await manager.rest.api.AssetPredictedDatapointResource.getPredictedDatapoints(this.districtAsset.id, 'powerDistrict', {
-                    type: 'interval',
-                    interval: '1 hour',
-                    formula: AssetDatapointIntervalQueryFormula.AVG,
-                    gapFill: true,
-                    fromTimestamp: from,
-                    toTimestamp: to
-                });
-                const predictedPercentageData: ValueDatapoint<any>[] = responsePredicted.data.map(d => {
-                    return {
-                        x: d.x,
-                        y: d.y / this.districtAsset.attributes['powerImportMax'].value * 100
-                    } as ValueDatapoint<any>;
-                });
-                datapoints.push(predictedPercentageData);
+                datapoints = await this._loadDistrictAttributeData(asset, attribute, color, from, to, predicted, label);
             } catch (e) {
                 console.error(e);
                 showSnackbar(undefined, i18next.t('error.historicalDistrictData'));
@@ -375,5 +354,91 @@ export class OgUsageChart extends OrChart {
             },
             plugins: [backgroundPlugin, predictedBackgroundPlugin]
         };
+    }
+
+
+    /* ----------------------------------------------------- */
+
+
+    /**
+     * Copy and paste / override of _loadAttributeData() to make querying predicted data points more efficient
+     */
+    protected async _loadPowerAttributeData(asset: Asset, attribute: Attribute<any>, color: string | undefined, from: number, to: number, predicted: boolean, label: string | undefined): Promise<any> {
+
+        const dataset: any = {
+            borderColor: color,
+            backgroundColor: color,
+            label: label,
+            pointRadius: 2,
+            fill: false,
+            data: [],
+            borderDash: predicted ? [2, 4] : undefined
+        };
+
+        if (asset.id && attribute.name && this.datapointQuery) {
+            let response: GenericAxiosResponse<ValueDatapoint<any>[]> | undefined;
+            const query = JSON.parse(JSON.stringify(this.datapointQuery)); // recreating object, since the changes shouldn't apply to parent components; only or-chart itself.
+            query.fromTimestamp = this._startOfPeriod;
+            query.toTimestamp = this._endOfPeriod;
+
+            if(query.type == 'lttb' && !query.amountOfPoints) {
+                if(this._chartElem.clientWidth == 0) {
+                    console.error("Could not grab width of the Chart for estimating amount of datapoints. Using 10 points instead.")
+                }
+                query.amountOfPoints = (this._chartElem.clientWidth == 0) ? 100 : Math.round(this._chartElem.clientWidth / 10); // set amount of datapoints based on current chart width.
+            } else if(query.type == 'interval' && !query.interval) {
+                const diffInHours = (this.datapointQuery.toTimestamp! - this.datapointQuery.fromTimestamp!) / 1000 / 60 / 60;
+                const intervalArr = this._getInterval(diffInHours);
+                query.interval = (intervalArr[0].toString() + " " + intervalArr[1].toString()); // for example: "5 minute"
+            }
+
+            if(!predicted) {
+                response = await manager.rest.api.AssetDatapointResource.getDatapoints(asset.id, attribute.name, query)
+            } else {
+                if(moment().isBefore(query.toTimestamp)) {
+                    response = await manager.rest.api.AssetPredictedDatapointResource.getPredictedDatapoints(asset.id, attribute.name, query)
+                }
+            }
+
+            if (response?.status === 200) {
+                dataset.data = response.data.filter(value => value.y !== null && value.y !== undefined) as any[];
+            }
+        }
+
+        return dataset;
+    }
+
+    protected async _loadDistrictAttributeData(asset: Asset, attribute: Attribute<any>, color: string | undefined, from: number, to: number, predicted: boolean, label: string | undefined): Promise<any> {
+        const datapoints: ValueDatapoint<any>[][] = [];
+        const response = await manager.rest.api.AssetDatapointResource.getDatapoints(this.districtAsset.id, 'powerImportPercentage', {
+            type: 'interval',
+            interval: '1 hour',
+            formula: AssetDatapointIntervalQueryFormula.AVG,
+            gapFill: true,
+            fromTimestamp: from,
+            toTimestamp: to
+        });
+        datapoints.push(response.data);
+
+        // Request predicted data if time is in the future
+        if(moment().isBefore(to)) {
+            const responsePredicted = await manager.rest.api.AssetPredictedDatapointResource.getPredictedDatapoints(this.districtAsset.id, 'powerDistrict', {
+                type: 'interval',
+                interval: '1 hour',
+                formula: AssetDatapointIntervalQueryFormula.AVG,
+                gapFill: true,
+                fromTimestamp: from,
+                toTimestamp: to
+            });
+            const predictedPercentageData: ValueDatapoint<any>[] = responsePredicted.data.map(d => {
+                return {
+                    x: d.x,
+                    y: d.y / this.districtAsset.attributes['powerImportMax'].value * 100
+                } as ValueDatapoint<any>;
+            });
+            datapoints.push(predictedPercentageData);
+        }
+
+        return datapoints;
     }
 }
