@@ -1,10 +1,11 @@
 import {LitElement, TemplateResult, html, css} from "lit";
 import {customElement, property, state} from "lit/decorators.js";
-import { OurGridConfig } from "@openremote/model";
+import {OurGridConfig, OurGridGatewayCity} from "@openremote/model";
 import { Task } from "@lit/task";
 import { InputType } from "@openremote/or-mwc-components/or-mwc-input";
 import { ListItem } from "@openremote/or-mwc-components/or-mwc-list";
 import { when } from "lit/directives/when.js";
+import {styleMap} from "lit/directives/style-map.js";
 import {getAppStyle} from "./styles";
 import "./components/og-city-list";
 import "./components/og-city-input";
@@ -13,25 +14,78 @@ import {navigateToCity} from "./util";
 
 const styling = css`
     #wrapper {
-        height: 100%;
+        height: calc(100% - 32px);
         width: 100%;
+        padding: 16px 0;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
-        gap: 5vh;
-        background: var(--og-color-primary-dark)
+        background: var(--og-color-primary-dark);
+    }
+
+    #header {
+        width: calc(100% - 32px);
     }
 
     #content {
         flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: center;
         width: calc(100% - 64px);
-        padding: 16px 32px;
+        padding: 0 32px;
+    }
+
+    #content-title {
+        text-align: center;
+    }
+
+    #content-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 2.5vh;
+        max-width: 480px;
+    }
+
+    #city-list-container {
+        position: absolute;
+        margin-top: 1.25vh;
+        z-index: 10;
+        width: 100%;
+        max-width: 480px;
+        background: var(--og-color-primary);
+        border-radius: 28px;
+    }
+
+    #selected-city-field {
+        width: 100%;
+        max-width: 480px;
+        --og-city-input-font-weight: 500;
+        --mdc-theme-primary: var(--og-color-primary);
+        --og-city-input-color: var(--og-color-primary-dark);
+    }
+
+    #city-list-error {
+        height: 64px;
+        width: 100%;
+        max-width: 480px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #footer {
+        width: calc(100% - 32px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 `;
 
@@ -49,6 +103,9 @@ export class CitySelectorApp extends LitElement {
 
     @state() // state of search field value
     protected _citySearchText?: string;
+
+    @state()
+    protected _selectedCity?: OurGridGatewayCity | string;
 
     constructor(baseUrl?: string, configUrl?: string, langFolder?: string, lang?: string) {
         super();
@@ -69,23 +126,74 @@ export class CitySelectorApp extends LitElement {
     }
 
     protected render(): TemplateResult {
+        const valid = this._selectedCity && typeof this._selectedCity !== "string";
         return html`
             <div id="wrapper">
+                
                 <div id="header">
-                    <!-- Empty content -->
+                    <img src="images/dots-onboarding.svg" style="width: 100%;"/>
                 </div>
+                
                 <div id="content">
-                    <span class="text-primary dark">${this._t("searchCityName")}</span>
-                    <og-city-input id="search-field" .type="${InputType.TEXT}" style="width: 100%; max-width: 480px;"
-                                   @city-input-changed="${(ev) => this._onCitySearch(ev)}"
-                    ></og-city-input>
-                    <div style="width: 100%; max-width: 480px; min-height: 300px;">
-                        ${this.getCitySelectorTemplate()}
+                    
+                    <!-- OurGrid title -->
+                    <div id="content-title">
+                        <span class="text-title dark">${this._t('appName')}</span>
+                    </div>
+                    
+                    <!-- City search content -->
+                    <div id="content-container">
+                        <span class="text-secondary bold dark" style="text-align: center; width: 90%; max-width: 480px;">${this._t("searchCityName")}</span>
+                        
+                        <!-- Search input -->
+                        <div style="position: relative; width: 100%;">
+                            ${when(this._selectedCity, () => html`
+                                <og-city-input id="selected-city-field" .type="${InputType.BUTTON}" .label="${(this._selectedCity as any)?.name || this._selectedCity}" svgIcon="close"
+                                               rounded raised fullWidth @or-mwc-input-changed="${(ev) => this._onCityRemove(ev)}"
+                                ></og-city-input>
+                            `, () => html`
+                                <og-city-input id="search-field" .type="${InputType.TEXT}" placeholder="Amsterdam" svgIcon="magnify"
+                                               rounded outlined compact comfortable style="width: 100%; max-width: 480px;"
+                                               @city-input-changed="${(ev) => this._onCitySearch(ev)}"
+                                ></og-city-input>
+                            `)}
+                            ${this.getCitySelectorTemplate()}
+                        </div>
+                        
+                        <!-- Login button -->
+                        ${when(!this._citySearchText, () => {
+                            const styles = {
+                                "width": "100%;",
+                                "max-width:": "480px",
+                                "--og-city-input-border": valid ? undefined : "2px solid var(--og-color-warning)",
+                                "--og-city-input-color": valid ? "var(--og-color-primary)" : "var(--og-color-warning)",
+                                "--og-city-input-font-weight": 500,
+                                "--mdc-theme-primary": valid ? "var(--og-color-warning)" : undefined
+                            }
+                            return html`
+                                <og-city-input .type="${InputType.BUTTON}" label="${this._t("login")}"
+                                               rounded .outlined="${!valid}" .raised="${valid}" fullWidth
+                                               style="${styleMap(styles)}" @or-mwc-input-changed="${(ev) => this._onCityLogin(ev)}"
+                                ></og-city-input>
+                            `;
+                        }, () => html`
+                            <div style="min-height: 48px;"></div>
+                        `)}
+                        
+                        <!-- Error / status text -->
+                        <div id="city-list-error">
+                            ${when(this._selectedCity && !valid, () => html`
+                                <span class="text-secondary bold dark" style="text-align: center;">${this._t("cityNotAvailable")}</span>
+                            `)}
+                        </div>
+                        
                     </div>
                 </div>
+                
                 <div id="footer">
-                    <!-- Empty content -->
+                    <img src="images/dots-onboarding.svg" style="width: 100%; transform: rotate(180deg)"/>
                 </div>
+                
             </div>
         `;
     }
@@ -97,11 +205,11 @@ export class CitySelectorApp extends LitElement {
      */
     protected getCitySelectorTemplate(): TemplateResult {
         return this._fetchSearchCitiesTask.render({
-            initial: () => html`<og-loading></og-loading>`,
-            pending: () => html`<og-loading></og-loading>`,
+            initial: () => html``,
+            pending: () => html``,
             complete: (cities) => {
                 const filtered = !!this._citySearchText;
-                const visibleCities = filtered ? this._getFilteredCities(cities, this._citySearchText) : [];
+                const visibleCities = filtered ? this._getFilteredCities(cities, this._citySearchText, 100) : [];
                 const cityItems = visibleCities.map(city => {
                     return {
                         text: city.name,
@@ -110,11 +218,17 @@ export class CitySelectorApp extends LitElement {
                     } as ListItem
                 })
                 return html`
-                    <div>
+                    <div id="city-list-container">
                         ${when(this._citySearchText, () => html`
-                            <og-city-list .listItems="${cityItems}"
-                                         @or-mwc-list-changed="${(ev: CustomEvent) => this._onCitySelect(ev)}"
-                            ></og-city-list>
+                            ${when(cityItems.length > 0, () => html`
+                                <og-city-list .listItems="${cityItems}"
+                                              @or-mwc-list-changed="${(ev: CustomEvent) => this._onCitySelect(ev)}"
+                                ></og-city-list>
+                            `, () => html`
+                                <div style="padding: 16px 32px;">
+                                    <span class="text-secondary bold">${this._t('noCityFound')}</span>
+                                </div>
+                            `)}
                         `)}
                     </div>
                 `;
@@ -132,15 +246,36 @@ export class CitySelectorApp extends LitElement {
 
     /**
      * HTML Event callback for {@link OgCityList} when a City is selected.
-     * It looks up whether the City is present in the {@link OurGridGatewayConfig}, and navigates to it.
+     * It looks up whether the City is present in the {@link OurGridGatewayConfig}, and selects it.
      */
     protected _onCitySelect(ev: CustomEvent) {
         const selected = (ev.detail[0] as ListItem).data as City;
         const ogCity = this._fetchConfigTask.value.gateway.cities.find(c => c.name === selected.name);
         if(ogCity) {
-            navigateToCity(window, ogCity);
+            this._selectedCity = ogCity;
+            this._citySearchText = undefined;
         } else {
+            this._selectedCity = selected.name;
+            this._citySearchText = undefined;
             console.warn("This city does not have an OurGrid installation.")
+        }
+    }
+
+    /**
+     * HTML Event callback for the "selected city" field, where the selection can be cleared when pressing it.
+     * It removes the currently selected city, allowing city input again.
+     */
+    protected _onCityRemove(ev: CustomEvent) {
+        this._selectedCity = undefined;
+        this._citySearchText = undefined;
+    }
+
+    /**
+     * HTML Event callback for the "login" button, where it should navigate to that City URL, once a city is selected.
+     */
+    protected _onCityLogin(ev: CustomEvent): void {
+        if(this._selectedCity && typeof this._selectedCity !== 'string') {
+            navigateToCity(window, this._selectedCity);
         }
     }
 

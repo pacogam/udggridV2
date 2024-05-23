@@ -7,8 +7,11 @@ const styling = css`
     .mdc-list {
         font-family: var(--og-font-family);
         font-size: var(--og-font-size-secondary);
-        font-weight: var(--og-font-weight-secondary);
-        color: var(--og-color-primary);
+        font-weight: var(--og-font-weight-primary);
+        color: var(--og-color-primary-dark);
+        max-height: var(--og-city-list-max-height, 35vh);
+        overflow: hidden auto;
+        padding: 8px;
     }
 `;
 

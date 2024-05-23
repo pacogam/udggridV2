@@ -1,5 +1,9 @@
 {
   "appName": "OurGrid",
   "loadingCity": "Connecting to the server...",
-  "searchCityName": "In what City do you live?"
+  "searchCityName": "OurGrid is available in multiple cities, select your city to continue.",
+  "noCityFound": "Could not find city.",
+  "cityNotAvailable": "... but not yet for this city.",
+  "login": "Login",
+  "about": "What is OurGrid?"
 }

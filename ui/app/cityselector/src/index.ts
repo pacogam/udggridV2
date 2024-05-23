@@ -4,7 +4,7 @@ import {OurGridGatewayCity} from "@openremote/model";
 import {CitySelectorLoader} from "./city-selector-loader";
 
 declare var CONFIG_URL_PREFIX: string;
-export const DEFAULT_LANGUAGE: string = 'en';
+export const DEFAULT_LANGUAGE: string = 'nl';
 
 // Try and load the app config from JSON and if anything is found amalgamate it with default
 const configURL = (CONFIG_URL_PREFIX || "") + "/ourgrid_config.json";
