@@ -133,7 +133,10 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     protected onVisibilityChange(ev: Event) {
         super.onVisibilityChange(ev);
         if(manager.console.isMobile && document.visibilityState === 'visible') {
-            window.location.reload();
+            const exclusions = ['setup'];
+            if(!exclusions.includes(this._page)) {
+                window.location.reload();
+            }
         }
     }
 
@@ -159,8 +162,8 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
 
             // Detect whether it's the first page being loaded (so from 'undefined' to something)
             // If so, always redirect to the homepage. (except for several pages listed below)
-            const exlusions = ['home', 'setup', 'onboarding', 'confirm-privacy'];
-            if(!changedProps.get('_page') && !exlusions.includes(this._page)) {
+            const exclusions = ['home', 'setup', 'onboarding', 'confirm-privacy'];
+            if(!changedProps.get('_page') && !exclusions.includes(this._page)) {
                 console.log('Redirecting to Homepage...');
                 this.updateComplete.then(() => router.navigate('home'));
 
