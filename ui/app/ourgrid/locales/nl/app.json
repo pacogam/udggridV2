@@ -149,13 +149,7 @@
     "page2-heading": "Installatie",
     "page2-text": "Verbind je apparaat door de gekopieerde code uit de Dongle Connect App hier te plakken:",
     "page2-inputlabel": "Plak code hier",
-    "page2-action": "Verifiëren",
-    "page3-heading": "Installatie",
-    "page3-text": "Verbinden naar je apparaat...",
-    "page3-action": "Verbinden...",
-    "page4-heading": "Gelukt!",
-    "page4-text": "Je apparaat is nu gekoppeld met de OurGrid App!",
-    "page4-action": "Afronden"
+    "page2-action": "Klaar"
   },
   "vehicleBrands": {
     "TESLA": "Tesla",

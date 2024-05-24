@@ -5,6 +5,7 @@ import {OgInputButtonGroupOption, OgSpecialInputType} from '../components/og-inp
 import {i18next} from '@openremote/or-translate';
 import {DeviceCharacteristic, WellknownCharacteristics} from '@openremote/model';
 import { InputType } from '@openremote/or-mwc-components/or-mwc-input';
+import {getAppStyle} from "../styles";
 
 export interface OgCharacteristicsUpdateEventDetail {
     characteristics: DeviceCharacteristic[],
@@ -32,7 +33,7 @@ const styling = css`
   .characteristic-container {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 36px;
   }
 
   .characteristic-item-group {
@@ -76,8 +77,8 @@ export class OgCharacteristicsSettings extends LitElement {
     public heatPumpBrand: OgHeatPumpBrand = undefined;
 
     protected options: OgInputButtonGroupOption[] = [
-        {icon: 'close', iconColors: {active: 'var(--og-color-primary)'}, fillColors: {active: 'var(--og-color-secondary)'}},
-        {icon: 'check', iconColors: {active: 'var(--og-color-primary)'}, fillColors: {active: 'var(--og-color-success)'}}
+        {icon: 'close', iconColors: {active: 'var(--og-color-primary)', inactive: 'var(--og-color-warning)'}, borderColors: {active: 'var(--og-color-warning)', inactive: 'var(--og-color-warning)'}, fillColors: {active: 'var(--og-color-warning)'}},
+        {icon: 'check', iconColors: {active: 'var(--og-color-primary)', inactive: 'var(--og-color-success)'}, borderColors: {active: 'var(--og-color-success)', inactive: 'var(--og-color-success)'}, fillColors: {active: 'var(--og-color-success)'}}
     ];
 
     protected willUpdate(changedProps: PropertyValues) {
@@ -128,7 +129,7 @@ export class OgCharacteristicsSettings extends LitElement {
     }
 
     static get styles(): any[] {
-        return [styling];
+        return [getAppStyle(), styling];
     }
 
     protected render(): TemplateResult {
@@ -138,7 +139,7 @@ export class OgCharacteristicsSettings extends LitElement {
 
                     <!-- Solar panels -->
                     <div class="characteristic-item">
-                        <span class="text-secondary"><or-translate value="panel_characteristics.question_solarPanels"/></span>
+                        <span class="text-secondary bold"><or-translate value="panel_characteristics.question_solarPanels"/></span>
                         <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.solarState}" .options="${this.options}"
                                   @or-mwc-input-changed="${ev => this.onSolarUpdate(ev)}"></og-input>
                     </div>
@@ -146,12 +147,12 @@ export class OgCharacteristicsSettings extends LitElement {
                     <!-- Electric vehicle -->
                     <div class="characteristic-item-group">
                         <div class="characteristic-item">
-                            <span class="text-secondary"><or-translate value="panel_characteristics.question_electricVehicle"/></span>
+                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_electricVehicle"/></span>
                             <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.electricCarState}" .options="${this.options}"
                                       @or-mwc-input-changed="${ev => this.onElectricCarUpdate(ev)}"></og-input>
                         </div>
                         <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" comfortable outlined ?disabled="${this.electricCarState === 0}" style="width: 100%;"
+                            <og-input .type="${InputType.SELECT}" comfortable ?disabled="${this.electricCarState === 0}" style="width: 100%;"
                                       label="${this.electricCarState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_electricVehicleBrand')}"
                                       .options="${[OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.OTHER]}" .value="${this.electricCarBrand}"
                                       @or-mwc-input-changed="${ev => this.onElectricCarBrandUpdate(ev)}"
@@ -162,7 +163,7 @@ export class OgCharacteristicsSettings extends LitElement {
                     <!-- Charging station -->
                     <div class="characteristic-item-group">
                         <div class="characteristic-item">
-                            <span class="text-secondary"><or-translate value="panel_characteristics.question_vehicleCharger"/></span>
+                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_vehicleCharger"/></span>
                             <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.vehicleChargerState}" .options="${this.options}"
                                       @or-mwc-input-changed="${ev => this.onVehicleChargerUpdate(ev)}"></og-input>
                         </div>
@@ -171,12 +172,12 @@ export class OgCharacteristicsSettings extends LitElement {
                     <!-- Heat pump -->
                     <div class="characteristic-item-group">
                         <div class="characteristic-item">
-                            <span class="text-secondary"><or-translate value="panel_characteristics.question_heatPump"/></span>
+                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_heatPump"/></span>
                             <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.heatPumpState}" .options="${this.options}"
                                       @or-mwc-input-changed="${ev => this.onHeatPumpUpdate(ev)}"></og-input>
                         </div>
                         <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" comfortable outlined ?disabled="${this.heatPumpState === 0}" style="width: 100%;"
+                            <og-input .type="${InputType.SELECT}" comfortable ?disabled="${this.heatPumpState === 0}" style="width: 100%; position: relative; display: block;"
                                       label="${this.heatPumpState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_heatPumpBrand')}"
                                       .options="${[OgHeatPumpBrand.RESIDEO_HONEYWELL, OgHeatPumpBrand.TOON, OgHeatPumpBrand.NEST, OgHeatPumpBrand.OTHER]}" .value="${this.heatPumpBrand}"
                                       @or-mwc-input-changed="${ev => this.onHeatPumpBrandUpdate(ev)}"

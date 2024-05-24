@@ -11,9 +11,13 @@ export function getAppStyle() {
         --or-app-color6: #F44F1A;
 
         --og-color-primary: #F9F5F2;
+        --og-color-primary-rgb: 249, 245, 242;
         --og-color-secondary: #C6B9BA;
+        --og-color-secondary-rgb: 198, 185, 186;
         --og-color-primary-dark: #4F2D39;
+        --og-color-primary-dark-rgb: 79, 45, 57;
         --og-color-secondary-dark: #5F424C;
+        --og-color-secondary-dark-rgb: 95, 66, 76;
         --og-color-success: #00AA45;
         --og-color-success-light: #80d5a2;
         --og-color-neutral: #F2B344;

@@ -69,6 +69,9 @@ export class OgUsageGraphic extends LitElement {
     @property() // Sets the background color
     protected dark = false;
 
+    @property()
+    protected small = false;
+
     @property() // Fill to full width & height
     protected fill = false;
 
@@ -87,21 +90,21 @@ export class OgUsageGraphic extends LitElement {
 
             // Header image only, which is normally placed on top of the screen.
             case GraphicType.HEADER: {
-                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark);
+                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark, this.small);
                 return html`
                     <img src="${headerFooterUrl}" style="width: 100%;">
                 `;
             }
             // Footer image only, which is normally placed at the bottom of the screen.
             case GraphicType.FOOTER: {
-                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark);
+                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark, this.small);
                 return html`
                     <img src="${headerFooterUrl}" style="width: 100%; rotate: 180deg;">
                 `;
             }
             // Header AND footer images, which get static on the top and bottom of the viewport.
             case GraphicType.HEADER_FOOTER: {
-                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark);
+                const headerFooterUrl = this.getHeaderFooterByColor(this.color, this.dark, this.small);
                 return html`
                     <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;">
                         <img src="${headerFooterUrl}"/>
@@ -199,7 +202,7 @@ export class OgUsageGraphic extends LitElement {
     }
 
     // TODO: Support dark backgrounds & multiple colors
-    protected getHeaderFooterByColor(_color: OgStateColor, _dark = false): string {
-        return 'images/dots-onboarding.svg';
+    protected getHeaderFooterByColor(_color: OgStateColor, _dark = false, small = false): string {
+        return small ? 'images/dots-onboarding-small.svg' : 'images/dots-onboarding.svg';
     }
 }

@@ -40,8 +40,6 @@ const styling = css`
   }
   #onboarding-topgraphic {
     width: inherit;
-    position: absolute;
-    bottom: 0;
   }
   #onboarding-content {
     flex: 1;
@@ -65,7 +63,6 @@ const styling = css`
 
 export interface OnboardPage {
     getHeading?: () => string
-    headingStyle?: 'title' | 'heading'
     pageContent: () => Promise<TemplateResult> | TemplateResult;
     noTopGraphic?: boolean
     noBottomGraphic?: boolean;
@@ -133,19 +130,20 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
 
                     <!-- Optional header content with title and/or graphic -->
                     ${when(!page.noTopGraphic || !!page.getHeading, () => html`
-                        <div id="onboarding-title" style="height: 16vh; position: relative;">
+                        <div id="onboarding-title" style="position: relative;">
                             ${when(!page.noTopGraphic, () => html`
-                                <og-usage-graphic id="onboarding-topgraphic" .type="${GraphicType.HEADER}"></og-usage-graphic>
+                                <og-usage-graphic id="onboarding-topgraphic" .type="${GraphicType.HEADER}" small="true"></og-usage-graphic>
                             `)}
                             ${when(!!page.getHeading, () => {
-                                const classes = {
-                                    'text-title': page.headingStyle === undefined || page.headingStyle === 'title',
-                                    'text-heading': page.headingStyle === 'heading'
-                                };
                                 return html`
-                                    <span class="${classMap(classes)}" style="position: absolute; bottom: 0; --animate-offset: 0.2s; max-width: 65vw; text-align: center;">
-                                        <or-translate value="${page.getHeading()}"></or-translate>
-                                    </span>
+                                    <div style="margin-top: -15%; --animate-offset: 0.2s; display: flex; flex-direction: column; max-width: 65vw; text-align: center;">
+                                        <span class="text-title">
+                                            <or-translate value="appName"></or-translate>
+                                        </span>
+                                        <span class="text-heading2" style="margin-top: -12px;">
+                                            <or-translate value="${page.getHeading()}"></or-translate>
+                                        </span>
+                                    </div>
                                 `;
                             })}
                         </div>
@@ -153,35 +151,14 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                     
                     <!-- Main content with one or multiple pages using og-swipable -->
                     <div id="onboarding-content" style="${styleMap(contentStyling)}">
-                        ${when(this.pages.length > 1, () => {
-                            return html`
-                                <og-swipable .dots="${this.dots}" .dotsClickable="${false}" .gesture="${this.gesture}" .vertical="${this.vertical}" .language="${this.language}"
-                                             .size="${this.pages.length}" .selected="${this.currentPageIndex}" @slide="${ev => this.onSlide(ev)}">
-                                    ${guard([this.pages, this.language, this.currentPageIndex], () => html`
-                                        ${map(this.pages, (p, index) => {
-                                            return html`
-                                                <div slot="${index}" style="height: 100%; overflow: auto;">
-                                                    ${until(p.pageContent(), html`
-                                                        <og-loading></og-loading>
-                                                    `)}
-                                                </div>
-                                            `;
-                                        })}
-                                    `)}
-                                </og-swipable>
-                            `;
-                        }, () => html`
-                            ${until(page.pageContent(), html`
-                                <og-loading></og-loading>
-                            `)}
-                        `)}
+                        ${this.getOnboardingContent(this.pages, this.currentPageIndex)}
                     </div>
                     
                     <!-- Optional footer content with action button and/or graphic. -->
                     ${when(!page.noBottomGraphic || !!page.getActionText, () => html`
                         <div id="onboarding-footer" style="${styleMap(footerStyling)}">
                             ${when(!page.noBottomGraphic, () => html`
-                                <og-usage-graphic id="onboarding-bottomgraphic" .type="${GraphicType.FOOTER}"></og-usage-graphic>
+                                <og-usage-graphic id="onboarding-bottomgraphic" .type="${GraphicType.FOOTER}" small="true"></og-usage-graphic>
                             `)}
                             ${when(typeof page.getActionText === 'function', () => {
                                 const buttonStyling = {
@@ -189,9 +166,11 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                                     'position': !page.noBottomGraphic ? 'absolute' : undefined,
                                     'bottom': !page.noBottomGraphic ? '16px' : undefined
                                 };
+                                const disabled = typeof page.getActionDisabled === 'function' ? page.getActionDisabled() : false;
                                 return html`
-                                    <og-input .type="${InputType.BUTTON}" fullWidth raised rounded .disabled="${typeof page.getActionDisabled === 'function' ? page.getActionDisabled() : false}" label="${page.getActionText()}"
-                                              style="--or-app-color4: var(--og-color-success); ${styleMap(buttonStyling)}" @or-mwc-input-changed="${() => this.onActionClick(this.currentPageIndex)}"
+                                    <og-input .type="${InputType.BUTTON}" fullWidth rounded label="${page.getActionText()}"
+                                              .disabled="${disabled}" .raised="${!disabled}" .outlined="${disabled}"
+                                              style="--mdc-theme-primary: var(--og-color-warning); ${styleMap(buttonStyling)}" @or-mwc-input-changed="${() => this.onActionClick(this.currentPageIndex)}"
                                     ></og-input>
                                 `;
                             })}
@@ -199,6 +178,40 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                     `)}
                 </div>
             </div>
+        `;
+    }
+
+    protected getOnboardingContent(pages: OnboardPage[], index: number): TemplateResult {
+        const page = pages[index];
+        return html`
+            ${when(pages.length > 1, () => {
+                return html`
+                    <og-swipable .dots="${this.dots}" .dotsClickable="${false}" .gesture="${this.gesture}" .vertical="${this.vertical}" .language="${this.language}"
+                                 .size="${this.pages.length}" .selected="${this.currentPageIndex}" @slide="${ev => this.onSlide(ev)}">
+                        ${this.getOnboardingPagesContent(pages)}
+                    </og-swipable>
+                `;
+            }, () => html`
+                ${until(page.pageContent(), html`
+                    <og-loading></og-loading>
+                `)}
+            `)}
+        `;
+    }
+
+    protected getOnboardingPagesContent(pages: OnboardPage[]): TemplateResult {
+        return html`
+            ${guard([pages, this.language, this.currentPageIndex], () => html`
+                ${map(pages, (p, index) => {
+                    return html`
+                        <div slot="${index}" style="height: 100%; width: 100%; overflow: auto;">
+                            ${until(p.pageContent(), html`
+                                <og-loading></og-loading>
+                            `)}
+                        </div>
+                    `;
+                })}
+            `)}
         `;
     }
 

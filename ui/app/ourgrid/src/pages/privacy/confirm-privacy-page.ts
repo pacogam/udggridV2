@@ -30,7 +30,6 @@ export class ConfirmPrivacyPage extends OgOnboardingPage {
         {
             getHeading: () => 'page-privacy.heading',
             getActionText: () => 'page-privacy.accept',
-            headingStyle: 'heading',
             noBottomGraphic: true,
             noPadding: true,
             pageContent: (): TemplateResult => {

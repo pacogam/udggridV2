@@ -10371,6 +10371,7 @@ __metadata:
   dependencies:
     "@babel/plugin-proposal-decorators": "npm:^7.22.7"
     "@lit-labs/motion": "npm:^1.0.3"
+    "@lit/task": "npm:^1.0.0"
     "@material/chips": "npm:^14.0.0"
     "@material/circular-progress": "npm:^14.0.0"
     "@openremote/manager": "workspace:*"

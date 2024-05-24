@@ -203,9 +203,10 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 return;
             }
             case 'intro': {
-                window.localStorage.removeItem('completedOnboarding');
+                this.dispatchEvent(new CustomEvent('navigate', { detail: 'onboarding' }));
+                /*window.localStorage.setItem('completedOnboarding', '0');
                 router.navigate('');
-                window.location.reload();
+                window.location.reload();*/
                 return;
             }
             case 'privacy': {
@@ -241,28 +242,28 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                                     <img id="top-graphic" src="images/dots-heading-suffix.svg"/>
                                 </div>
                                 <div class="menu-container" style="gap: 36px;">
-                                    ${when(this.showDeviceCard, () => html`
-                                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                                            <div class="menu-asset-card">
-                                                <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
-                                                                   @remove="${() => this.onDeviceRemove()}"
-                                                ></panel-device-info>
-                                            </div>
-                                            <div class="menu-earnings-card">
-                                                <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
-                                            </div>
-                                        </div>
-                                    `)}
                                     <div style="flex: 1;">
                                         <div>
                                             <span class="text-heading">${i18next.t('menu')}</span>
                                         </div>
                                         <og-mwc-list .values="${this.currentPage}" .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
                                     </div>
+                                    ${when(this.showDeviceCard, () => html`
+                                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                                            <div class="menu-earnings-card">
+                                                <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
+                                            </div>
+                                            <div class="menu-asset-card">
+                                                <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
+                                                                   @remove="${() => this.onDeviceRemove()}"
+                                                ></panel-device-info>
+                                            </div>
+                                        </div>
+                                    `)}
                                 </div>
-                                <div id="bottom-graphic-container">
+                                <!--<div id="bottom-graphic-container">
                                     <img id="bottom-graphic" src="images/dots-heading-suffix.svg"/>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     `)}
