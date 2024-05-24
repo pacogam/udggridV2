@@ -72,7 +72,6 @@ export class OnboardingFlow extends OgOnboardingPage {
             `
         }, {
             getHeading: () => 'onboarding.page2-heading',
-            headingStyle: 'heading',
             noBottomGraphic: true,
             noPadding: true,
             pageContent: (): TemplateResult => {

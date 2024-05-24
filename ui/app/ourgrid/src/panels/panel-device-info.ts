@@ -61,9 +61,7 @@ export class PanelDeviceInfo extends OgDataPanel {
                     </div>
                     <div>
                         <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
-                            <div>
-                                <span class="text-heading2">${this.meterAsset ? i18next.t('panel_deviceInfo.yourDevice') : i18next.t('panel_deviceInfo.noDeviceFound')}</span>
-                            </div>
+                            <span class="text-heading2" style="text-align: start;">${this.meterAsset ? i18next.t('panel_deviceInfo.yourDevice') : i18next.t('panel_deviceInfo.noDeviceFound')}</span>
                             <div style="display: flex; flex-direction: column; gap: 2px;">
                                 ${when(this.meterAsset, () => {
                                     const model = this.meterAsset.attributes['smartmeterModel']?.value;
@@ -72,19 +70,19 @@ export class PanelDeviceInfo extends OgDataPanel {
                                     return html`
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <or-icon style="font-size: var(--og-font-size-button-small)" icon="domain"></or-icon>
-                                            <span class="text-tertiary">
+                                            <span class="text-tertiary" style="text-align: start;">
                                                 ${when(model, () => model, () => html`<or-translate value="panel_deviceInfo.unknownModel"></or-translate>`)}
                                             </span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <or-icon style="font-size: var(--og-font-size-button-small)" icon="identifier"></or-icon>
-                                            <span class="text-tertiary">
+                                            <span class="text-tertiary" style="text-align: start;">
                                                 ${when(deviceId, () => deviceId, () => html`<or-translate value="panel_deviceInfo.unknownID"></or-translate>`)}
                                             </span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <or-icon style="font-size: var(--og-font-size-button-small)" icon="download"></or-icon>
-                                            <span class="text-tertiary">
+                                            <span class="text-tertiary" style="text-align: start;">
                                                 ${when(version, () => html`
                                                     <or-translate value="panel_deviceInfo.version"></or-translate>
                                                     ${version}
@@ -95,7 +93,7 @@ export class PanelDeviceInfo extends OgDataPanel {
                                         </div>
                                     `;
                                 }, () => html`
-                                    <or-translate value="panel_deviceInfo.noDeviceText"></or-translate>
+                                    <or-translate value="panel_deviceInfo.noDeviceText" style="margin-bottom: 20px;"></or-translate>
                                 `)}
                             </div>
                             <div>

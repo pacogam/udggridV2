@@ -14,6 +14,7 @@ const styling = css`
   #swipable-wrapper {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: 8px;
     height: 100%;
   }

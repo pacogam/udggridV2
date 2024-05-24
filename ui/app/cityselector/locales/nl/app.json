@@ -1,0 +1,9 @@
+{
+  "appName": "OurGrid",
+  "loadingCity": "Verbinden met de server...",
+  "searchCityName": "OurGrid is beschikbaar in meerdere gemeentes, kies je gemeente om verder te gaan",
+  "noCityFound": "Kon jouw stad niet vinden.",
+  "cityNotAvailable": "... maar nog niet in deze stad.",
+  "login": "Log in",
+  "about": "Wat is OurGrid?"
+}

@@ -149,13 +149,7 @@
     "page2-heading": "Device Setup",
     "page2-text": "Setup your device by filling in the code that you copied from the Dongle Connect App here:",
     "page2-inputlabel": "Paste code here",
-    "page2-action": "Verify",
-    "page3-heading": "Device Setup",
-    "page3-text": "Connecting to your device...",
-    "page3-action": "Connecting...",
-    "page4-heading": "Complete!",
-    "page4-text": "Successfully connected your device!",
-    "page4-action": "Finish"
+    "page2-action": "Finish"
   },
   "vehicleBrands": {
     "TESLA": "Tesla",

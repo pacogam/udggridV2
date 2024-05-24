@@ -1,7 +1,7 @@
 {
-  "name": "ourgrid-app",
+  "name": "cityselector-app",
   "version": "1.0.0",
-  "description": "OurGrid App",
+  "description": "City Selector app",
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",
   "private": true,
@@ -19,15 +19,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@lit-labs/motion": "^1.0.3",
     "@lit/task": "^1.0.0",
-    "@material/chips": "^14.0.0",
-    "@material/circular-progress": "^14.0.0",
-    "@openremote/manager": "workspace:*",
-    "@openremote/or-app": "workspace:*",
-    "countup.js": "^2.8.0",
-    "keen-slider": "^6.8.6",
-    "lit": "^2.0.2"
+    "@openremote/model": "workspace:*",
+    "@openremote/or-mwc-components": "workspace:*",
+    "lit": "^3.1.3"
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.22.7",

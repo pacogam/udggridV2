@@ -1,0 +1,12 @@
+{
+  "gateway": {
+    "searchCitiesFile": "/ourgrid_cities.json",
+    "cities": [
+      {
+        "name": "Amsterdam",
+        "ourGridUrl": "https://staging.ourgrid.openremote.app/ourgrid",
+        "realm": "amsterdam"
+      }
+    ]
+  }
+}

@@ -170,8 +170,13 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
             // Else, just continue loading the page...
             } else {
                 const provider = this.getPageProvider(this._page);
-                if(provider) {
-                    this.switchPage(provider);
+                const previous = changedProps.get('_page') as string | undefined;
+                const forceAnimate =
+                    (previous?.toLowerCase() === 'setup' && this._page.toLowerCase() === 'home') ||
+                    (previous?.toLowerCase() === 'onboarding' && this._page.toLowerCase() === 'home');
+
+                if (provider) {
+                    this.switchPage(provider, forceAnimate);
                 } else {
                     console.error('Provider for the page could not be found.');
                 }
@@ -263,10 +268,10 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
 
     // Method that switches pages using enter/exit animations.
     // Checks whether a loading check should be in place, and waits for it to finish.
-    protected async switchPage(provider: OgPageProvider<any>, animate = true) {
+    protected async switchPage(provider: OgPageProvider<any>, animate?: boolean) {
         const currentPage = this._activePage;
         const newPage = provider.pageCreator();
-        if(animate) {
+        if(animate === undefined) {
             animate = !this._isMenuActive;
         }
         console.info(`Navigating from ${currentPage?.name} to ${newPage.name}, with animation set to ${animate}`);

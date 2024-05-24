@@ -35,15 +35,17 @@ export const DefaultPagesConfig: OgPageProvider<any>[] = [
     pageAccountPasswordProvider(store),
     pageCharacteristicsProvider(store),
     pagePrivacyProvider(store),
-    page1SetupProvider(store)
+    page1SetupProvider(store),
+    pageOnboardingProvider(store)
 ];
 
 if(localStorage.getItem('acceptedPrivacy') == null) {
     DefaultPagesConfig.push(pageConfirmPrivacyProvider(store));
 }
-if(localStorage.getItem('completedOnboarding') == null){
+/*if(localStorage.getItem('completedOnboarding') === '0'/!*null*!/){
+    console.log("Adding onboarding page!");
     DefaultPagesConfig.push(pageOnboardingProvider(store));
-}
+}*/
 
 
 export const DefaultRealmConfig: RealmAppConfig = {

@@ -3,70 +3,83 @@ import {css, html, nothing, PropertyValues, TemplateResult} from 'lit';
 import {InputType, OrInputChangedEvent, OrMwcInput} from '@openremote/or-mwc-components/or-mwc-input';
 import {getAppStyle} from '../styles';
 import {classMap} from 'lit/directives/class-map.js';
-import { when } from 'lit/directives/when.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import {when} from 'lit/directives/when.js';
+import {styleMap} from 'lit/directives/style-map.js';
 
 const styling = css`
-  .mdc-button {
-    font-family: var(--og-font-family);
-    font-size: var(--og-font-size-button-text);
-    font-weight: var(--og-font-weight-button-text);
-    letter-spacing: normal;
-    text-transform: initial;
-    transition: background 0.2s;
-    -webkit-transition: background 0.2s;
-    height: 48px;
-  }
+    .mdc-button {
+        font-family: var(--og-font-family);
+        font-size: var(--og-font-size-button-text);
+        font-weight: var(--og-font-weight-button-text);
+        letter-spacing: normal;
+        text-transform: initial;
+        transition: background 0.2s;
+        -webkit-transition: background 0.2s;
+        height: 48px;
+    }
 
-  .mdc-button--outlined:not(:disabled) {
-    border-color: var(--og-color-secondary);
-  }
+    .mdc-button--outlined {
+        border-width: 2px;
+    }
 
-  .mdc-button--error {
-    --mdc-theme-primary: var(--og-color-error);
-  }
+    .mdc-button--outlined:not(:disabled) {
+        border-color: var(--og-color-secondary);
+    }
 
-  .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-    background-color: var(--og-background-shade);
-  }
+    .mdc-button--outlined:disabled {
+        border-color: var(--mdc-theme-primary);
+        color: var(--mdc-theme-primary);
+    }
 
-  .mdc-fab:hover, .mdc-fab:focus {
-    box-shadow: none;
-  }
+    .mdc-button--error {
+        --mdc-theme-primary: var(--og-color-error);
+    }
 
-  .mdc-fab {
-    box-shadow: none;
-    background: var(--og-color-primary);
-    width: 64px;
-    height: 64px;
-    border-radius: var(--og-mdc-fab-border-radius, 50%) !important;
-  }
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+        background-color: var(--og-background-shade);
+    }
 
-  .mdc-fab__icon {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 32px !important;
-  }
+    .mdc-fab:hover, .mdc-fab:focus {
+        box-shadow: none;
+    }
 
-  .mdc-notched-outline__leading {
-    border-color: var(--og-color-secondary) !important;
-  }
+    .mdc-fab {
+        box-shadow: none;
+        background: var(--og-color-primary);
+        width: 64px;
+        height: 64px;
+        border-radius: var(--og-mdc-fab-border-radius, 50%) !important;
+    }
 
-  .mdc-notched-outline__notch {
-    border-color: var(--og-color-secondary) !important;
-  }
+    .mdc-fab__icon {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 32px !important;
+    }
 
-  .mdc-notched-outline__trailing {
-    border-color: var(--og-color-secondary) !important;
-  }
-  
-  .mdc-button-grouped {
-    padding: 0;
-    min-width: 0;
-    aspect-ratio: 1/1;
-    width: 44px; /*4px smaller than Material spec*/
-    height: auto;
-  }
+    .mdc-notched-outline__leading {
+        border-color: var(--og-color-secondary) !important;
+    }
+
+    .mdc-notched-outline__notch {
+        border-color: var(--og-color-secondary) !important;
+    }
+
+    .mdc-notched-outline__trailing {
+        border-color: var(--og-color-secondary) !important;
+    }
+
+    .mdc-button-grouped {
+        padding: 0;
+        min-width: 0;
+        aspect-ratio: 1/1;
+        width: 44px; /*4px smaller than Material spec*/
+        height: auto;
+    }
+
+    .mdc-select--filled:not(.mdc-select--disabled) .mdc-select__anchor {
+        background-color: var(--og-background-shade);
+    }
 `;
 
 export enum OgSpecialInputType {
@@ -82,6 +95,10 @@ export interface OgInputButtonGroupOption {
         inactive?: string
     },
     fillColors?: {
+        active?: string,
+        inactive?: string
+    },
+    borderColors?: {
         active?: string,
         inactive?: string
     }
@@ -137,7 +154,7 @@ export class OgInput extends OrMwcInput {
     // Only overriding BUTTON type, that is mostly copied from OrMwcInput render(),
     // with the additions of a loading indicator and error message
     protected render(): TemplateResult {
-        if(this.type === InputType.BUTTON) {
+        if (this.type === InputType.BUTTON) {
             const onMouseDown = (ev: MouseEvent) => {
                 if (this.disabled || this.readonly || this.loading) {
                     ev.stopPropagation();
@@ -178,15 +195,19 @@ export class OgInput extends OrMwcInput {
                         ?disabled="${this.disabled}"
                         @click="${(ev: MouseEvent) => onClick(ev)}"
                         @mousedown="${(ev: MouseEvent) => onMouseDown(ev)}" @mouseup="${(ev: MouseEvent) => onMouseUp(ev)}">
-                    ${!isIconButton ? html`<div class="mdc-button__ripple"></div>` : ``}
-                    ${this.icon ? html`<or-icon class="${isIconButton ? '' : this.action ? 'mdc-fab__icon' : 'mdc-button__icon'}" aria-hidden="true" icon="${this.icon}"></or-icon>` : ``}
+                    ${!isIconButton ? html`
+                        <div class="mdc-button__ripple"></div>` : ``}
+                    ${this.icon ? html`
+                        <or-icon class="${isIconButton ? '' : this.action ? 'mdc-fab__icon' : 'mdc-button__icon'}" aria-hidden="true" icon="${this.icon}"></or-icon>` : ``}
                     ${(this.label || this.error) ? html`
                         <span class="${this.action ? 'mdc-fab__label' : 'mdc-button__label'}" style="${this.loading ? 'visibility: hidden' : nothing}">
-                            ${this.doTranslate ? html`<or-translate .value="${this.error ? this.error : this.label}"></or-translate>` : html`${this.error ? this.error : this.label}`}
+                            ${this.doTranslate ? html`
+                                <or-translate .value="${this.error ? this.error : this.label}"></or-translate>` : html`${this.error ? this.error : this.label}`}
                         </span>
                     ` : ``}
                     ${this.loading ? html`<span style="position: absolute;"><og-loading size="medium" style="display: flex; --og-loading-color: var(--mdc-theme-primary);"></og-loading></span>` : ``}
-                    ${!isIconButton && this.iconTrailing ? html`<or-icon class="${this.action ? 'mdc-fab__icon' : 'mdc-button__icon'}" aria-hidden="true" icon="${this.iconTrailing}"></or-icon>` : ``}
+                    ${!isIconButton && this.iconTrailing ? html`
+                        <or-icon class="${this.action ? 'mdc-fab__icon' : 'mdc-button__icon'}" aria-hidden="true" icon="${this.iconTrailing}"></or-icon>` : ``}
                 </button>
             `;
 
@@ -200,12 +221,13 @@ export class OgInput extends OrMwcInput {
                 this.dispatchEvent(new OrInputChangedEvent(index, null));
             };
             return html`
-                <div style="display: flex;">
+                <div style="display: flex; gap: 8px;">
                     ${this.options.map((item: string | OgInputButtonGroupOption, index) => {
                         const isString = typeof item === 'string';
                         const buttonStyles: {} = {
-                            'border-left': index > 0 ? 'none' : undefined,
-                            'border-radius': index === 0 ? '4px 0 0 4px' : (index === (this.options.length - 1) ? '0 4px 4px 0' : '0'),
+                            'width': '34px',
+                            'border-radius': '50%',
+                            'border-color': !isString ? (this.value === index ? item.borderColors?.active : item.borderColors?.inactive) : undefined,
                             'background-color': !isString ? (this.value === index ? item.fillColors?.active : item.fillColors?.inactive) : undefined
                         };
                         const iconStyles: {} = {

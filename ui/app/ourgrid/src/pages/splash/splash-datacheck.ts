@@ -121,9 +121,9 @@ export class SplashDatacheck extends OgSplashPage {
         // Execute necessary checks
         try {
 
-            if(localStorage.getItem("completedOnboarding") == null) {
+            /*if(localStorage.getItem("completedOnboarding") == '0') {
                 throw new NeedsOnboardingError("Requires onboarding");
-            }
+            }*/
 
             if(localStorage.getItem("acceptedPrivacy") == null) {
                 throw new RequiresPrivacyConfirmationError("Requires privacy confirmation");
