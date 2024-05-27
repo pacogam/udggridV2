@@ -171,9 +171,15 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
             } else {
                 const provider = this.getPageProvider(this._page);
                 const previous = changedProps.get('_page') as string | undefined;
-                const forceAnimate =
-                    (previous?.toLowerCase() === 'setup' && this._page.toLowerCase() === 'home') ||
-                    (previous?.toLowerCase() === 'onboarding' && this._page.toLowerCase() === 'home');
+
+                let forceAnimate = undefined;
+                if(
+                    !this._assets || this._assets.length === 0 || // if no assets are present
+                    (previous?.toLowerCase() === 'setup' && this._page.toLowerCase() === 'home') || // or user has just completed the setup
+                    (previous?.toLowerCase() === 'onboarding' && this._page.toLowerCase() === 'home') // or user has just completed the onboarding
+                ) {
+                    forceAnimate = true; // then force the 'animation'
+                }
 
                 if (provider) {
                     this.switchPage(provider, forceAnimate);
