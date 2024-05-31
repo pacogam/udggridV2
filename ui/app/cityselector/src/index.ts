@@ -10,8 +10,15 @@ export const DEFAULT_LANGUAGE: string = 'nl';
 const configURL = (CONFIG_URL_PREFIX || "") + "/ourgrid_config.json";
 const langFolder = "locales";
 
+// TEMPROARY: Automatically redirect all traffic to staging.reschool.openremote.app
+navigateToCity(window, {
+    name: "Amsterdam",
+    ourGridUrl: "https://staging.reschool.openremote.app/ourgrid",
+    realm: "amsterdam"
+})
+
 // Check if city is already selected
-const cityStr = window.localStorage.getItem(LOCALSTORAGE_KEY_CITY) as string | undefined;
+/*const cityStr = window.localStorage.getItem(LOCALSTORAGE_KEY_CITY) as string | undefined;
 if(cityStr) {
     const city = JSON.parse(cityStr) as OurGridGatewayCity;
     navigateToCity(window, city);
@@ -19,10 +26,10 @@ if(cityStr) {
     // In case navigating takes long, we show a loading page
     const loader = new CitySelectorLoader();
     document.body.appendChild(loader);
-}
+}*/
 
 // if not, load the selector app
-else {
+/*else {
     const app = new CitySelectorApp(CONFIG_URL_PREFIX, configURL, langFolder, DEFAULT_LANGUAGE);
     document.body.appendChild(app);
-}
+}*/
