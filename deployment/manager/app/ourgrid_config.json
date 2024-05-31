@@ -4,7 +4,7 @@
     "cities": [
       {
         "name": "Amsterdam",
-        "ourGridUrl": "https://staging.ourgrid.openremote.app/ourgrid",
+        "ourGridUrl": "https://staging.reschool.openremote.app/ourgrid",
         "realm": "amsterdam"
       }
     ]
