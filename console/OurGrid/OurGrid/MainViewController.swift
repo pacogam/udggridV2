@@ -17,7 +17,7 @@ class MainViewController: ORViewcontroller {
     override func viewDidLoad() {
         super.viewDidLoad()
         let url = Bundle.main.object(forInfoDictionaryKey: "BaseURL") as! String
-        self.baseUrl =  "\(url)/ourgrid/?\(queryParameters)"
+        self.baseUrl =  "\(url)/cityselector/?\(queryParameters)"
         if let encodedUrl = self.baseUrl!.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed){
             loadURL(url: URL(string: encodedUrl)!)
         }

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BaseURL</key>
-	<string>https://staging.reschool.openremote.app</string>
+	<string>https://ourgrid.openremote.app</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIApplicationSceneManifest</key>

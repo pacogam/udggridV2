@@ -12,6 +12,6 @@ class MainActivity : OrMainActivity() {
         val platform = "Android " + Build.VERSION.RELEASE
         val version = BuildConfig.VERSION_NAME
 
-        loadUrl("https://staging.reschool.openremote.app/ourgrid/?consolePlatform=$platform&consoleName=ourgrid&consoleVersion=$version&consoleProviders=push storage")
+        loadUrl("https://ourgrid.openremote.app/cityselector/?consolePlatform=$platform&consoleName=ourgrid&consoleVersion=$version&consoleProviders=push storage")
     }
 }
