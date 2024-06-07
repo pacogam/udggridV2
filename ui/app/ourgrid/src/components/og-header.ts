@@ -25,11 +25,14 @@ const styling = css`
 @customElement('og-header')
 export class OgHeader extends LitElement {
 
-    @property()
+    @property({type: Boolean})
     public loading = false;
 
-    @property()
+    @property({type: Boolean})
     public dark = false;
+
+    @property({type: Boolean})
+    public menuActive = false;
 
     static styles = [getAppStyle(), styling];
 
@@ -37,13 +40,15 @@ export class OgHeader extends LitElement {
         const buttonStyles: {} = {
             '--og-color-primary': this.dark ? 'var(--og-color-primary-dark)' : undefined,
             '--or-icon-fill': this.dark ? 'var(--or-app-color1)' : 'var(--og-color-primary-dark)',
-            '--og-mdc-fab-border-radius': '50% 0 50% 50%'
+            '--og-mdc-fab-border-radius': '50% 0 50% 50%',
+            '--og-mdc-fab-transition': 'all ease 0.5s',
+            '--og-mdc-fab-background': this.dark ? 'transparent' : undefined
         };
         return html`
             <div id="header-container">
                 ${when(!this.loading, () => html`
                     <div id="button-container">
-                        <og-input type="${InputType.BUTTON}" icon="tune" action="${true}" style=${styleMap(buttonStyles)}
+                        <og-input type="${InputType.BUTTON}" .icon="${this.menuActive ? 'close' : 'tune'}" action="${true}" style=${styleMap(buttonStyles)}
                                       @or-mwc-input-changed="${() => { this.dispatchEvent(new CustomEvent('menu')); }}"
                         ></og-input>
                     </div>

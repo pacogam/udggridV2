@@ -26,108 +26,108 @@ export function pageMenuProvider(store: Store<GridAppStateKeyed>): OgPageProvide
 }
 
 const styling = css`
-  :host {
-    z-index: 9;
-    position: relative;
-  }
+    :host {
+        z-index: 9;
+        position: relative;
+    }
 
-  #menu-wrapper {
-    position: absolute;
-    width: 100%;
-    max-width: 100%;
-    right: 0;
-  }
+    #menu-wrapper {
+        position: absolute;
+        width: 100%;
+        max-width: 100%;
+        right: 0;
+    }
 
-  .menu-content-wrapper {
-    position: absolute;
-    right: 0;
-    height: 0;
-    width: 0;
-    opacity: 0;
-    z-index: 11;
-    overflow: hidden;
-  }
+    .menu-content-wrapper {
+        position: absolute;
+        right: 0;
+        height: 0;
+        width: 0;
+        opacity: 0;
+        z-index: 11;
+        overflow: hidden;
+    }
 
-  .menu-content-wrapper-closed {
-    transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important; /*closing transition*/
-    -webkit-transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important;
-  }
+    .menu-content-wrapper-closed {
+        transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important; /*closing transition*/
+        -webkit-transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important;
+    }
 
-  .menu-content-wrapper-opened {
-    width: 100%;
-    height: 100vh;
-    opacity: 1;
-    transition: opacity ease-in-out 0.3s 0.3s; /*open transition*/
-    -webkit-transition: opacity ease-in-out 0.3s 0.3s;
-  }
+    .menu-content-wrapper-opened {
+        width: 100%;
+        height: 100vh;
+        opacity: 1;
+        transition: opacity ease-in-out 0.3s 0.3s; /*open transition*/
+        -webkit-transition: opacity ease-in-out 0.3s 0.3s;
+    }
 
-  .menu-content {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-  }
+    .menu-content {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
 
-  .menu-container {
-    flex: 1;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-  }
+    .menu-container {
+        flex: 1;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 24px;
+    }
 
-  #top-graphic-container {
-    padding: 0 12px;
-  }
+    #top-graphic-container {
+        padding: 0 12px;
+    }
 
-  #top-graphic {
-    width: 70%;
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
-  }
+    #top-graphic {
+        width: 100%;
+        /*-webkit-transform: scaleX(-1);
+        transform: scaleX(-1);*/
+    }
 
-  #bottom-graphic-container {
-    padding: 0 12px;
-    display: flex;
-    justify-content: end;
-  }
+    #bottom-graphic-container {
+        padding: 0 12px;
+        display: flex;
+        justify-content: center;
+    }
 
-  #bottom-graphic {
-    width: 70%;
-    -webkit-transform: scaleY(-1);
-    transform: scaleY(-1);
-  }
+    #bottom-graphic {
+        width: 100%;
+        /*-webkit-transform: scaleY(-1);
+        transform: scaleY(-1);*/
+    }
 
-  .menu-background-wrapper {
-    position: relative;
-    overflow: hidden;
-    max-width: 100%;
-    height: 0;
-    transition: all ease-in-out 0.5s;
-    -webkit-transition: all ease-in-out 0.5s;
-  }
-  
-  .menu-background-wrapper-opened {
-    height: 100vh;
-  }
-  
-  .menu-background {
-    position: absolute;
-    right: 0;
-    height: 0;
-    width: 0;
-    border-radius: 0 0 0 100%;
-    background: var(--og-color-primary);
-    transition: all ease-in-out 0.5s;
-    -webkit-transition: all ease-in-out 0.5s;
-    z-index: 10;
-  }
+    .menu-background-wrapper {
+        position: relative;
+        overflow: hidden;
+        max-width: 100%;
+        height: 0;
+        transition: all ease-in-out 0.5s;
+        -webkit-transition: all ease-in-out 0.5s;
+    }
 
-  .menu-background-opened {
-    height: 150vh;
-    width: 150vh;
-  }
+    .menu-background-wrapper-opened {
+        height: 100vh;
+    }
+
+    .menu-background {
+        position: absolute;
+        right: 0;
+        height: 0;
+        width: 0;
+        border-radius: 0 0 0 100%;
+        background: var(--og-color-primary);
+        transition: all ease-in-out 0.5s;
+        -webkit-transition: all ease-in-out 0.5s;
+        z-index: 10;
+    }
+
+    .menu-background-opened {
+        height: 150vh;
+        width: 150vh;
+    }
 `;
 
 @customElement('page-menu')
@@ -168,9 +168,9 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
 
     protected willUpdate(changedProps: Map<string, any>) {
         super.willUpdate(changedProps);
-        if(changedProps.has('currentPage')) {
+        if (changedProps.has('currentPage')) {
             this.toggle(false);
-            if(this.currentPage === 'setup') {
+            if (this.currentPage === 'setup') {
                 this.showDeviceCard = false;
             } else {
                 this.showDeviceCard = true;
@@ -187,15 +187,15 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected _onMenuSelect(ev: OrMwcListChangedEvent) {
         switch (ev.detail[0].value) {
             case 'home': {
-                this.dispatchEvent(new CustomEvent('navigate', { detail: 'home' }));
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'home'}));
                 return;
             }
             case 'account': {
-                this.dispatchEvent(new CustomEvent('navigate', { detail: 'account' }));
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'account'}));
                 return;
             }
             case 'characteristics': {
-                this.dispatchEvent(new CustomEvent('navigate', { detail: 'characteristics' }));
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'characteristics'}));
                 return;
             }
             case 'language': {
@@ -203,20 +203,21 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 return;
             }
             case 'intro': {
-                this.dispatchEvent(new CustomEvent('navigate', { detail: 'onboarding' }));
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'onboarding'}));
                 /*window.localStorage.setItem('completedOnboarding', '0');
                 router.navigate('');
                 window.location.reload();*/
                 return;
             }
             case 'privacy': {
-                this.dispatchEvent(new CustomEvent('navigate', { detail: 'privacy' }));
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'privacy'}));
                 return;
             }
             case 'logout': {
                 manager.logout();
                 return;
-            } default: {
+            }
+            default: {
                 return;
             }
         }
@@ -228,7 +229,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
             {icon: 'account', text: i18next.t('account'), value: 'account'},
             {icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},
             {icon: 'web', text: i18next.t('language'), value: 'language'},
-            {icon: 'help-circle-outline', text: i18next.t('intro'), value: 'intro' },
+            {icon: 'help-circle-outline', text: i18next.t('intro'), value: 'intro'},
             {icon: 'book', text: i18next.t('privacyStatement'), value: 'privacy'},
             {prefixImg: 'images/logout.svg', text: i18next.t('logout'), value: 'logout'}
         ];
@@ -237,33 +238,39 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 <div class="menu-content-wrapper ${this.opened ? 'menu-content-wrapper-opened' : 'menu-content-wrapper-closed'}">
                     ${guard([this.userAsset, this.currentPage, this.showDeviceCard, this.challengeAsset, this.language], () => html`
                         <div class="menu-content">
+                            
+                            <!-- Top container -->
+                            <div class="menu-container" style="background: var(--og-color-primary-dark)">
+                                <div class="menu-container" style="gap: 36px;">
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+                                        <div>
+                                            <span class="text-heading dark">${i18next.t('menu')}</span>
+                                        </div>
+                                        <og-mwc-list dark .values="${this.currentPage}" .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
+                                    </div>
+                                </div>
+                                <div id="bottom-graphic-container">
+                                    <img id="bottom-graphic" src="images/dots-menu-white-bottom.svg"/>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom container -->
                             <div class="menu-container">
                                 <div id="top-graphic-container">
-                                    <img id="top-graphic" src="images/dots-heading-suffix.svg"/>
+                                    <img id="top-graphic" src="images/dots-menu-green-top.svg"/>
                                 </div>
-                                <div class="menu-container" style="gap: 36px;">
-                                    <div style="flex: 1;">
-                                        <div>
-                                            <span class="text-heading">${i18next.t('menu')}</span>
+                                ${when(this.showDeviceCard, () => html`
+                                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                                        <div class="menu-earnings-card">
+                                            <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
                                         </div>
-                                        <og-mwc-list .values="${this.currentPage}" .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
+                                        <div class="menu-asset-card">
+                                            <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
+                                                               @remove="${() => this.onDeviceRemove()}"
+                                            ></panel-device-info>
+                                        </div>
                                     </div>
-                                    ${when(this.showDeviceCard, () => html`
-                                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                                            <div class="menu-earnings-card">
-                                                <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
-                                            </div>
-                                            <div class="menu-asset-card">
-                                                <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
-                                                                   @remove="${() => this.onDeviceRemove()}"
-                                                ></panel-device-info>
-                                            </div>
-                                        </div>
-                                    `)}
-                                </div>
-                                <!--<div id="bottom-graphic-container">
-                                    <img id="bottom-graphic" src="images/dots-heading-suffix.svg"/>
-                                </div>-->
+                                `)}
                             </div>
                         </div>
                     `)}

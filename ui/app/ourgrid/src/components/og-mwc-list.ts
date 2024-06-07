@@ -1,20 +1,26 @@
 import {getListTemplate, ListItem, ListType, OrMwcList} from '@openremote/or-mwc-components/or-mwc-list';
 import {TemplateResult, html, css} from 'lit';
-import {customElement} from 'lit/decorators.js';
+import {customElement, property} from 'lit/decorators.js';
 import {i18next} from '@openremote/or-translate';
 import {styleMap} from 'lit/directives/style-map.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
+import {classMap} from 'lit/directives/class-map.js';
+import {getAppStyle} from "../styles";
 
 export interface OgListItem extends ListItem {
     prefixImg?: string
 }
 
 const styling = css`
-  .mdc-list-item__text {
-    font-family: var(--og-font-family);
-    font-size: var(--og-font-size-menu-options);
-    font-weight: var(--og-font-weight-menu-options);
-  }
+    .mdc-list-item__text {
+        font-family: var(--og-font-family);
+        font-size: var(--og-font-size-menu-options);
+        font-weight: var(--og-font-weight-menu-options);
+    }
+
+    .mdc-list-item__graphic--dark {
+        --or-icon-fill: var(--og-color-warning)
+    }
 `
 
 // Extended class that uses OgListItem instead of ListItem to add extra fields.
@@ -24,8 +30,11 @@ export class OgMwcList extends OrMwcList {
 
     public listItems?: (OgListItem | null)[];
 
+    @property({type: Boolean})
+    public dark = false;
+
     static get styles() {
-        return [...super.styles, styling];
+        return [...super.styles, getAppStyle(), styling];
     }
 
     protected render() {
@@ -71,14 +80,22 @@ export class OgMwcList extends OrMwcList {
         }
 
         if (type === ListType.MULTI_TICK || icon) {
+            const classes = {
+                'mdc-list-item__graphic': true,
+                'mdc-list-item__graphic--dark': this.dark
+            }
             leftTemplate = html`
-                <span class="mdc-list-item__graphic">
+                <span class="${classMap(classes)}">
                     <or-icon icon="${icon}"></or-icon>
                 </span>
             `;
         } else if (prefixImg) {
+            const classes = {
+                'mdc-list-item__graphic': true,
+                'mdc-list-item__graphic--dark': this.dark
+            }
             leftTemplate = html`
-                <span class="mdc-list-item__graphic">
+                <span class="${classMap(classes)}">
                     <img src="${prefixImg}" width="24" height="24" alt="icon"/>
                 </span>
             `;
@@ -140,15 +157,15 @@ export class OgMwcList extends OrMwcList {
             if (secondaryText !== undefined) {
                 textTemplate = html`
                     <span class="mdc-list-item__text">
-                        <span class="mdc-list-item__primary-text text-primary">${translate ? i18next.t(text) : text}</span>
-                        <span class="mdc-list-item__secondary-text text-secondary">${translate ? i18next.t(secondaryText) : secondaryText}</span>
+                        <span class="mdc-list-item__primary-text text-primary ${this.dark ? 'dark': undefined}">${translate ? i18next.t(text) : text}</span>
+                        <span class="mdc-list-item__secondary-text text-secondary ${this.dark ? 'dark': undefined}">${translate ? i18next.t(secondaryText) : secondaryText}</span>
                     </span>
                 `;
             } else {
                 if (type === ListType.RADIO) {
-                    textTemplate = html`<label class="mdc-list-item__text" for="radio-item-${index + 1}">${translate ? i18next.t(text) : text}</label>`;
+                    textTemplate = html`<label class="mdc-list-item__text text-primary ${this.dark ? 'dark': undefined}" for="radio-item-${index + 1}">${translate ? i18next.t(text) : text}</label>`;
                 } else {
-                    textTemplate = html`<span class="mdc-list-item__text" title="${translate ? i18next.t(text) : text}">${translate ? i18next.t(text) : text}</span>`;
+                    textTemplate = html`<span class="mdc-list-item__text text-primary ${this.dark ? 'dark': undefined}" title="${translate ? i18next.t(text) : text}">${translate ? i18next.t(text) : text}</span>`;
                 }
             }
         }

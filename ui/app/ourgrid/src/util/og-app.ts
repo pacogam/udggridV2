@@ -243,10 +243,11 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
             return html`
 
                 <!-- Header and main menu -->
-                ${guard([this.appConfig, this._headerShown, this._dark, this._initialised, this._loading], () => html`
+                ${guard([this.appConfig, this._headerShown, this._dark, this._initialised, this._loading, this._isMenuActive], () => html`
                     ${when(!pageProvider?.hideHeader, () => html`
                         <div id="header-container">
-                            <og-header style="transform: translateY(${this._headerShown ? '0' : '-100%'})" .dark="${this._dark}" .loading="${!this._initialised || this._loading}"
+                            <og-header style="transform: translateY(${this._headerShown ? '0' : '-100%'})" .dark="${this._dark || this._isMenuActive}"
+                                       .menuActive="${this._isMenuActive}" .loading="${!this._initialised || this._loading}"
                                        @menu="${() => this._isMenuActive = !this._isMenuActive}"
                             ></og-header>
                         </div>
