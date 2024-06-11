@@ -38,7 +38,10 @@ module.exports = (env, argv) => {
     // Add a custom base URL to resolve the config dir to the path of the dev server not root
     config.plugins.push(
         new webpack.DefinePlugin({
-            CONFIG_URL_PREFIX: JSON.stringify(IS_DEV_SERVER && customConfigDir ? "/cityselector" : "")
+            CONFIG_URL_PREFIX: JSON.stringify(IS_DEV_SERVER && customConfigDir ? "/cityselector" : ""),
+            IGNORE_LOCALSTORAGE: JSON.stringify(process.env.IGNORE_LOCALSTORAGE),
+            FORCE_REDIRECT_URL: JSON.stringify(process.env.FORCE_REDIRECT_URL),
+            FORCE_REDIRECT_REALM: JSON.stringify(process.env.FORCE_REDIRECT_REALM),
         })
     );
 

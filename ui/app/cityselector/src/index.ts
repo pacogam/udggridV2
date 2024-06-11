@@ -4,22 +4,27 @@ import {OurGridGatewayCity} from "@openremote/model";
 import {CitySelectorLoader} from "./city-selector-loader";
 
 declare var CONFIG_URL_PREFIX: string;
+declare var IGNORE_LOCALSTORAGE: boolean;
+declare var FORCE_REDIRECT_URL: string;
+declare var FORCE_REDIRECT_REALM: string;
+
 export const DEFAULT_LANGUAGE: string = 'nl';
 
 // Try and load the app config from JSON and if anything is found amalgamate it with default
 const configURL = (CONFIG_URL_PREFIX || "") + "/ourgrid_config.json";
 const langFolder = "locales";
 
-// TEMPROARY: Automatically redirect all traffic to staging.reschool.openremote.app
-/*navigateToCity(window, {
-    name: "Amsterdam",
-    ourGridUrl: "https://staging.reschool.openremote.app/ourgrid",
-    realm: "amsterdam"
-})*/
+// Force redirect to specified URL, and skip city selector
+if(FORCE_REDIRECT_URL) {
+    navigateToCity(window, {
+        ourGridUrl: FORCE_REDIRECT_URL,
+        realm: FORCE_REDIRECT_REALM || "default"
+    }, false);
+}
 
 // Check if city is already selected
 const cityStr = window.localStorage.getItem(LOCALSTORAGE_KEY_CITY) as string | undefined;
-if(cityStr) {
+if(!IGNORE_LOCALSTORAGE && cityStr) {
     const city = JSON.parse(cityStr) as OurGridGatewayCity;
     navigateToCity(window, city);
 
