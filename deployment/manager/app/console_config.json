@@ -2,6 +2,6 @@
   "showAppTextInput": false,
   "showRealmTextInput": false,
   "app": null,
-  "allowedApps": ["ourgrid"],
+  "allowedApps": ["ourgrid", "cityselector"],
   "apps": null
 }

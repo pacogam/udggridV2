@@ -1,114 +1,11 @@
 {
   "options" : {
     "default" : {
-      "center" : [ 12.5192, 48.7251 ],
-      "bounds" : [ -50.0, 15.0, 70.0, 75.0 ],
-      "zoom" : 2,
-      "minZoom" : 1,
-      "maxZoom" : 19,
-      "boxZoom" : false,
-      "geocodeUrl" : "https://nominatim.openstreetmap.org"
-    },
-    "amsterdam" : {
-      "center" : [ 4.943772, 52.373657 ],
-      "bounds" : [ 4.89, 52.35, 4.99, 52.41 ],
-      "zoom" : 16,
-      "minZoom" : 11,
-      "maxZoom" : 19,
-      "boxZoom" : false,
-      "geocodeUrl" : "https://nominatim.openstreetmap.org",
-      "geoJson": {
-        "source": {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "properties": {},
-              "geometry": {
-                "coordinates": [
-                  [
-                    [
-                      4.941517167552263,
-                      52.37393714904351
-                    ],
-                    [
-                      4.941973488816558,
-                      52.37347902641258
-                    ],
-                    [
-                      4.9450257710531105,
-                      52.37381952341565
-                    ],
-                    [
-                      4.945228580503823,
-                      52.37310757214203
-                    ],
-                    [
-                      4.945441530427132,
-                      52.3729094619203
-                    ],
-                    [
-                      4.94970052889613,
-                      52.3733985449189
-                    ],
-                    [
-                      4.949061679126288,
-                      52.37532386966569
-                    ],
-                    [
-                      4.945218440031255,
-                      52.37487814278575
-                    ],
-                    [
-                      4.94523872097642,
-                      52.374927668216884
-                    ],
-                    [
-                      4.944224673722033,
-                      52.37499576559367
-                    ],
-                    [
-                      4.944113128523725,
-                      52.374203353254075
-                    ],
-                    [
-                      4.941517167552263,
-                      52.37393714904351
-                    ]
-                  ]
-                ],
-                "type": "Polygon"
-              }
-            }
-          ]
-        }
-
-      }
-    },
-    "athens" : {
-      "center" : [ 23.7279, 37.9841 ],
-      "bounds" : [ 18.56, 37.82, 23.89, 40.8 ],
-      "zoom" : 12,
-      "minZoom" : 11,
-      "maxZoom" : 19,
-      "boxZoom" : false,
-      "geocodeUrl" : "https://nominatim.openstreetmap.org"
-    },
-    "girona" : {
-      "center" : [ 2.8183, 41.9773 ],
-      "bounds" : [ 1.72, 41.65, 3.33, 42.5 ],
-      "zoom" : 12,
-      "minZoom" : 11,
-      "maxZoom" : 19,
-      "boxZoom" : false,
-      "geocodeUrl" : "https://nominatim.openstreetmap.org"
-    },
-    "stockholm" : {
-      "center" : [ 18.071, 59.3251 ],
-      "bounds" : [ 17.76, 59.16, 18.24, 59.49 ],
-      "zoom" : 12,
-      "minZoom" : 11,
-      "maxZoom" : 19,
+      "center" : [ 5.726412, 52.197693 ],
+      "bounds" : [ -15.0, 40.0, 25.0, 60.0 ],
+      "zoom" : 8,
+      "minZoom" : 6,
+      "maxZoom" : 18,
       "boxZoom" : false,
       "geocodeUrl" : "https://nominatim.openstreetmap.org"
     }

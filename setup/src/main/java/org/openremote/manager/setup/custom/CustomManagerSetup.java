@@ -56,21 +56,6 @@ public class CustomManagerSetup extends ManagerSetup {
                 .setLocation(new GeoJSONPoint(4.8936, 52.3727));
         cityAmsterdam = assetStorageService.merge(cityAmsterdam);
 
-        CityAsset cityAthens = new CityAsset("Athens")
-                .setRealm(Constants.MASTER_REALM)
-                .setLocation(new GeoJSONPoint(23.7279, 37.9841));
-        cityAthens = assetStorageService.merge(cityAthens);
-
-        CityAsset cityGirona = new CityAsset("Girona")
-                .setRealm(Constants.MASTER_REALM)
-                .setLocation(new GeoJSONPoint(2.8183, 41.9773));
-        cityGirona = assetStorageService.merge(cityGirona);
-
-        CityAsset cityStockholm = new CityAsset("Stockholm")
-                .setRealm(Constants.MASTER_REALM)
-                .setLocation(new GeoJSONPoint(18.0710, 59.3251));
-        cityStockholm = assetStorageService.merge(cityStockholm);
-
 
         //// Realm Amsterdam ////
 

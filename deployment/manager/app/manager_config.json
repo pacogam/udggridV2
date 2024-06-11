@@ -3,42 +3,10 @@
   "realms" : {
     "default" : {
       "appTitle" : "Reschool",
-      "styles" : ":host > * {--or-app-color2: #F9F9F9; --or-app-color3: #22211f; --or-app-color4: #ff9300; --or-app-color5: #CCCCCC;}",
-      "logo" : "/images/reschool_logo.png",
-      "logoMobile" : "/images/reschool_logo-mobile.png",
+      "styles" : ":host > * {--or-app-color1:#FFFFFF;--or-app-color2:#F9F9F9;--or-app-color3:#22211f;--or-app-color4:#4f2d39;--or-app-color5:#CCCCCC;--or-app-color6:#ef4444;--or-app-color8:#FFFFFF;",
+      "logo" : "/images/default/logo.png",
+      "logoMobile" : "/images/default/logoMobile.png",
       "favicon" : "/images/default/reschool_favicon.png",
-      "language" : "en"
-    },
-    "amsterdam" : {
-      "appTitle" : "Reschool Amsterdam",
-      "styles" : ":host > * {--or-app-color2: #F9F9F9; --or-app-color3: #22211f; --or-app-color4: #ec0000; --or-app-color5: #CCCCCC;}",
-      "logo" : "/images/amsterdam_gemeente_logo.svg",
-      "logoMobile" : "/images/amsterdam_gemeente_logo-mobile.svg",
-      "favicon" : "/images/amsterdam_gemeente_favicon.svg",
-      "language" : "nl"
-    },
-    "athens" : {
-      "appTitle" : "Reschool Athens",
-      "styles" : ":host > * {--or-app-color2: #F9F9F9; --or-app-color3: #22211f; --or-app-color4: #51494a; --or-app-color5: #CCCCCC;}",
-      "logo" : "/images/athens_logo.png",
-      "logoMobile" : "/images/athens_favicon.png",
-      "favicon" : "/images/athens_favicon.png",
-      "language" : "en"
-    },
-    "girona" : {
-      "appTitle" : "Reschool Girona",
-      "styles" : ":host > * {--or-app-color2: #F9F9F9; --or-app-color3: #22211f; --or-app-color4: #393939; --or-app-color5: #CCCCCC;}",
-      "logo" : "/images/girona_logo.png",
-      "logoMobile" : "/images/girona_favicon.png",
-      "favicon" : "/images/girona_favicon.png",
-      "language" : "en"
-    },
-    "stockholm" : {
-      "appTitle" : "Reschool Stockholm",
-      "styles" : ":host > * {--or-app-color2: #F9F9F9; --or-app-color3: #22211f; --or-app-color4: #0c4da2; --or-app-color5: #CCCCCC;}",
-      "logo" : "/images/logo.png",
-      "logoMobile" : "/images/logo-mobile.png",
-      "favicon" : "/images/favicon.ico",
       "language" : "en"
     }
   },
