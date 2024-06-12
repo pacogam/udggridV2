@@ -2,7 +2,7 @@
   "loadLocales" : true,
   "realms" : {
     "default" : {
-      "appTitle" : "Reschool",
+      "appTitle" : "OurGrid",
       "styles" : ":host > * {--or-app-color1:#FFFFFF;--or-app-color2:#F9F9F9;--or-app-color3:#22211f;--or-app-color4:#4f2d39;--or-app-color5:#CCCCCC;--or-app-color6:#ef4444;--or-app-color8:#FFFFFF;",
       "logo" : "/images/default/logo.png",
       "logoMobile" : "/images/default/logoMobile.png",
