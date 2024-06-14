@@ -7,8 +7,9 @@ import moment from 'moment';
 import '../features/og-usage-chart';
 import '../components/og-swipable';
 import {guard} from 'lit/directives/guard.js';
+import {until} from 'lit/directives/until.js';
 import {OgDataPanel} from '../components/og-data-panel';
-import manager from "@openremote/core";
+import manager, {Util} from "@openremote/core";
 import {Constants} from "../util/constants";
 import {AssetDatapointIntervalQueryFormula} from "@openremote/model";
 import {OgUsageChart} from "../features/og-usage-chart";
@@ -27,6 +28,7 @@ export class PanelUsageHistory extends OgDataPanel {
     public fullWidth = true;
 
     protected options: Map<string, TimePresetCallback>[];
+    protected lazyLoadDeferreds: Map<number, Util.Deferred<any>> = new Map();
     protected currentMin: number;
     protected currentMax: number;
 
@@ -65,10 +67,11 @@ export class PanelUsageHistory extends OgDataPanel {
 
     protected async getPanelContent(): Promise<TemplateResult> {
         const nowMs = new Date().getTime();
+        const selected = 7;
         return html`
             <div>
                 <!-- Swipe container of all charts; where 'today' is selected first. -->
-                <og-swipable .dots="${false}" .arrows="${true}" .selected="${7}" .size="${this.options.length}">
+                <og-swipable .dots="${false}" .arrows="${true}" .selected="${selected}" .size="${this.options.length}" @slide="${this._onSlide}">
                     ${map(this.options, (option, index) => {
                         const startEndValue = Array.from(option)[0][1](undefined);
                         const isSameDay = nowMs >= startEndValue[0].getTime() && nowMs <= startEndValue[1].getTime();
@@ -78,15 +81,49 @@ export class PanelUsageHistory extends OgDataPanel {
                         // Other days use the array index, so they will stay static and won't be rerendered over time.
                         const key = isSameDay ? nowMs : index;
                         return html`
-                            ${guard([key], () => html`
-                                <og-usage-chart slot="${index}" id="${key}" .timePresetOptions="${option}" style="pointer-events: none;"
-                                                .assets="${this.meterAsset ? [this.meterAsset] : []}" .districtAsset="${this.districtAsset}"
-                                ></og-usage-chart>
-                            `)}
+                            ${guard([key], () => until(this.getChartContent(index, selected, option), html`<og-loading slot="${index}"></og-loading>`))}
                         `;
                     })}
                 </og-swipable>
             </div>
+        `;
+    }
+
+    /**
+     * HTML event callback of {@link OgSwipable} when a user 'swipes' from slide to a different slide.
+     */
+    protected _onSlide(ev: CustomEvent) {
+        const selected = ev.detail.value as number;
+
+        // If lazy loading, resolve the waiting deferreds of the previous, current and next slide
+        this.lazyLoadDeferreds.get(selected - 1)?.resolve(null);
+        this.lazyLoadDeferreds.get(selected)?.resolve(null);
+        this.lazyLoadDeferreds.get(selected + 1)?.resolve(null);
+    }
+
+    /**
+     * Returns a {@link Promise} of {@link TemplateResult}, containing the UI for the chart.
+     * If {@link lazyLoad} is set to true, it will initially wait with rendering, until the user can (almost) see the slide.
+     */
+    protected async getChartContent(index: number, selected = 0, options: Map<String, TimePresetCallback>, lazyLoad = true): Promise<TemplateResult> {
+        if(lazyLoad) {
+            // Create deferred if not done yet
+            if(!this.lazyLoadDeferreds.has(index)) {
+                this.lazyLoadDeferreds.set(index, new Util.Deferred<any>());
+            }
+            // If selected (or next to the selected slide), directly load it by resolving the promise.
+            if(selected === index || (selected + 1 === index) || (selected - 1 === index)) {
+                this.lazyLoadDeferreds.get(index).resolve(null);
+            }
+            // Await deferred before loading UI (aka lazy loading)
+            await this.lazyLoadDeferreds.get(index)?.promise;
+        }
+
+        // Return chart HTML
+        return html`
+            <og-usage-chart slot="${index}" .timePresetOptions="${options}" style="pointer-events: none;"
+                            .assets="${this.meterAsset ? [this.meterAsset] : []}" .districtAsset="${this.districtAsset}"
+            ></og-usage-chart>
         `;
     }
 
