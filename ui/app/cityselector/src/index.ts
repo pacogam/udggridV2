@@ -18,9 +18,13 @@ const langFolder = "locales";
     }, false);
 }*/
 
+// Get query parameters
+const urlParams = new URLSearchParams(window.location.search);
+const redirect = urlParams.has("redirect") ? urlParams.get("redirect") === 'true' : true;
+
 // Check if city is already selected
 const cityStr = window.localStorage.getItem(LOCALSTORAGE_KEY_CITY) as string | undefined;
-if(cityStr) {
+if(redirect && cityStr) {
     const city = JSON.parse(cityStr) as OurGridGatewayCity;
     navigateToCity(window, city);
 
