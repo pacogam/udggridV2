@@ -269,6 +269,15 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                                                                @remove="${() => this.onDeviceRemove()}"
                                             ></panel-device-info>
                                         </div>
+                                        <div></div>
+                                        <div style="display: flex; justify-content: center;">
+                                            <or-translate value="switchCity" class="text-tertiary bold" 
+                                                          style="text-decoration: underline; cursor: pointer;"
+                                                          @click="${() => {
+                                                              window.location.replace("https://ourgrid.openremote.app/cityselector/?redirect=false");
+                                                          }}"
+                                            ></or-translate>
+                                        </div>
                                     </div>
                                 `)}
                             </div>
