@@ -62,9 +62,5 @@ public class CustomKeycloakSetup extends AbstractKeycloakSetup {
         realmAmsterdam.setResetPasswordAllowed(true);
         keycloakProvider.updateRealm(realmAmsterdam);
 
-        createRealm("athens", "Athens", true);
-        createRealm("girona", "Girona", true);
-        createRealm("stockholm", "Stockholm", true);
-
     }
 }

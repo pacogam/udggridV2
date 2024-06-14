@@ -57,7 +57,6 @@ export const DefaultRealmConfig: RealmAppConfig = {
 
 // Configure manager connection and i18next settings
 ogApp.managerConfig = {
-    realm: 'amsterdam',
     loadTranslations: ['app', 'or'],
     autoLogin: true,
     mapType: MapType.VECTOR
