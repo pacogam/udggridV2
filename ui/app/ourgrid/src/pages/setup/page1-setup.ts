@@ -50,10 +50,13 @@ export class Page1Setup extends OgOnboardingPage {
     protected userAsset?: Asset;
 
     @state()
-    protected characteristics?: DeviceCharacteristic[];
+    protected characteristics?: DeviceCharacteristic[] = this._getCharacteristicsFromLocalStorage();
 
     @state()
     protected dongleCode?: string;
+
+    // If characteristics are set, we skip to the second page
+    currentPageIndex = this.characteristics ? 1 : 0;
 
     @state()
     protected pages: OnboardPage[] = [
@@ -63,10 +66,10 @@ export class Page1Setup extends OgOnboardingPage {
             pageContent: (): TemplateResult => {
                 return html`
                     <div style="display: flex; flex-direction: column; gap: 32px; text-align: center; position: relative;">
-                            <!--<span class="text-secondary">${i18next.t('setup.page1-text')}</span>-->
-                        <og-characteristics-settings @characteristics-changed="${(ev: OgCharacteristicsUpdateEvent) =>
-                                this.characteristics = ev.detail.valid ? ev.detail.characteristics : undefined}"
-                        ></og-characteristics-settings>
+                        <og-characteristics-settings .characteristics="${this.characteristics}" @characteristics-changed="${(ev: OgCharacteristicsUpdateEvent) => {
+                            this.characteristics = ev.detail.valid ? ev.detail.characteristics : undefined;
+                            window.localStorage.setItem('characteristics', this.characteristics ? JSON.stringify(this.characteristics) : undefined);
+                        }}"></og-characteristics-settings>
                     </div>
                 `;
             },
@@ -242,5 +245,13 @@ export class Page1Setup extends OgOnboardingPage {
                 );
             }
         });
+    }
+
+    protected _getCharacteristicsFromLocalStorage(): DeviceCharacteristic[] | undefined {
+        try {
+            return JSON.parse(window.localStorage.getItem("characteristics")) as DeviceCharacteristic[] | undefined;
+        } catch (e) {
+            return undefined;
+        }
     }
 }

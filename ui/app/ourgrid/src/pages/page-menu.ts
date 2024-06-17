@@ -296,6 +296,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     // In this class we handle that the Asset is removed from the local store.
     protected onDeviceRemove() {
         console.log('Removing device from local store...');
+        window.localStorage.removeItem('characteristics');
         this._store.dispatch(removeUserAsset());
     }
 }
