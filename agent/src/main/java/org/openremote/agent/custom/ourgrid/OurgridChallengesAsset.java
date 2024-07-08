@@ -1,20 +1,21 @@
-package org.openremote.agent.custom.reschool;
+package org.openremote.agent.custom.ourgrid;
 
+import jakarta.persistence.Entity;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.AssetDescriptor;
 import org.openremote.model.attribute.Attribute;
 import org.openremote.model.attribute.MetaItem;
-import org.openremote.model.value.*;
-
-import jakarta.persistence.Entity;
+import org.openremote.model.value.AttributeDescriptor;
+import org.openremote.model.value.MetaItemType;
+import org.openremote.model.value.ValueDescriptor;
+import org.openremote.model.value.ValueType;
 
 import java.util.Optional;
 
 import static org.openremote.model.Constants.*;
 
 @Entity
-public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
-    public static final AssetDescriptor<OurGridChallengesAsset> DESCRIPTOR = new AssetDescriptor<>("cube-outline", null, OurGridChallengesAsset.class);
+public class OurgridChallengesAsset extends Asset<OurgridChallengesAsset> {
 
     public static final AttributeDescriptor<Boolean> TURN_ON_CHALLENGES = new AttributeDescriptor<>("turnOnChallenges", ValueType.BOOLEAN,
             new MetaItem<>(MetaItemType.LABEL, "      Turn on challenges"),
@@ -32,9 +33,9 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
         noChallenge
     }
 
-    public static final ValueDescriptor<OurGridChallengesAsset.ChallengeStatusGeneralValueType> CHALLENGE_STATUS_GENERAL_VALUE_TYPE = new ValueDescriptor<>("challengeStatusGeneralValueType", OurGridChallengesAsset.ChallengeStatusGeneralValueType.class);
+    public static final ValueDescriptor<OurgridChallengesAsset.ChallengeStatusGeneralValueType> CHALLENGE_STATUS_GENERAL_VALUE_TYPE = new ValueDescriptor<>("challengeStatusGeneralValueType", OurgridChallengesAsset.ChallengeStatusGeneralValueType.class);
 
-    public static final AttributeDescriptor<OurGridChallengesAsset.ChallengeStatusGeneralValueType> CHALLENGE_GENERAL_STATUS = new AttributeDescriptor<>("challengeGeneralStatus", CHALLENGE_STATUS_GENERAL_VALUE_TYPE,
+    public static final AttributeDescriptor<OurgridChallengesAsset.ChallengeStatusGeneralValueType> CHALLENGE_GENERAL_STATUS = new AttributeDescriptor<>("challengeGeneralStatus", CHALLENGE_STATUS_GENERAL_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "     Challenge general status"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.RULE_STATE)
@@ -45,7 +46,8 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE),
-            new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
+            new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
+            new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 366)
     );
 
     public static final AttributeDescriptor<String> CHALLENGE_END = new AttributeDescriptor<>("challengeEnd", ValueType.TEXT,
@@ -53,16 +55,17 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE),
-            new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
+            new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
+            new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 366)
     );
 
-    public static final AttributeDescriptor<Long> CHALLENGE_WAIT = new AttributeDescriptor<>("challengeWait", ValueType.LONG,
+    public static final AttributeDescriptor<Integer> CHALLENGE_WAIT = new AttributeDescriptor<>("challengeWait", ValueType.POSITIVE_INTEGER,
             new MetaItem<>(MetaItemType.LABEL, "   Challenge wait"),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE)
     ).withUnits(UNITS_MINUTE);
 
-    public static final AttributeDescriptor<Long> CHALLENGE_DURATION = new AttributeDescriptor<>("challengeDuration", ValueType.LONG,
+    public static final AttributeDescriptor<Integer> CHALLENGE_DURATION = new AttributeDescriptor<>("challengeDuration", ValueType.POSITIVE_INTEGER,
             new MetaItem<>(MetaItemType.LABEL, "   Challenge duration"),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE)
@@ -80,9 +83,9 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
         ladder
     }
 
-    public static final ValueDescriptor<OurGridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitValueType", OurGridChallengesAsset.ChallengePowerLimitValueType.class);
+    public static final ValueDescriptor<OurgridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitValueType", OurgridChallengesAsset.ChallengePowerLimitValueType.class);
 
-    public static final AttributeDescriptor<OurGridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_DEFAULT_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengeDefaultPowerLimitMethod", CHALLENGE_POWER_LIMIT_VALUE_TYPE,
+    public static final AttributeDescriptor<OurgridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_DEFAULT_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengeDefaultPowerLimitMethod", CHALLENGE_POWER_LIMIT_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "  Challenge default power limit method"),
             new MetaItem<>(MetaItemType.RULE_STATE)
     );
@@ -177,10 +180,12 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
     );
 
 
-    protected OurGridChallengesAsset() {
+    public static final AssetDescriptor<OurgridChallengesAsset> DESCRIPTOR = new AssetDescriptor<>("star-outline", "fab40b", OurgridChallengesAsset.class);
+
+    protected OurgridChallengesAsset() {
     }
 
-    public OurGridChallengesAsset(String name) {
+    public OurgridChallengesAsset(String name) {
         super(name);
     }
 
@@ -196,57 +201,57 @@ public class OurGridChallengesAsset extends Asset<OurGridChallengesAsset> {
         return getAttributes().get(CHALLENGE_END).flatMap(Attribute::getValue);
     }
 
-    public Optional<Long> getChallengeWait() {
+    public Optional<Integer> getChallengeWait() {
         return getAttributes().get(CHALLENGE_WAIT).flatMap(Attribute::getValue);
     }
 
-    public OurGridChallengesAsset setTurnOnChallenges(Boolean value) {
+    public OurgridChallengesAsset setTurnOnChallenges(Boolean value) {
         getAttributes().getOrCreate(TURN_ON_CHALLENGES).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengeWait(Long value) {
+    public OurgridChallengesAsset setChallengeWait(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_WAIT).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengeDuration(Long value) {
+    public OurgridChallengesAsset setChallengeDuration(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_DURATION).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengeEarnPointInterval(Integer value) {
+    public OurgridChallengesAsset setChallengeEarnPointInterval(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_EARN_POINT_INTERVAL).setValue(value);
         return this;
     }
 
     ////
-    public OurGridChallengesAsset setChallengeDefaultPowerLimitMethod(OurGridChallengesAsset.ChallengePowerLimitValueType value) {
+    public OurgridChallengesAsset setChallengeDefaultPowerLimitMethod(OurgridChallengesAsset.ChallengePowerLimitValueType value) {
         getAttributes().getOrCreate(CHALLENGE_DEFAULT_POWER_LIMIT_METHOD).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengePowerLimitInterval(Integer value) {
+    public OurgridChallengesAsset setChallengePowerLimitInterval(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_POWER_LIMIT_INTERVAL).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengePowerLimitMaximum(Integer value) {
+    public OurgridChallengesAsset setChallengePowerLimitMaximum(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_POWER_LIMIT_MAXIMUM).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengePowerLimitMinimum(Integer value) {
+    public OurgridChallengesAsset setChallengePowerLimitMinimum(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_POWER_LIMIT_MINIMUM).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengePowerLimitPromotion(Integer value) {
+    public OurgridChallengesAsset setChallengePowerLimitPromotion(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_POWER_LIMIT_PROMOTION_PERCENTAGE).setValue(value);
         return this;
     }
 
-    public OurGridChallengesAsset setChallengePowerLimitTarget(Integer value) {
+    public OurgridChallengesAsset setChallengePowerLimitTarget(Integer value) {
         getAttributes().getOrCreate(CHALLENGE_POWER_LIMIT_TARGET).setValue(value);
         return this;
     }

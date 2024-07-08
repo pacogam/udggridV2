@@ -1,5 +1,6 @@
-package org.openremote.agent.custom.reschool;
+package org.openremote.agent.custom.ourgrid;
 
+import jakarta.persistence.Entity;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.AssetDescriptor;
 import org.openremote.model.attribute.Attribute;
@@ -11,16 +12,12 @@ import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueDescriptor;
 import org.openremote.model.value.ValueType;
 
-import jakarta.persistence.Entity;
-
 import java.util.Optional;
 
 import static org.openremote.model.Constants.*;
 
 @Entity
-public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
-
-    public static final AssetDescriptor<ReschoolMeterAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", ReschoolMeterAsset.class); // set icon and colour of asset
+public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
 
     public static final AttributeDescriptor<Double> CONNECTION_QUALITY = new AttributeDescriptor<>("connectionQuality", ValueType.POSITIVE_NUMBER,
             new MetaItem<>(MetaItemType.LABEL, "   Connection quality (previous day)"),
@@ -35,9 +32,9 @@ public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
         disconnected
     }
 
-    public static final ValueDescriptor<ReschoolMeterAsset.ConnectionStatusValueType> CONNECTION_STATUS_VALUE_TYPE = new ValueDescriptor<>("ConnectionStatusValueType", ReschoolMeterAsset.ConnectionStatusValueType.class);
+    public static final ValueDescriptor<OurgridMeterAsset.ConnectionStatusValueType> CONNECTION_STATUS_VALUE_TYPE = new ValueDescriptor<>("ConnectionStatusValueType", OurgridMeterAsset.ConnectionStatusValueType.class);
 
-    public static final AttributeDescriptor<ReschoolMeterAsset.ConnectionStatusValueType> CONNECTION_STATUS = new AttributeDescriptor<>("connectionStatus", CONNECTION_STATUS_VALUE_TYPE,
+    public static final AttributeDescriptor<OurgridMeterAsset.ConnectionStatusValueType> CONNECTION_STATUS = new AttributeDescriptor<>("connectionStatus", CONNECTION_STATUS_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "   Connection status"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
@@ -53,16 +50,16 @@ public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
         noChallenge
     }
 
-    public static final ValueDescriptor<ReschoolMeterAsset.ChallengeStatusValueType> CHALLENGE_STATUS_VALUE_TYPE = new ValueDescriptor<>("challengeStatusValueType", ReschoolMeterAsset.ChallengeStatusValueType.class);
+    public static final ValueDescriptor<OurgridMeterAsset.ChallengeStatusValueType> CHALLENGE_STATUS_VALUE_TYPE = new ValueDescriptor<>("challengeStatusValueType", OurgridMeterAsset.ChallengeStatusValueType.class);
 
-    public static final AttributeDescriptor<ReschoolMeterAsset.ChallengeStatusValueType> CHALLENGE_STATUS = new AttributeDescriptor<>("challengeStatus", CHALLENGE_STATUS_VALUE_TYPE,
+    public static final AttributeDescriptor<OurgridMeterAsset.ChallengeStatusValueType> CHALLENGE_STATUS = new AttributeDescriptor<>("challengeStatus", CHALLENGE_STATUS_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "   Challenge status"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE)
     );
 
-    public static final AttributeDescriptor<Boolean> CHALLENGE_JOIN_BUTTON = new AttributeDescriptor<>("ChallengeJoinButton", ValueType.BOOLEAN,
+    public static final AttributeDescriptor<Boolean> CHALLENGE_JOIN_BUTTON = new AttributeDescriptor<>("challengeJoinButton", ValueType.BOOLEAN,
             new MetaItem<>(MetaItemType.LABEL, "    Challenge join button"),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_WRITE),
@@ -128,9 +125,15 @@ public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
             new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 366)
     ).withUnits(UNITS_WATT);
 
-    public static final ValueDescriptor<OurGridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitValueType", OurGridChallengesAsset.ChallengePowerLimitValueType.class);
+    private enum ChallengePowerLimitValueType {
+        manual,
+        constant,
+        ladder
+    }
 
-    public static final AttributeDescriptor<OurGridChallengesAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengePowerLimitMethod", CHALLENGE_POWER_LIMIT_VALUE_TYPE,
+    private static final ValueDescriptor<OurgridMeterAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitValueType", OurgridMeterAsset.ChallengePowerLimitValueType.class);
+
+    public static final AttributeDescriptor<OurgridMeterAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengePowerLimitMethod", CHALLENGE_POWER_LIMIT_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "  Challenge power limit method"),
             new MetaItem<>(MetaItemType.RULE_STATE)
     );
@@ -271,18 +274,21 @@ public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
     ).withUnits(UNITS_WATT);
 
-    protected ReschoolMeterAsset() {
+
+    public static final AssetDescriptor<OurgridMeterAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterAsset.class);
+
+    protected OurgridMeterAsset() {
     }
 
-    public ReschoolMeterAsset(String name) {
+    public OurgridMeterAsset(String name) {
         super(name);
     }
 
-    public Optional<ChallengeStatusValueType> getChallengeStatus() {
+    public Optional<OurgridMeterAsset.ChallengeStatusValueType> getChallengeStatus() {
         return getAttributes().get(CHALLENGE_STATUS).flatMap(Attribute::getValue);
     }
 
-    public ReschoolMeterAsset setChallengeJoinStatus(boolean status) {
+    public OurgridMeterAsset setChallengeJoinStatus(boolean status) {
         getAttributes().getOrCreate(CHALLENGE_JOIN_BUTTON).setValue(status);
         return this;
     }
@@ -303,23 +309,23 @@ public class ReschoolMeterAsset extends Asset<ReschoolMeterAsset> {
         return ValueUtil.parse(jsonString.get(), DeviceCharacteristic[].class);
     }
 
-    public ReschoolMeterAsset setHouseholdCharacteristics(DeviceCharacteristic[] characteristics) {
+    public OurgridMeterAsset setHouseholdCharacteristics(DeviceCharacteristic[] characteristics) {
         Optional<String> jsonString = ValueUtil.asJSON(characteristics);
         getAttributes().getOrCreate(HOUSEHOLD_ENERGY_CHARACTERISTICS).setValue(jsonString.orElse(""));
         return this;
     }
 
-    public ReschoolMeterAsset setDeviceId(String value) {
+    public OurgridMeterAsset setDeviceId(String value) {
         getAttributes().getOrCreate(DEVICE_ID).setValue(value);
         return this;
     }
 
-    public ReschoolMeterAsset setSmartmeterModel(String value) {
+    public OurgridMeterAsset setSmartmeterModel(String value) {
         getAttributes().getOrCreate(SMARTMETER_MODEL).setValue(value);
         return this;
     }
 
-    public ReschoolMeterAsset setSoftwareVersion(String value) {
+    public OurgridMeterAsset setSoftwareVersion(String value) {
         getAttributes().getOrCreate(SOFTWARE_VERSION).setValue(value);
         return this;
     }

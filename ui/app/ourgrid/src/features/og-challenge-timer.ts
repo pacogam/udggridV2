@@ -1,7 +1,7 @@
 import {css, html, LitElement, PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {getAppStyle} from '../styles';
-import {ReschoolMeterAsset} from '../util/util';
+import {OurgridMeterAsset} from '../util/util';
 import {Asset} from '@openremote/model';
 import {OgLoading} from '../components/og-loading';
 import moment from 'moment';
@@ -14,7 +14,7 @@ const styling = css`
 export class OgChallengeTimer extends LitElement {
 
     @property()
-    protected userAsset: ReschoolMeterAsset;
+    protected userAsset: OurgridMeterAsset;
 
     @property()
     protected challengeAsset: Asset;

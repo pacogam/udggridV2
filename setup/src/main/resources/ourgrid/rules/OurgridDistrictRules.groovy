@@ -1,12 +1,11 @@
-package reschool.rules
+package ourgrid.rules
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.openremote.agent.custom.reschool.OurGridChallengesAsset
-import org.openremote.agent.custom.reschool.OurGridPeaksAsset
-import org.openremote.agent.custom.reschool.ReschoolMeterAsset
+import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset
+import org.openremote.agent.custom.ourgrid.OurgridPeaksAsset
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset
 import org.openremote.container.persistence.PersistenceService
-import org.openremote.container.util.UniqueIdentifierGenerator
 import org.openremote.manager.rules.RulesBuilder
 import org.openremote.manager.rules.RulesFacts
 import org.openremote.model.attribute.AttributeInfo
@@ -34,12 +33,12 @@ Notifications notifications = binding.notifications
 Assets assets = binding.assets
 
 // Put the asset ID of relevant assets here:
-String parentDistrictAssetId = UniqueIdentifierGenerator.generateId("amsterdam_sporenburg")
-String parentMeterAssetId = UniqueIdentifierGenerator.generateId("amsterdam_sporenburg_meters")
-String solarAssetId = UniqueIdentifierGenerator.generateId("amsterdam_sporenburg_solar")
-String researchAsset1Id = UniqueIdentifierGenerator.generateId("research_asset_1")
-String challengesAssetId = UniqueIdentifierGenerator.generateId("challengesAsset")
-String peaksAssetId = UniqueIdentifierGenerator.generateId("peaksAsset")
+String parentDistrictAssetId = "uniqueId1"
+String parentMeterAssetId = "uniqueId2"
+String solarAssetId = "uniqueId3"
+String researchAsset1Id = "uniqueId4"
+String challengesAssetId = "uniqueId5"
+String peaksAssetId = "uniqueId6"
 
 // Put the attribute names that need to be summed here:
 String[] attributeNames = ["power", "energyImportTotal", "energyExportTotal", "energyNetTotal", "gasImportTotal", "gasFlowRate"]
@@ -86,7 +85,7 @@ rules.add()
             def changes = facts.matchAssetState(
                     new AssetQuery()
                             .parents(parentMeterAssetId)
-                            .types(ReschoolMeterAsset)
+                            .types(OurgridMeterAsset)
                             .attributeNames(attributeNames)
             ).filter { state ->
                 def changed = false
@@ -369,7 +368,7 @@ rules.add()
             def changesChallenges = facts.matchAssetState(
                     new AssetQuery()
                             .ids(challengesAssetId)
-                            .attributeName(OurGridChallengesAsset.CHALLENGE_START.name)
+                            .attributeName(OurgridChallengesAsset.CHALLENGE_START.name)
             ).filter { state ->
                 def changed = false
 
@@ -388,8 +387,8 @@ rules.add()
             def changesChildren = facts.matchAssetState(
                     new AssetQuery()
                             .parents(parentMeterAssetId)
-                            .types(ReschoolMeterAsset)
-                            .attributeNames(ReschoolMeterAsset.CHALLENGE_JOIN_BUTTON.name)
+                            .types(OurgridMeterAsset)
+                            .attributeNames(OurgridMeterAsset.CHALLENGE_JOIN_BUTTON.name)
             ).filter { state ->
                 def changed = false
 
@@ -413,18 +412,18 @@ rules.add()
             def children = facts.matchAssetState(
                     new AssetQuery()
                             .parents(parentMeterAssetId)
-                            .types(ReschoolMeterAsset)
+                            .types(OurgridMeterAsset)
                             .attributeNames(
-                                    ReschoolMeterAsset.POWER.name,
-                                    ReschoolMeterAsset.CHALLENGE_POWER_LIMIT.name,
-                                    ReschoolMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name,
-                                    ReschoolMeterAsset.CONNECTION_STATUS.name,
-                                    ReschoolMeterAsset.CHALLENGE_STATUS.name,
-                                    ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name,
-                                    ReschoolMeterAsset.CHALLENGE_POINTS.name,
-                                    ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name,
-                                    ReschoolMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name,
-                                    ReschoolMeterAsset.CHALLENGES_JOINED.name
+                                    OurgridMeterAsset.POWER.name,
+                                    OurgridMeterAsset.CHALLENGE_POWER_LIMIT.name,
+                                    OurgridMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name,
+                                    OurgridMeterAsset.CONNECTION_STATUS.name,
+                                    OurgridMeterAsset.CHALLENGE_STATUS.name,
+                                    OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name,
+                                    OurgridMeterAsset.CHALLENGE_POINTS.name,
+                                    OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name,
+                                    OurgridMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name,
+                                    OurgridMeterAsset.CHALLENGES_JOINED.name
                             )
             ).toList()
 
@@ -512,7 +511,7 @@ rules.add()
 
             // Check current connection of meters
             Map<String, Boolean> childrenConnection = children
-                    .findAll { it.name == ReschoolMeterAsset.POWER.name }
+                    .findAll { it.name == OurgridMeterAsset.POWER.name }
                     .collectEntries { state ->
                         boolean connection = false
 
@@ -525,18 +524,18 @@ rules.add()
 
             // Update connection status & set power reading to null when disconnected
             childrenConnection.forEach { AssetId, connection ->
-                String connectionStatus = childrenAttributes.get(AssetId).get(ReschoolMeterAsset.CONNECTION_STATUS.name).toString()
+                String connectionStatus = childrenAttributes.get(AssetId).get(OurgridMeterAsset.CONNECTION_STATUS.name).toString()
 
                 if (connectionStatus == "connected" && !connection) {
-                    assets.dispatch(AssetId, ReschoolMeterAsset.CONNECTION_STATUS.name, "disconnected")
-                    assets.dispatch(AssetId, ReschoolMeterAsset.POWER.name, null)
+                    assets.dispatch(AssetId, OurgridMeterAsset.CONNECTION_STATUS.name, "disconnected")
+                    assets.dispatch(AssetId, OurgridMeterAsset.POWER.name, null)
                 } else if (connectionStatus == "disconnected" && connection) {
-                    assets.dispatch(AssetId, ReschoolMeterAsset.CONNECTION_STATUS.name, "connected")
+                    assets.dispatch(AssetId, OurgridMeterAsset.CONNECTION_STATUS.name, "connected")
                 } else if (connectionStatus == "null" && !connection) {
-                    assets.dispatch(AssetId, ReschoolMeterAsset.CONNECTION_STATUS.name, "disconnected")
-                    assets.dispatch(AssetId, ReschoolMeterAsset.POWER.name, null)
+                    assets.dispatch(AssetId, OurgridMeterAsset.CONNECTION_STATUS.name, "disconnected")
+                    assets.dispatch(AssetId, OurgridMeterAsset.POWER.name, null)
                 } else if (connectionStatus == "null" && connection) {
-                    assets.dispatch(AssetId, ReschoolMeterAsset.CONNECTION_STATUS.name, "connected")
+                    assets.dispatch(AssetId, OurgridMeterAsset.CONNECTION_STATUS.name, "connected")
                 }
             }
 
@@ -544,7 +543,7 @@ rules.add()
             boolean turnOnChallenges = facts.matchFirstAssetState(
                     new AssetQuery()
                             .ids(challengesAssetId)
-                            .attributeName(OurGridChallengesAsset.TURN_ON_CHALLENGES.name)
+                            .attributeName(OurgridChallengesAsset.TURN_ON_CHALLENGES.name)
             ).flatMap { it.value }.orElse(false) as boolean
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -566,13 +565,13 @@ rules.add()
                 def challengeWaitValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_WAIT.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_WAIT.name)
                 ).flatMap { it.value }.orElse(null)
 
                 def challengeDurationValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_DURATION.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_DURATION.name)
                 ).flatMap { it.value }.orElse(null)
 
                 if (powerImportMaxValue != null && powerImportCriticalPercentage != null && challengeWaitValue != null && challengeDurationValue != null) {
@@ -602,8 +601,8 @@ rules.add()
                             String dateTimeToStr = sdf.format(dateTimeTo)
 
                             // Update attributes
-                            assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_START.name, dateTimeFromStr)
-                            assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_END.name, dateTimeToStr)
+                            assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_START.name, dateTimeFromStr)
+                            assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_END.name, dateTimeToStr)
 
                             challengeActive = true
                         }
@@ -613,7 +612,7 @@ rules.add()
 
             // Calculate power limit per household for new challenge
             Map<String, Integer> powerLimitMap = children
-                    .findAll { it.name == ReschoolMeterAsset.CHALLENGE_POWER_LIMIT.name }
+                    .findAll { it.name == OurgridMeterAsset.CHALLENGE_POWER_LIMIT.name }
                     .collectEntries { state -> [state.id, state.value.orElse(null)] }
 
             if (challengeActive && !challengeActivePrevious) {
@@ -625,87 +624,87 @@ rules.add()
 
             // Get challenge status per household
             Map<String, String> childrenChallengeStatus = children
-                    .findAll { it.name == ReschoolMeterAsset.CHALLENGE_STATUS.name }
+                    .findAll { it.name == OurgridMeterAsset.CHALLENGE_STATUS.name }
                     .collectEntries { state -> [state.id, state.value.orElse('unknown')] }
 
             // Join challenge at button press
-            changesChildren.findAll { it.name == ReschoolMeterAsset.CHALLENGE_JOIN_BUTTON.name }
+            changesChildren.findAll { it.name == OurgridMeterAsset.CHALLENGE_JOIN_BUTTON.name }
                     .forEach { state ->
                         boolean button = state.value.orElse(false)
                         boolean connection = childrenConnection.get(state.id)
 
                         if (button) {
                             // Reset button
-                            assets.dispatch(state.id, ReschoolMeterAsset.CHALLENGE_JOIN_BUTTON.name, false)
+                            assets.dispatch(state.id, OurgridMeterAsset.CHALLENGE_JOIN_BUTTON.name, false)
                             String challengeStatus = childrenChallengeStatus.get(state.id)
 
                             if (challengeStatus == "joinChallenge" && connection) {
                                 childrenChallengeStatus.put(state.id, "joinedChallenge")
 
                                 if (currentTimestamp < challengeStartMillis) {
-                                    assets.dispatch(state.id, ReschoolMeterAsset.CHALLENGE_STATUS.name, "joinedChallenge")
+                                    assets.dispatch(state.id, OurgridMeterAsset.CHALLENGE_STATUS.name, "joinedChallenge")
                                 }
                             }
                         }
                     }
 
             Map<String, Long> childrenPointTimerStart = children
-                    .findAll { it.name == ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name }
+                    .findAll { it.name == OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name }
                     .collectEntries { state -> [state.id, state.value.orElse(0L)] }
 
             // Update Challenge status
             childrenChallengeStatus.each { assetId, status ->
                 String challengeStatus = status.toString()
                 boolean connection = childrenConnection.get(assetId)
-                Integer points = childrenAttributes.get(assetId).get(ReschoolMeterAsset.CHALLENGE_POINTS.name) as Integer
+                Integer points = childrenAttributes.get(assetId).get(OurgridMeterAsset.CHALLENGE_POINTS.name) as Integer
 
                 if (currentTimestamp < challengeStartMillis) {
                     if (challengeStatus != "joinChallenge" && challengeStatus != "joinedChallenge") {
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "joinChallenge")
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "joinChallenge")
                         childrenChallengeStatus.put(assetId, "joinChallenge")
                     }
                 } else if (currentTimestamp >= challengeStartMillis && currentTimestamp <= challengeEndMillis) {
                     if (challengeStatus == "joinedChallenge") {
                         if (connection) {
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "activeChallenge")
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "activeChallenge")
                             childrenChallengeStatus.put(assetId, "activeChallenge")
                         } else {
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "inactiveChallenge")
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "inactiveChallenge")
                             childrenChallengeStatus.put(assetId, "inactiveChallenge")
                         }
 
                         // Update number of joined challenges
-                        def challengesJoined = childrenAttributes.get(assetId).get(ReschoolMeterAsset.CHALLENGES_JOINED.name)
+                        def challengesJoined = childrenAttributes.get(assetId).get(OurgridMeterAsset.CHALLENGES_JOINED.name)
 
                         if (challengesJoined == null) {
                             challengesJoined = 0
                         }
                         challengesJoined++
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGES_JOINED.name, challengesJoined)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGES_JOINED.name, challengesJoined)
 
                         // Reset challenge points for new challenge
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name, 0)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name, 0)
 
                         // Number of total points at start of new challenge
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS.name, points)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS.name, points)
                         challengePointsMap.put(assetId, points)
 
                         // Update earn point timer
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                         childrenPointTimerStart.put(assetId, updateTimestamp)
                     } else if (challengeStatus == "inactiveChallenge" && connection) {
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "activeChallenge")
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "activeChallenge")
                         childrenChallengeStatus.put(assetId, "activeChallenge")
 
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                         childrenPointTimerStart.put(assetId, updateTimestamp)
                     } else if (challengeStatus == "activeChallenge" && !connection) {
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "inactiveChallenge")
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "inactiveChallenge")
                         childrenChallengeStatus.put(assetId, "inactiveChallenge")
                     }
                 } else if (currentTimestamp > challengeEndMillis) {
                     if (challengeStatus != "noChallenge") {
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_STATUS.name, "noChallenge")
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_STATUS.name, "noChallenge")
                     }
                 }
             }
@@ -713,14 +712,14 @@ rules.add()
             def challengePointIntervalValue = facts.matchFirstAssetState(
                     new AssetQuery()
                             .ids(challengesAssetId)
-                            .attributeName(OurGridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name)
+                            .attributeName(OurgridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name)
             ).flatMap { it.value }.orElse(null)
 
             // Default earn point interval of 6 minutes
             long challengePointIntervalMillis = 360000
 
             if (challengePointIntervalValue == null) {
-                assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name, 6)
+                assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name, 6)
             } else {
                 challengePointIntervalMillis = challengePointIntervalValue * 60000
             }
@@ -731,25 +730,25 @@ rules.add()
                     String challengeStatus = status.toString()
 
                     def childAttributes = childrenAttributes.get(assetId)
-                    def netPower = childAttributes.get(ReschoolMeterAsset.POWER.name)
-                    def points = childAttributes.get(ReschoolMeterAsset.CHALLENGE_POINTS.name)
-                    def pointsCurrent = childAttributes.get(ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name)
+                    def netPower = childAttributes.get(OurgridMeterAsset.POWER.name)
+                    def points = childAttributes.get(OurgridMeterAsset.CHALLENGE_POINTS.name)
+                    def pointsCurrent = childAttributes.get(OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name)
 
                     Integer powerLimit = powerLimitMap.get(assetId)
 
                     if (powerLimit == null) {
                         powerLimit = 2000
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POWER_LIMIT.name, powerLimit)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POWER_LIMIT.name, powerLimit)
                     }
 
                     if (points == null) {
                         points = 0
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS.name, points)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS.name, points)
                     }
 
                     if (pointsCurrent == null) {
                         pointsCurrent = 0
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
                     }
 
                     // Update total number of points during challenge
@@ -758,23 +757,23 @@ rules.add()
 
                         if (netPower > powerLimit) {
                             // Reset timer
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                         } else if (currentTimestamp - pointTimerStart >= challengePointIntervalMillis) {
                             // Award point
                             points++
                             pointsCurrent++
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS.name, points)
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS.name, points)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                         }
                     } else if (netPower != null && challengeStatus == "activeChallenge" && currentTimestamp > challengeEndMillis) {
                         // Award remaining point
                         if (netPower <= powerLimit) {
                             points++
                             pointsCurrent++
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS.name, points)
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
-                            assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS.name, points)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS_CURRENT.name, pointsCurrent)
+                            assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                         }
                     }
 
@@ -788,7 +787,7 @@ rules.add()
                             pointsCurrentChallenge = points - pointsPrevious
                         }
                         challengePointsMap.put(assetId, pointsCurrentChallenge)
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name, pointsCurrentChallenge)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name, pointsCurrentChallenge)
                     }
                 }
             }
@@ -798,30 +797,30 @@ rules.add()
                 def challengeStatusGeneral = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_GENERAL_STATUS.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name)
                 ).flatMap { it.value }.orElse("unknown") as String
 
                 def pointsMax = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_POINTS_MAX.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_POINTS_MAX.name)
                 ).flatMap { it.value }.orElse(0) as Integer
 
                 if (currentTimestamp < challengeStartMillis) {
                     if (challengeStatusGeneral != "joinedChallenge") {
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "joinedChallenge")
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "joinedChallenge")
                     }
                 } else if (currentTimestamp >= challengeStartMillis && currentTimestamp <= challengeEndMillis) {
                     if (challengeStatusGeneral != "activeChallenge") {
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "activeChallenge")
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "activeChallenge")
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
                     } else if (challengeStatusGeneral == "activeChallenge") {
                         // Award point to perfect household
                         def pointTimerStartValue = facts.matchFirstAssetState(
                                 new AssetQuery()
                                         .ids(challengesAssetId)
-                                        .attributeName(OurGridChallengesAsset.CHALLENGE_POINT_TIMER_START.name)
+                                        .attributeName(OurgridChallengesAsset.CHALLENGE_POINT_TIMER_START.name)
                         ).flatMap { it.value }.orElse(null)
 
                         if (pointTimerStartValue != null) {
@@ -829,8 +828,8 @@ rules.add()
 
                             if ((currentTimestamp - pointTimerStartMillis) >= challengePointIntervalMillis) {
                                 pointsMax++
-                                assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
-                                assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                                assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
+                                assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                             }
                         }
                     }
@@ -838,15 +837,15 @@ rules.add()
                     // Award remaining point to perfect household
                     if (challengeStatusGeneral == "activeChallenge") {
                         pointsMax++
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_MAX.name, pointsMax)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINT_TIMER_START.name, updateTimestamp)
                     }
 
                     // Calculate total points earned by all users
                     def pointsTotal = facts.matchFirstAssetState(
                             new AssetQuery()
                                     .ids(challengesAssetId)
-                                    .attributeName(OurGridChallengesAsset.CHALLENGE_POINTS_TOTAL.name)
+                                    .attributeName(OurgridChallengesAsset.CHALLENGE_POINTS_TOTAL.name)
                     ).flatMap { it.value }.orElse(0)
 
                     def pointsTotalCurrentChallenge = challengePointsMap.findAll { it.value >= 0 }.values().sum()
@@ -866,11 +865,11 @@ rules.add()
                         participationRate = (participationCount / challengePointsMap.size() * 100).round(1)
                     }
 
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_TOTAL.name, pointsTotal)
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_PARTICIPATION.name, participationCount)
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_PARTICIPATION_RATE.name, participationRate)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_TOTAL.name, pointsTotal)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_PARTICIPATION.name, participationCount)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_PARTICIPATION_RATE.name, participationRate)
 
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "noChallenge")
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "noChallenge")
 
                     challengeActive = false
                     challengeActivePrevious = false
@@ -884,7 +883,7 @@ rules.add()
         .when({
             facts ->
                 // Put your attribute name here:
-                String attributeName = OurGridChallengesAsset.ACTIVATE_CHALLENGE_MANUALLY.name
+                String attributeName = OurgridChallengesAsset.ACTIVATE_CHALLENGE_MANUALLY.name
 
                 // Find first matching attribute using an asset query
                 facts.matchFirstAssetState(
@@ -923,29 +922,29 @@ rules.add()
                 boolean turnOnChallenges = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.TURN_ON_CHALLENGES.name)
+                                .attributeName(OurgridChallengesAsset.TURN_ON_CHALLENGES.name)
                 ).flatMap { it.value }.orElse(false) as boolean
 
                 def challengeWaitValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_WAIT.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_WAIT.name)
                 ).flatMap { it.value }.orElse(null)
 
                 if (challengeWaitValue == null) {
                     challengeWaitValue = 15
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_WAIT.name, challengeWaitValue)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_WAIT.name, challengeWaitValue)
                 }
 
                 def challengeDurationValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_DURATION.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_DURATION.name)
                 ).flatMap { it.value }.orElse(null)
 
                 if (challengeDurationValue == null) {
                     challengeDurationValue = 60
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_DURATION.name, challengeDurationValue)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_DURATION.name, challengeDurationValue)
                 }
 
                 if (button) {
@@ -975,9 +974,9 @@ rules.add()
                         String dateTimeToStr = sdf.format(dateTimeTo)
 
                         // Update attributes
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "joinedChallenge")
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_START.name, dateTimeFromStr)
-                        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_END.name, dateTimeToStr)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name, "joinedChallenge")
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_START.name, dateTimeFromStr)
+                        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_END.name, dateTimeToStr)
                         challengeActive = true
                     } else {
                         LOG.info("A challenge is already activate for district with asset ID = '" + parentDistrictAssetId + "'")
@@ -1006,8 +1005,8 @@ rules.add()
                         new AssetQuery()
                                 .ids(assetId)
                                 .attributeNames(
-                                        OurGridChallengesAsset.CHALLENGE_BUDGET.name,
-                                        OurGridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_MANUAL.name
+                                        OurgridChallengesAsset.CHALLENGE_BUDGET.name,
+                                        OurgridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_MANUAL.name
                                 )
                 ).filter { state ->
                     def changed = false
@@ -1058,23 +1057,23 @@ rules.add()
                 def budgetValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_BUDGET.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_BUDGET.name)
                 ).flatMap { it.value }.orElse(null)
 
                 def pointsYearPredictionManualValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_MANUAL.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_MANUAL.name)
                 ).flatMap { it.value }.orElse(0)
 
                 def pointsTotalValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_POINTS_TOTAL.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_POINTS_TOTAL.name)
                 ).flatMap { it.value }.orElse(null)
 
                 if (pointsTotalValue == null) {
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_TOTAL.name, 0)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_TOTAL.name, 0)
                 }
 
                 // Get day of year
@@ -1087,13 +1086,13 @@ rules.add()
                 // Calculate predicted number of all earned points during a year based on current number of earned points
                 if (pointsTotalValue != null) {
                     int pointsYearPredictionAutomatic = (int) Math.round((Double) (pointsTotalValue / dayOfYear * 365))
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_AUTOMATIC.name, pointsYearPredictionAutomatic)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_YEAR_PREDICTION_AUTOMATIC.name, pointsYearPredictionAutomatic)
                 }
 
                 // Calculate the exchange rate
                 if (budgetValue != null && pointsYearPredictionManualValue > 0) {
                     def exchangeRate = budgetValue / pointsYearPredictionManualValue
-                    assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POINTS_EXCHANGE_RATE.name, exchangeRate)
+                    assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POINTS_EXCHANGE_RATE.name, exchangeRate)
                 }
         })
 
@@ -1122,7 +1121,7 @@ rules.add()
                 Boolean turnOnPeakPoints = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(peaksAssetId)
-                                .attributeName(OurGridPeaksAsset.TURN_ON_PEAK_POINTS.name)
+                                .attributeName(OurgridPeaksAsset.TURN_ON_PEAK_POINTS.name)
                 ).flatMap { it.value }.orElse(false)
 
                 // Prevent instant rule trigger when peak points are turned on
@@ -1141,8 +1140,8 @@ rules.add()
                 def children = facts.matchAssetState(
                         new AssetQuery()
                                 .parents(parentMeterAssetId)
-                                .types(ReschoolMeterAsset)
-                                .attributeName(ReschoolMeterAsset.PEAK_POINTS.name)
+                                .types(OurgridMeterAsset)
+                                .attributeName(OurgridMeterAsset.PEAK_POINTS.name)
                 ).toList()
 
                 if (!children.isEmpty()) {
@@ -1186,7 +1185,7 @@ rules.add()
 
                 // Peak points per household map
                 Map<String, Double> peakPointsMap = children
-                        .findAll { it.name == ReschoolMeterAsset.PEAK_POINTS.name }
+                        .findAll { it.name == OurgridMeterAsset.PEAK_POINTS.name }
                         .collectEntries { attributeInfo -> [attributeInfo.id, attributeInfo.value.orElse(0.0)] }
 
                 // Get attribute values
@@ -1201,45 +1200,45 @@ rules.add()
                 Double connectionQualityThreshold = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(peaksAssetId)
-                                .attributeName(OurGridPeaksAsset.CONNECTION_QUALITY_THRESHOLD.name)
+                                .attributeName(OurgridPeaksAsset.CONNECTION_QUALITY_THRESHOLD.name)
                 ).flatMap { it.value }.orElse(null) as Double
 
                 if (connectionQualityThreshold == null) {
                     connectionQualityThreshold = 95.0
-                    assets.dispatch(peaksAssetId, OurGridPeaksAsset.CONNECTION_QUALITY_THRESHOLD.name, connectionQualityThreshold)
+                    assets.dispatch(peaksAssetId, OurgridPeaksAsset.CONNECTION_QUALITY_THRESHOLD.name, connectionQualityThreshold)
                 }
 
                 Double peakConsumptionPercentageThreshold = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(peaksAssetId)
-                                .attributeNames(OurGridPeaksAsset.PEAK_CONSUMPTION_THRESHOLD.name)
+                                .attributeNames(OurgridPeaksAsset.PEAK_CONSUMPTION_THRESHOLD.name)
                 ).flatMap { it.value }.orElse(null) as Double
 
                 if (peakConsumptionPercentageThreshold == null) {
                     peakConsumptionPercentageThreshold = 16.7
-                    assets.dispatch(peaksAssetId, OurGridPeaksAsset.PEAK_CONSUMPTION_THRESHOLD.name, peakConsumptionPercentageThreshold)
+                    assets.dispatch(peaksAssetId, OurgridPeaksAsset.PEAK_CONSUMPTION_THRESHOLD.name, peakConsumptionPercentageThreshold)
                 }
 
                 Double peakPointsDay = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(peaksAssetId)
-                                .attributeName(OurGridPeaksAsset.PEAK_POINTS_DAY.name)
+                                .attributeName(OurgridPeaksAsset.PEAK_POINTS_DAY.name)
                 ).flatMap { it.value }.orElse(null) as Double
 
                 if (peakPointsDay == null) {
                     peakPointsDay = 1.0
-                    assets.dispatch(peaksAssetId, OurGridPeaksAsset.PEAK_POINTS_DAY.name, peakPointsDay)
+                    assets.dispatch(peaksAssetId, OurgridPeaksAsset.PEAK_POINTS_DAY.name, peakPointsDay)
                 }
 
                 String peakPeriodsJSON = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(peaksAssetId)
-                                .attributeName(OurGridPeaksAsset.PEAK_PERIODS.name)
+                                .attributeName(OurgridPeaksAsset.PEAK_PERIODS.name)
                 ).flatMap { it.value }.orElse("")
 
                 if (peakPeriodsJSON == "") {
                     peakPeriodsJSON = '[{"peak_period_start": "7:00", "peak_period_end": "9:00"}, {"peak_period_start": "17:00", "peak_period_end": "19:00"}]'
-                    assets.dispatch(peaksAssetId, OurGridPeaksAsset.PEAK_PERIODS.name, peakPeriodsJSON)
+                    assets.dispatch(peaksAssetId, OurgridPeaksAsset.PEAK_PERIODS.name, peakPeriodsJSON)
                 }
 
                 // Parse peak periods JSON
@@ -1285,7 +1284,7 @@ rules.add()
 
                 // Calculate peak period power consumption per Household
                 childrenAttributes.forEach { assetId, values ->
-                    Double peakPointsHousehold = values.get(ReschoolMeterAsset.PEAK_POINTS.name) as Double
+                    Double peakPointsHousehold = values.get(OurgridMeterAsset.PEAK_POINTS.name) as Double
                     TreeMap<String, Double> powerDatapoints = getDatabaseDatapoints("asset_datapoint", assetId, "power", dateFromStr, dateToStr)
 
                     // Data binning
@@ -1328,7 +1327,7 @@ rules.add()
 
                     // Calculate connection quality percentage
                     double connectionQuality = ((countInsidePeakIntervals + countOutsidePeakIntervals) / timeIntervals.size() * 100).round(1)
-                    assets.dispatch(assetId, ReschoolMeterAsset.CONNECTION_QUALITY.name, connectionQuality)
+                    assets.dispatch(assetId, OurgridMeterAsset.CONNECTION_QUALITY.name, connectionQuality)
 
                     if (connectionQuality >= connectionQualityThreshold) {
                         // Calculate peak power consumption percentage
@@ -1346,14 +1345,14 @@ rules.add()
                             }
                             peakPointsHousehold += peakPointsDay
                             peakPointsMap.put(assetId, peakPointsHousehold)
-                            assets.dispatch(assetId, ReschoolMeterAsset.PEAK_POINTS.name, peakPointsHousehold)
+                            assets.dispatch(assetId, OurgridMeterAsset.PEAK_POINTS.name, peakPointsHousehold)
                         }
                     }
                 }
 
                 // Update total peak points
                 def totalPoints = peakPointsMap.values().sum()
-                assets.dispatch(peaksAssetId, OurGridPeaksAsset.PEAK_POINTS_TOTAL.name, totalPoints)
+                assets.dispatch(peaksAssetId, OurgridPeaksAsset.PEAK_POINTS_TOTAL.name, totalPoints)
         })
 
 rules.add()
@@ -1365,10 +1364,10 @@ rules.add()
                 def changesChildren = facts.matchAssetState(
                         new AssetQuery()
                                 .parents(parentMeterAssetId)
-                                .types(ReschoolMeterAsset)
+                                .types(OurgridMeterAsset)
                                 .attributeNames(
-                                        ReschoolMeterAsset.CHALLENGE_POINTS.name,
-                                        ReschoolMeterAsset.PEAK_POINTS.name,
+                                        OurgridMeterAsset.CHALLENGE_POINTS.name,
+                                        OurgridMeterAsset.PEAK_POINTS.name,
                                 )
                 ).filter { state ->
                     def changed = false
@@ -1413,8 +1412,8 @@ rules.add()
                         new AssetQuery()
                                 .ids(assetIds)
                                 .attributeNames(
-                                        ReschoolMeterAsset.CHALLENGE_POINTS.name,
-                                        ReschoolMeterAsset.PEAK_POINTS.name,
+                                        OurgridMeterAsset.CHALLENGE_POINTS.name,
+                                        OurgridMeterAsset.PEAK_POINTS.name,
                                 )
                 ).toList()
 
@@ -1433,13 +1432,13 @@ rules.add()
                 def challengeExchangeRateValue = facts.matchFirstAssetState(
                         new AssetQuery()
                                 .ids(challengesAssetId)
-                                .attributeName(OurGridChallengesAsset.CHALLENGE_POINTS_EXCHANGE_RATE.name)
+                                .attributeName(OurgridChallengesAsset.CHALLENGE_POINTS_EXCHANGE_RATE.name)
                 ).flatMap { it.value }.orElse(null)
 
                 // Calculate total points and corresponding earnings
                 childrenAttributes.forEach { assetId, values ->
-                    def challengePoints = values.get(ReschoolMeterAsset.CHALLENGE_POINTS.name)
-                    def peakPoints = values.get(ReschoolMeterAsset.PEAK_POINTS.name)
+                    def challengePoints = values.get(OurgridMeterAsset.CHALLENGE_POINTS.name)
+                    def peakPoints = values.get(OurgridMeterAsset.PEAK_POINTS.name)
 
                     if (challengePoints == null) {
                         challengePoints = 0
@@ -1450,11 +1449,11 @@ rules.add()
                     }
 
                     def totalPoints = challengePoints + peakPoints
-                    assets.dispatch(assetId, ReschoolMeterAsset.TOTAL_POINTS.name, totalPoints)
+                    assets.dispatch(assetId, OurgridMeterAsset.TOTAL_POINTS.name, totalPoints)
 
                     if (challengeExchangeRateValue != null) {
                         def earnings = challengeExchangeRateValue * totalPoints
-                        assets.dispatch(assetId, ReschoolMeterAsset.CHALLENGE_EARNINGS.name, earnings)
+                        assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_EARNINGS.name, earnings)
                     }
                 }
         })
@@ -1470,89 +1469,89 @@ private Map<String, Integer> calculatePowerLimits(RulesFacts facts, def children
     def defaultPowerLimitMethod = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_DEFAULT_POWER_LIMIT_METHOD.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_DEFAULT_POWER_LIMIT_METHOD.name)
     ).flatMap { it.value }.orElse(null) as String
 
     if (defaultPowerLimitMethod == null) {
         defaultPowerLimitMethod = "ladder"
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_DEFAULT_POWER_LIMIT_METHOD.name, defaultPowerLimitMethod)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_DEFAULT_POWER_LIMIT_METHOD.name, defaultPowerLimitMethod)
     }
 
     def powerLimitTarget = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_TARGET.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_TARGET.name)
     ).flatMap { it.value }.orElse(null) as Integer
 
     if (powerLimitTarget == null) {
         powerLimitTarget = 2000
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_TARGET.name, powerLimitTarget)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_TARGET.name, powerLimitTarget)
     }
 
     def powerLimitMinimum = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_MINIMUM.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_MINIMUM.name)
     ).flatMap { it.value }.orElse(null) as Integer
 
     if (powerLimitMinimum == null) {
         powerLimitMinimum = 2000
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_MINIMUM.name, powerLimitMinimum)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_MINIMUM.name, powerLimitMinimum)
     }
 
     def powerLimitMaximum = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_MAXIMUM.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_MAXIMUM.name)
     ).flatMap { it.value }.orElse(null) as Integer
 
     if (powerLimitMaximum == null) {
         powerLimitMaximum = 3000
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_MAXIMUM.name, powerLimitMaximum)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_MAXIMUM.name, powerLimitMaximum)
     }
 
     def powerLimitInterval = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_INTERVAL.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_INTERVAL.name)
     ).flatMap { it.value }.orElse(null) as Integer
 
     if (powerLimitInterval == null) {
         powerLimitInterval = 100
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_INTERVAL.name, powerLimitInterval)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_INTERVAL.name, powerLimitInterval)
     }
 
     def powerLimitProDegPercentage = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_PROMOTION_PERCENTAGE.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_PROMOTION_PERCENTAGE.name)
     ).flatMap { it.value }.orElse(null) as Integer
 
     if (powerLimitProDegPercentage == null) {
         powerLimitProDegPercentage = 20
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_POWER_LIMIT_PROMOTION_PERCENTAGE.name, powerLimitProDegPercentage)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_POWER_LIMIT_PROMOTION_PERCENTAGE.name, powerLimitProDegPercentage)
     }
 
     def challengeDuration = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_DURATION.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_DURATION.name)
     ).flatMap { it.value }.orElse(null) as Long
 
     if (challengeDuration == null) {
         challengeDuration = 60
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_DURATION.name, challengeDuration)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_DURATION.name, challengeDuration)
     }
 
     def challengePointInterval = facts.matchFirstAssetState(
             new AssetQuery()
                     .ids(challengesAssetId)
-                    .attributeName(OurGridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name)
+                    .attributeName(OurgridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name)
     ).flatMap { it.value }.orElse(null) as Long
 
     if (challengePointInterval == null) {
         challengePointInterval = 6
-        assets.dispatch(challengesAssetId, OurGridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name, challengePointInterval)
+        assets.dispatch(challengesAssetId, OurgridChallengesAsset.CHALLENGE_EARN_POINT_INTERVAL.name, challengePointInterval)
     }
 
     // Maximum number of points that can be earned during challenge
@@ -1562,15 +1561,15 @@ private Map<String, Integer> calculatePowerLimits(RulesFacts facts, def children
     int promotionZone = (int) Math.round(maxPoints * (1 - powerLimitProDegPercentage / 100))
 
     childrenAttributes.forEach { assetId, values ->
-        String powerLimitMethod = values.get(ReschoolMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name).toString()
-        def pointsPreviousChallenge = values.get(ReschoolMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name)
-        def powerLimit = values.get(ReschoolMeterAsset.CHALLENGE_POWER_LIMIT.name)
+        String powerLimitMethod = values.get(OurgridMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name).toString()
+        def pointsPreviousChallenge = values.get(OurgridMeterAsset.CHALLENGE_POINTS_PER_CHALLENGE.name)
+        def powerLimit = values.get(OurgridMeterAsset.CHALLENGE_POWER_LIMIT.name)
 
         // Set power limit method
         if (powerLimitMethod == "null") {
             powerLimitMethod = defaultPowerLimitMethod.toString()
 
-            assets.dispatch(assetId.toString(), ReschoolMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name, powerLimitMethod)
+            assets.dispatch(assetId.toString(), OurgridMeterAsset.CHALLENGE_POWER_LIMIT_METHOD.name, powerLimitMethod)
         }
 
         // Calculate power limit based on method
@@ -1605,7 +1604,7 @@ private Map<String, Integer> calculatePowerLimits(RulesFacts facts, def children
                 break
         }
         powerLimitMap.put(assetId.toString(), powerLimit)
-        assets.dispatch(assetId.toString(), ReschoolMeterAsset.CHALLENGE_POWER_LIMIT.name, powerLimit)
+        assets.dispatch(assetId.toString(), OurgridMeterAsset.CHALLENGE_POWER_LIMIT.name, powerLimit)
     }
     return powerLimitMap
 }

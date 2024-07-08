@@ -2,8 +2,8 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.OurGridChallengesAsset;
-import org.openremote.agent.custom.reschool.ReschoolMeterAsset;
+import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset;
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.datapoint.AssetDatapointService;
@@ -38,9 +38,9 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the meter asset with the same id.
-        ReschoolMeterAsset meterAsset = (ReschoolMeterAsset) assetStorageService.find(new AssetQuery()
+        OurgridMeterAsset meterAsset = (OurgridMeterAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .ids(joinChallengeDetails.meterId)
         );
         if (meterAsset == null) {
@@ -54,10 +54,10 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the challenge asset with the same id.
-        OurGridChallengesAsset challengeAsset = (OurGridChallengesAsset) assetStorageService.find(new AssetQuery()
+        OurgridChallengesAsset challengeAsset = (OurgridChallengesAsset) assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurGridChallengesAsset.class)
+                .types(OurgridChallengesAsset.class)
         );
         if (challengeAsset == null) {
             throw new WebApplicationException(NOT_FOUND);
@@ -65,7 +65,7 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
 
         // Check if the meter has the possibility to join the challenge
         Optional<?> meterChallengeStatus = meterAsset.getChallengeStatus();
-        if (meterChallengeStatus.isEmpty() || meterChallengeStatus.get() != ReschoolMeterAsset.ChallengeStatusValueType.joinChallenge) {
+        if (meterChallengeStatus.isEmpty() || meterChallengeStatus.get() != OurgridMeterAsset.ChallengeStatusValueType.joinChallenge) {
             throw new WebApplicationException(FORBIDDEN);
         }
 
@@ -89,9 +89,9 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the meter asset with the same linked user
-        ReschoolMeterAsset meterAsset = (ReschoolMeterAsset) assetStorageService.find(new AssetQuery()
+        OurgridMeterAsset meterAsset = (OurgridMeterAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .userIds(getUserId())
         );
         if (meterAsset == null) {
@@ -99,9 +99,9 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the challenge asset with the same linked user
-        OurGridChallengesAsset challengesAsset = (OurGridChallengesAsset) assetStorageService.find(new AssetQuery()
+        OurgridChallengesAsset challengesAsset = (OurgridChallengesAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurGridChallengesAsset.class)
+                .types(OurgridChallengesAsset.class)
                 .userIds(getUserId())
         );
         if (challengesAsset == null) {
@@ -110,11 +110,11 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
 
         // Check if the meter has joined a challenge to return
         Optional<?> meterChallengeStatus = meterAsset.getChallengeStatus();
-        Collection<ReschoolMeterAsset.ChallengeStatusValueType> allowed = Arrays.asList(
-                ReschoolMeterAsset.ChallengeStatusValueType.activeChallenge,
-                ReschoolMeterAsset.ChallengeStatusValueType.joinedChallenge
+        Collection<OurgridMeterAsset.ChallengeStatusValueType> allowed = Arrays.asList(
+                OurgridMeterAsset.ChallengeStatusValueType.activeChallenge,
+                OurgridMeterAsset.ChallengeStatusValueType.joinedChallenge
         );
-        if (meterChallengeStatus.isEmpty() || !allowed.contains((ReschoolMeterAsset.ChallengeStatusValueType) meterChallengeStatus.get())) {
+        if (meterChallengeStatus.isEmpty() || !allowed.contains((OurgridMeterAsset.ChallengeStatusValueType) meterChallengeStatus.get())) {
             throw new WebApplicationException(NOT_FOUND);
         }
 
@@ -146,9 +146,9 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the meter asset with the same linked user
-        ReschoolMeterAsset meterAsset = (ReschoolMeterAsset) assetStorageService.find(new AssetQuery()
+        OurgridMeterAsset meterAsset = (OurgridMeterAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .userIds(getUserId())
         );
         if (meterAsset == null) {
@@ -156,9 +156,9 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
         }
 
         // Query the challenge asset with the same linked user
-        OurGridChallengesAsset challengesAsset = (OurGridChallengesAsset) assetStorageService.find(new AssetQuery()
+        OurgridChallengesAsset challengesAsset = (OurgridChallengesAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurGridChallengesAsset.class)
+                .types(OurgridChallengesAsset.class)
                 .userIds(getUserId())
         );
         if (challengesAsset == null) {

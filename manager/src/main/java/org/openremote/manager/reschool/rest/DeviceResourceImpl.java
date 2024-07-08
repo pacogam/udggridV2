@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.ReschoolMeterAsset;
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -42,9 +42,9 @@ public class DeviceResourceImpl extends ManagerWebResource implements DeviceReso
         Asset<?> meterAsset = assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .attributes(
-                        new AttributePredicate(ReschoolMeterAsset.DEVICE_ID.getName(), new StringPredicate(AssetQuery.Match.EXACT, true, details.deviceName))
+                        new AttributePredicate(OurgridMeterAsset.DEVICE_ID.getName(), new StringPredicate(AssetQuery.Match.EXACT, true, details.deviceName))
                 )
         );
         if (meterAsset == null) {
@@ -67,7 +67,7 @@ public class DeviceResourceImpl extends ManagerWebResource implements DeviceReso
         Collection<Asset<?>> linkedMetersOfUser = assetStorageService.findAll(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .ids(assetIds)
         );
         if (!linkedMetersOfUser.isEmpty()) {
@@ -89,7 +89,7 @@ public class DeviceResourceImpl extends ManagerWebResource implements DeviceReso
         Asset<?> meterAsset = assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
+                .types(OurgridMeterAsset.class)
                 .names(details.deviceName)
         );
         if (meterAsset == null) {

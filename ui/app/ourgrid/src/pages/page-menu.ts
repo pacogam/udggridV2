@@ -11,7 +11,7 @@ import '../panels/panel-device-info';
 import '../panels/panel-challenge-earnings';
 import {AppStateKeyed, router} from '@openremote/or-app';
 import {GridAppStateKeyed, removeUserAsset} from '../util/og-state';
-import {ReschoolMeterAsset} from '../util/util';
+import {OurgridMeterAsset} from '../util/util';
 import {when} from 'lit/directives/when.js';
 import {guard} from 'lit/directives/guard.js';
 import {OgPage, OgPageProvider} from './util/og-page';
@@ -140,7 +140,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected showDeviceCard = true;
 
     @state()
-    protected userAsset?: ReschoolMeterAsset;
+    protected userAsset?: OurgridMeterAsset;
 
     @state()
     protected challengeAsset?: Asset;

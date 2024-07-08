@@ -1,5 +1,6 @@
-package org.openremote.agent.custom.reschool;
+package org.openremote.agent.custom.ourgrid;
 
+import jakarta.persistence.Entity;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.AssetDescriptor;
 import org.openremote.model.attribute.MetaItem;
@@ -7,14 +8,10 @@ import org.openremote.model.value.AttributeDescriptor;
 import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueType;
 
-import jakarta.persistence.Entity;
-
 import static org.openremote.model.Constants.*;
 
 @Entity
-public class ReschoolMeterSumAsset extends Asset<ReschoolMeterSumAsset> {
-
-    public static final AssetDescriptor<ReschoolMeterSumAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", ReschoolMeterSumAsset.class); // set icon and colour of asset
+public class OurgridMeterSumAsset extends Asset<OurgridMeterSumAsset> {
 
     public static final AttributeDescriptor<Double> POWER = new AttributeDescriptor<>("power", ValueType.NUMBER,
             new MetaItem<>(MetaItemType.LABEL, "Power"),
@@ -53,10 +50,13 @@ public class ReschoolMeterSumAsset extends Asset<ReschoolMeterSumAsset> {
             new MetaItem<>(MetaItemType.RULE_STATE)
     ).withUnits(UNITS_METRE, UNITS_CUBED, UNITS_PER, UNITS_MINUTE);
 
-    protected ReschoolMeterSumAsset() {
+
+    public static final AssetDescriptor<OurgridMeterSumAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterSumAsset.class);
+
+    protected OurgridMeterSumAsset() {
     }
 
-    public ReschoolMeterSumAsset(String name) {
+    public OurgridMeterSumAsset(String name) {
         super(name);
     }
 }

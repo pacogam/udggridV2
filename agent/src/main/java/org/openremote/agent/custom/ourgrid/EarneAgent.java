@@ -1,4 +1,4 @@
-package org.openremote.agent.custom.reschool;
+package org.openremote.agent.custom.ourgrid;
 
 import org.openremote.model.asset.agent.Agent;
 import org.openremote.model.asset.agent.AgentDescriptor;
@@ -15,7 +15,7 @@ import static org.openremote.model.Constants.UNITS_MINUTE;
 
 
 @Entity // makes table in database
-public class ReschoolAgent extends Agent<ReschoolAgent, ReschoolProtocol, DefaultAgentLink> { // agent makes the fields in the UI
+public class EarneAgent extends Agent<EarneAgent, EarneProtocol, DefaultAgentLink> { // agent makes the fields in the UI
     public static final AttributeDescriptor<Integer> ACTIVE_PERIOD = new AttributeDescriptor<>("activePeriod", ValueType.POSITIVE_INTEGER,
             new MetaItem<>(MetaItemType.LABEL, "Active Period")
     ).withUnits(UNITS_MINUTE);
@@ -46,19 +46,19 @@ public class ReschoolAgent extends Agent<ReschoolAgent, ReschoolProtocol, Defaul
     );
 
 
-    public static final AgentDescriptor<ReschoolAgent, ReschoolProtocol, DefaultAgentLink> DESCRIPTOR = new AgentDescriptor<>(
-            ReschoolAgent.class, ReschoolProtocol.class, DefaultAgentLink.class);
+    public static final AgentDescriptor<EarneAgent, EarneProtocol, DefaultAgentLink> DESCRIPTOR = new AgentDescriptor<>(
+            EarneAgent.class, EarneProtocol.class, DefaultAgentLink.class);
 
-    protected ReschoolAgent() { // default constructor
+    protected EarneAgent() { // default constructor
     }
 
-    public ReschoolAgent(String name){
+    public EarneAgent(String name){
         super (name);
     }
 
     @Override
-    public ReschoolProtocol getProtocolInstance() {
-        return new ReschoolProtocol(this);
+    public EarneProtocol getProtocolInstance() {
+        return new EarneProtocol(this);
     }
 
     public Optional<Integer> getActivePeriod(){
@@ -89,31 +89,31 @@ public class ReschoolAgent extends Agent<ReschoolAgent, ReschoolProtocol, Defaul
         return getAttributes().getValue(RABBITMQ_QUEUE);
     }
 
-    public ReschoolAgent setMeterParentId(String value) {
+    public EarneAgent setMeterParentId(String value) {
         getAttributes().getOrCreate(METER_SUM_ID).setValue(value);
         return this;
     }
-    public ReschoolAgent setRabbitMqHost(String value) {
+    public EarneAgent setRabbitMqHost(String value) {
         getAttributes().getOrCreate(RABBITMQ_HOST).setValue(value);
         return this;
     }
 
-    public ReschoolAgent setRabbitMqUsername(String value) {
+    public EarneAgent setRabbitMqUsername(String value) {
         getAttributes().getOrCreate(RABBITMQ_USERNAME).setValue(value);
         return this;
     }
 
-    public ReschoolAgent setRabbitMqPassword(String value) {
+    public EarneAgent setRabbitMqPassword(String value) {
         getAttributes().getOrCreate(RABBITMQ_PASSWORD).setValue(value);
         return this;
     }
 
-    public ReschoolAgent setRabbitMqVirtualhost(String value) {
+    public EarneAgent setRabbitMqVirtualhost(String value) {
         getAttributes().getOrCreate(RABBITMQ_VIRTUALHOST).setValue(value);
         return this;
     }
 
-    public ReschoolAgent setRabbitMqQueue(String value) {
+    public EarneAgent setRabbitMqQueue(String value) {
         getAttributes().getOrCreate(RABBITMQ_QUEUE).setValue(value);
         return this;
     }

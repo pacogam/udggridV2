@@ -1,10 +1,11 @@
 package org.openremote.manager.reschool.rest;
 
-import org.openremote.agent.custom.reschool.OurGridChallengesAsset;
-import org.openremote.agent.custom.reschool.ReschoolMeterAsset;
+import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset;
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.datapoint.AssetDatapointService;
+import org.openremote.manager.rules.RulesetStorageService;
 import org.openremote.model.datapoint.ValueDatapoint;
 import org.openremote.model.datapoint.query.AssetDatapointAllQuery;
 import org.openremote.model.reschool.Challenge;
@@ -20,6 +21,7 @@ public class DeviceChallengesService {
 
     protected AssetStorageService assetStorageService;
     protected AssetDatapointService assetDatapointService;
+    RulesetStorageService rulesetStorageService;
 
     public DeviceChallengesService(TimerService timerService, AssetStorageService assetStorageService, AssetDatapointService datapointService) {
         this.timerService = timerService;
@@ -28,7 +30,7 @@ public class DeviceChallengesService {
     }
 
 
-    public Collection<Challenge> getMeterChallengeHistory(ReschoolMeterAsset meterAsset, OurGridChallengesAsset challengesAsset, long startTime, long endTime) throws Exception {
+    public Collection<Challenge> getMeterChallengeHistory(OurgridMeterAsset meterAsset, OurgridChallengesAsset challengesAsset, long startTime, long endTime) throws Exception {
         if (meterAsset == null || challengesAsset == null) {
             return new ArrayList<>();
         }
@@ -41,7 +43,7 @@ public class DeviceChallengesService {
         // at the start of the challenge this value gets updated as well.
         Collection<ValueDatapoint<?>> pointDatapoints = this.assetDatapointService.queryDatapoints(
                 meterAsset.getId(),
-                ReschoolMeterAsset.CHALLENGE_POINTS.getName(),
+                OurgridMeterAsset.CHALLENGE_POINTS.getName(),
                 new AssetDatapointAllQuery(startTime, endTime) // TODO: Implement custom DatapointQuery which is more efficient
         );
 
@@ -57,7 +59,7 @@ public class DeviceChallengesService {
 
 
         // Get challenge wait to calculate the earliest moment a user can join the challenge
-        Optional<Long> challengeWaitMinutes = challengesAsset.getChallengeWait();
+        Optional<Integer> challengeWaitMinutes = challengesAsset.getChallengeWait();
         if(challengeWaitMinutes.isEmpty()) {
             throw new RuntimeException("Challenge wait time is invalid");
         }
@@ -66,7 +68,7 @@ public class DeviceChallengesService {
 
         Collection<ValueDatapoint<?>> joinDates = this.assetDatapointService.queryDatapoints(
                 meterAsset.getId(),
-                ReschoolMeterAsset.CHALLENGES_JOINED.getName(),
+                OurgridMeterAsset.CHALLENGES_JOINED.getName(),
                 new AssetDatapointAllQuery(earliestJoinTime, endTime) // TODO: Implement custom DatapointQuery which is more efficient
         );
 
@@ -100,7 +102,7 @@ public class DeviceChallengesService {
     }
 
 
-    public Collection<Challenge> getTotalChallengeHistory(OurGridChallengesAsset challengesAsset, long startTime, long endTime) throws RuntimeException {
+    public Collection<Challenge> getTotalChallengeHistory(OurgridChallengesAsset challengesAsset, long startTime, long endTime) throws RuntimeException {
         if (challengesAsset == null) {
             return new ArrayList<>();
         }
@@ -110,7 +112,7 @@ public class DeviceChallengesService {
         // Query all start timestamps between start and end time
         List<Long> startTimestamps = this.assetDatapointService.queryDatapoints(
                 challengesAsset.getId(),
-                OurGridChallengesAsset.CHALLENGE_START.getName(),
+                OurgridChallengesAsset.CHALLENGE_START.getName(),
                 new AssetDatapointAllQuery(startTime, endTime)
         ).stream().map((ValueDatapoint<?> dp) -> {
             try {
@@ -123,7 +125,7 @@ public class DeviceChallengesService {
         // Query all end timestamps between start and end time
         List<Long> endTimestamps = this.assetDatapointService.queryDatapoints(
                 challengesAsset.getId(),
-                OurGridChallengesAsset.CHALLENGE_END.getName(),
+                OurgridChallengesAsset.CHALLENGE_END.getName(),
                 new AssetDatapointAllQuery(startTime, endTime)
         ).stream().map((ValueDatapoint<?> dp) -> {
             try {

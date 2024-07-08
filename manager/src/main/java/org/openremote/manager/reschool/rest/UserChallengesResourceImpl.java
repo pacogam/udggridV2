@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.OurGridChallengesAsset;
+import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -50,7 +50,7 @@ public class UserChallengesResourceImpl extends ManagerWebResource implements Us
         Asset<?> asset = assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurGridChallengesAsset.class)
+                .types(OurgridChallengesAsset.class)
                 .ids(details.assetId)
         );
         if (asset == null) {
@@ -101,7 +101,7 @@ public class UserChallengesResourceImpl extends ManagerWebResource implements Us
         return assetStorageService.findAll(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(realm))
-                .types(OurGridChallengesAsset.class)
+                .types(OurgridChallengesAsset.class)
                 .ids(assetIds)
         );
     }

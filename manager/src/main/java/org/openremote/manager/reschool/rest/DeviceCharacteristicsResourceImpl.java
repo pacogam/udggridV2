@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.ReschoolMeterAsset;
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -33,10 +33,10 @@ public class DeviceCharacteristicsResourceImpl extends ManagerWebResource implem
         }
 
         // Query the meter asset with the same linked user
-        ReschoolMeterAsset meterAsset = (ReschoolMeterAsset) assetStorageService.find(new AssetQuery()
+        OurgridMeterAsset meterAsset = (OurgridMeterAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
-                .attributeNames(ReschoolMeterAsset.HOUSEHOLD_ENERGY_CHARACTERISTICS.getName())
+                .types(OurgridMeterAsset.class)
+                .attributeNames(OurgridMeterAsset.HOUSEHOLD_ENERGY_CHARACTERISTICS.getName())
                 .userIds(getUserId())
         );
         if(meterAsset == null) {
@@ -57,10 +57,10 @@ public class DeviceCharacteristicsResourceImpl extends ManagerWebResource implem
         }
 
         // Query the meter asset with the same linked user
-        ReschoolMeterAsset meterAsset = (ReschoolMeterAsset) assetStorageService.find(new AssetQuery()
+        OurgridMeterAsset meterAsset = (OurgridMeterAsset) assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolMeterAsset.class)
-                .attributeNames(ReschoolMeterAsset.HOUSEHOLD_ENERGY_CHARACTERISTICS.getName())
+                .types(OurgridMeterAsset.class)
+                .attributeNames(OurgridMeterAsset.HOUSEHOLD_ENERGY_CHARACTERISTICS.getName())
                 .userIds(getUserId())
         );
         if(meterAsset == null) {
