@@ -1,4 +1,4 @@
-package org.openremote.agent.custom.reschool;
+package org.openremote.agent.custom.ourgrid;
 
 import org.openremote.agent.protocol.AbstractProtocol;
 import org.openremote.container.util.UniqueIdentifierGenerator;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import static org.openremote.model.syslog.SyslogCategory.PROTOCOL;
 
-public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAgentLink> {
+public class EarneProtocol extends AbstractProtocol<EarneAgent, DefaultAgentLink> {
     private String hostPrevious = "";
     private String usernamePrevious = "";
     private String passwordPrevious = "";
@@ -42,10 +42,10 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
     private int activeEarneDevicesSizePrevious = 0;
 
 
-    public static final String PROTOCOL_DISPLAY_NAME = "Reschool";
-    private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, ReschoolProtocol.class);
+    public static final String PROTOCOL_DISPLAY_NAME = "Earne";
+    private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, EarneProtocol.class);
 
-    public ReschoolProtocol(ReschoolAgent agent) {
+    public EarneProtocol(EarneAgent agent) {
         super(agent);
     }
 
@@ -56,7 +56,7 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
 
     @Override
     public String getProtocolInstanceUri() {
-        return "reschool://" + agent.getId();
+        return "earne://" + agent.getId();
     }
 
 
@@ -186,7 +186,7 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
                 setConnectionStatus(ConnectionStatus.CONNECTED);
                 LOG.info("Agent='" + agent.getName() + "'; Connected to RabbitMQ host");
 
-                sendAttributeEvent(new AttributeEvent(agent.getId(), ReschoolAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), activeEarneDevices.size(), timerService.getCurrentTimeMillis()));
+                sendAttributeEvent(new AttributeEvent(agent.getId(), EarneAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), activeEarneDevices.size(), timerService.getCurrentTimeMillis()));
                 connectionStartTime = timerService.getCurrentTimeMillis();
             }
             reconnect = false;
@@ -200,7 +200,7 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
         }
 
         if (agent.getActivePeriod().isEmpty()) {
-            sendAttributeEvent(new AttributeEvent(agent.getId(), ReschoolAgent.ACTIVE_PERIOD.getName(), activePeriodMinutes, timerService.getCurrentTimeMillis()));
+            sendAttributeEvent(new AttributeEvent(agent.getId(), EarneAgent.ACTIVE_PERIOD.getName(), activePeriodMinutes, timerService.getCurrentTimeMillis()));
         }
 
         disableButtonPrevious = disableButton;
@@ -305,13 +305,13 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
 
         String uniqueDeviceName = parsedMessage.get("deviceId"); // Asset name is unique Earn-E device ID
         String assetId = UniqueIdentifierGenerator.generateId(agent.getRealm() + uniqueDeviceName); // Generate unique asset ID based on unique asset name
-        ReschoolMeterAsset reschoolAsset = assetService.findAsset(assetId); // Find if asset already exists
+        OurgridMeterAsset ourgridMeterAsset = assetService.findAsset(assetId); // Find if asset already exists
 
-        if (reschoolAsset != null) {
+        if (ourgridMeterAsset != null) {
             // Calculate "power calculated" and "gas flow rate"
-            Optional<String> timestampPrevious = reschoolAsset.getAttribute(ReschoolMeterAsset.TIMESTAMP).flatMap(Attribute::getValue);
-            Optional<Double> energyNetPrevious = reschoolAsset.getAttribute(ReschoolMeterAsset.ENERGY_NET_TOTAL).flatMap(Attribute::getValue);
-            Optional<Double> gasDeliveredPrevious = reschoolAsset.getAttribute(ReschoolMeterAsset.GAS_IMPORT_TOTAL).flatMap(Attribute::getValue);
+            Optional<String> timestampPrevious = ourgridMeterAsset.getAttribute(OurgridMeterAsset.TIMESTAMP).flatMap(Attribute::getValue);
+            Optional<Double> energyNetPrevious = ourgridMeterAsset.getAttribute(OurgridMeterAsset.ENERGY_NET_TOTAL).flatMap(Attribute::getValue);
+            Optional<Double> gasDeliveredPrevious = ourgridMeterAsset.getAttribute(OurgridMeterAsset.GAS_IMPORT_TOTAL).flatMap(Attribute::getValue);
 
             if (!parsedMessage.get("timestamp").isBlank() && timestampPrevious.isPresent()) {  // Power and gas flow rate calculation
                 long timestampCurrentSeconds = Instant.parse(parsedMessage.get("timestamp")).getEpochSecond();
@@ -320,47 +320,39 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
                 long dt = timestampCurrentSeconds - timestampPreviousSeconds;
 
                 if (dt <= 10) {
-                    LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Time between messages < 10 seconds: dt='" + dt + "'");
+                    LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Time between messages < 10 seconds: dt='" + dt + "'");
                 }
 
-                if (dt != 0) {
-//                    if (energyNet.isPresent() && energyNetPrevious.isPresent()) {
-//                        double dE = energyNet.get() - energyNetPrevious.get();
-//                        powerCalculated = Optional.of(Math.round(((dE * 3600000) / dt) * 1000.0) / 1000.0); // Nett power output (Watt), rounded to 3 decimals
-//
-//                        sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.POWER_CALCULATED.getName(), powerCalculated.orElse(null), timerService.getCurrentTimeMillis()));
-//                    }
+                if (dt != 0 && gasDelivered.isPresent() && gasDeliveredPrevious.isPresent()) {
+                    double dGas = gasDelivered.get() - gasDeliveredPrevious.get();
+                    gasFlowRate = Optional.of(Math.round(((dGas / dt) * 60) * 1000.0) / 1000.0); // Gas flow rate (m3/min), rounded to 3 decimals
 
-                    if (gasDelivered.isPresent() && gasDeliveredPrevious.isPresent()) {
-                        double dGas = gasDelivered.get() - gasDeliveredPrevious.get();
-                        gasFlowRate = Optional.of(Math.round(((dGas / dt) * 60) * 1000.0 ) / 1000.0); // Gas flow rate (m3/min), rounded to 3 decimals
-
-                        if (dGas >= 0) {
-                            sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.GAS_FLOW_RATE.getName(), gasFlowRate.orElse(null), timerService.getCurrentTimeMillis()));
-                            if (gasFlowRate.get() > 1.0) {
-                                LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Gas Flow Rate > 1; " +
-                                        "timestampCurrentSeconds: " + timestampCurrentSeconds + "; " +
-                                        "timestampPreviousSeconds: " + timestampPreviousSeconds + "; " +
-                                        "dt: " + dt  + "; " +
-                                        "gasDelivered: " + gasDelivered + "; " +
-                                        "gasDeliveredPrevious: " + gasDeliveredPrevious + "; " +
-                                        "dGas: " + dGas + "; " +
-                                        "gasFlowRate: " + gasFlowRate + "; " +
-                                        "energyNet: " + energyNet + "; " +
-                                        "energyNetPrevious: " + energyNetPrevious + "; " +
-                                        "powerCalculated: " + powerCalculated + "; "
-                                );
-                            }
-                        } else {
-                            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Gas-meter reset, negative dGas: '" + dGas + "'");
+                    if (dGas >= 0) {
+                        sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.GAS_FLOW_RATE.getName(), gasFlowRate.orElse(null), timerService.getCurrentTimeMillis()));
+                        if (gasFlowRate.get() > 1.0) {
+                            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Gas Flow Rate > 1; " +
+                                    "timestampCurrentSeconds: " + timestampCurrentSeconds + "; " +
+                                    "timestampPreviousSeconds: " + timestampPreviousSeconds + "; " +
+                                    "dt: " + dt + "; " +
+                                    "gasDelivered: " + gasDelivered + "; " +
+                                    "gasDeliveredPrevious: " + gasDeliveredPrevious + "; " +
+                                    "dGas: " + dGas + "; " +
+                                    "gasFlowRate: " + gasFlowRate + "; " +
+                                    "energyNet: " + energyNet + "; " +
+                                    "energyNetPrevious: " + energyNetPrevious + "; " +
+                                    "powerCalculated: " + powerCalculated + "; "
+                            );
                         }
+                    } else {
+                        LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Gas-meter reset, negative dGas: '" + dGas + "'");
                     }
                 }
+
             }
         } else {
             // Create new Meter Asset
-            reschoolAsset = new ReschoolMeterAsset(uniqueDeviceName);
-            reschoolAsset.setId(assetId); // Set asset ID (required)
+            ourgridMeterAsset = new OurgridMeterAsset(uniqueDeviceName);
+            ourgridMeterAsset.setId(assetId); // Set asset ID (required)
 
             // Set parent ID
             String parentId = agent.getMeterSParentId().orElse("");
@@ -368,12 +360,12 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
             if (!parentId.isEmpty()) {
                 Asset<?> parentAsset = assetService.findAsset(parentId);
                 if (parentAsset != null) {
-                    reschoolAsset.setParentId(parentId); // Set given asset as parent
+                    ourgridMeterAsset.setParentId(parentId); // Set given asset as parent
                 } else {
-                    reschoolAsset.setParentId(agent.getId()); // Set agent as parent
+                    ourgridMeterAsset.setParentId(agent.getId()); // Set agent as parent
                 }
             } else {
-                reschoolAsset.setParentId(agent.getId()); // Set agent as parent
+                ourgridMeterAsset.setParentId(agent.getId()); // Set agent as parent
             }
 
             // Set coordinates
@@ -383,56 +375,56 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
                     double latitude = Double.parseDouble(parsedMessage.get("latitude"));
 
                     if (!(longitude == 0.0) && !(latitude == 0.0)) {
-                        reschoolAsset.setLocation(new GeoJSONPoint(longitude, latitude)); // Set location
+                        ourgridMeterAsset.setLocation(new GeoJSONPoint(longitude, latitude)); // Set location
                     }
                 } catch (Exception e) {
-                    LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Invalid Geographic Coordinates. Longitude: '"
+                    LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Invalid Geographic Coordinates. Longitude: '"
                             + parsedMessage.get("longitude") + "' Latitude: '" + parsedMessage.get("latitude") + "'");
                 }
             }
 
-            reschoolAsset.setDeviceId(parsedMessage.get("deviceId")); // Unique Device ID will be used to connect between Earn-E and OpenRemote app
-            reschoolAsset.setSmartmeterModel(parsedMessage.get("model")); // Smart meter model
-            reschoolAsset.setSoftwareVersion(parsedMessage.get("swVersion")); // Software version of Earn-E device
+            ourgridMeterAsset.setDeviceId(parsedMessage.get("deviceId")); // Unique Device ID will be used to connect between Earn-E and OpenRemote app
+            ourgridMeterAsset.setSmartmeterModel(parsedMessage.get("model")); // Smart meter model
+            ourgridMeterAsset.setSoftwareVersion(parsedMessage.get("swVersion")); // Software version of Earn-E device
 
-            assetService.mergeAsset(reschoolAsset); // Create asset
+            assetService.mergeAsset(ourgridMeterAsset); // Create asset
 
             LOG.info("Agent='" + agent.getName() + "'; Created Meter Asset: '" + uniqueDeviceName + "'");
         }
 
-        String modelPrevious = reschoolAsset.getAttribute(ReschoolMeterAsset.SMARTMETER_MODEL).flatMap(Attribute::getValue).orElse("");
-        String swVersionPrevious = reschoolAsset.getAttribute(ReschoolMeterAsset.SOFTWARE_VERSION).flatMap(Attribute::getValue).orElse("");
+        String modelPrevious = ourgridMeterAsset.getAttribute(OurgridMeterAsset.SMARTMETER_MODEL).flatMap(Attribute::getValue).orElse("");
+        String swVersionPrevious = ourgridMeterAsset.getAttribute(OurgridMeterAsset.SOFTWARE_VERSION).flatMap(Attribute::getValue).orElse("");
 
         if (!parsedMessage.get("model").isBlank() && !modelPrevious.equals(parsedMessage.get("model"))) {
-            sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.SMARTMETER_MODEL.getName(), parsedMessage.get("model"), timerService.getCurrentTimeMillis()));
-            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Smart-meter model changed to: '" + parsedMessage.get("model") + "'");
+            sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.SMARTMETER_MODEL.getName(), parsedMessage.get("model"), timerService.getCurrentTimeMillis()));
+            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Smart-meter model changed to: '" + parsedMessage.get("model") + "'");
         }
 
         if (!parsedMessage.get("swVersion").isBlank() && !swVersionPrevious.equals(parsedMessage.get("swVersion"))) {
-            sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.SOFTWARE_VERSION.getName(), parsedMessage.get("swVersion"), timerService.getCurrentTimeMillis()));
-            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; Earn-E device software version update: '" + parsedMessage.get("swVersion") + "'");
+            sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.SOFTWARE_VERSION.getName(), parsedMessage.get("swVersion"), timerService.getCurrentTimeMillis()));
+            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; Earn-E device software version update: '" + parsedMessage.get("swVersion") + "'");
         }
 
         if (parsedMessage.get("timestamp").isBlank()) {
-            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + reschoolAsset.getName() + "'; No timestamp, message: '" + message + "'");
+            LOG.info("Agent='" + agent.getName() + "'; Meter Asset='" + ourgridMeterAsset.getName() + "'; No timestamp, message: '" + message + "'");
         }
 
-        sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.TIMESTAMP.getName(), parsedMessage.get("timestamp"), timerService.getCurrentTimeMillis()));
+        sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.TIMESTAMP.getName(), parsedMessage.get("timestamp"), timerService.getCurrentTimeMillis()));
 
-        wifiRssi.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.WIFI_SIGNAL.getName(), value, timerService.getCurrentTimeMillis())));
-        energyImported.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.ENERGY_IMPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
-        energyExported.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.ENERGY_EXPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
-        energyNet.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.ENERGY_NET_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
-        powerDelivered.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.POWER_IMPORT.getName(), value, timerService.getCurrentTimeMillis())));
-        powerReturned.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.POWER_EXPORT.getName(), value, timerService.getCurrentTimeMillis())));
-        power.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.POWER.getName(), value, timerService.getCurrentTimeMillis())));
-        gasDelivered.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, ReschoolMeterAsset.GAS_IMPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
+        wifiRssi.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.WIFI_SIGNAL.getName(), value, timerService.getCurrentTimeMillis())));
+        energyImported.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.ENERGY_IMPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
+        energyExported.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.ENERGY_EXPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
+        energyNet.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.ENERGY_NET_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
+        powerDelivered.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.POWER_IMPORT.getName(), value, timerService.getCurrentTimeMillis())));
+        powerReturned.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.POWER_EXPORT.getName(), value, timerService.getCurrentTimeMillis())));
+        power.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.POWER.getName(), value, timerService.getCurrentTimeMillis())));
+        gasDelivered.ifPresent(value -> sendAttributeEvent(new AttributeEvent(assetId, OurgridMeterAsset.GAS_IMPORT_TOTAL.getName(), value, timerService.getCurrentTimeMillis())));
 
         activeEarneDevices.put(parsedMessage.get("deviceId"), timerService.getCurrentTimeMillis());
     }
 
     public HashMap<String, String> parseMessage(String message) {
-//        System.out.println("message:\n" + message);
+        System.out.println("message:\n" + message);
         HashMap<String, String> map = new HashMap<>();
 
         try {
@@ -531,7 +523,7 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
         activeEarneDevices.entrySet().removeIf(entry -> timerService.getCurrentTimeMillis() - entry.getValue() > activePeriodMillis);
 
         if (activeEarneDevices.size() != activeEarneDevicesSizePrevious) {
-            sendAttributeEvent(new AttributeEvent(agent.getId(), ReschoolAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), activeEarneDevices.size(), timerService.getCurrentTimeMillis()));
+            sendAttributeEvent(new AttributeEvent(agent.getId(), EarneAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), activeEarneDevices.size(), timerService.getCurrentTimeMillis()));
         }
 
         if (activeEarneDevices.size() == 0 && (timerService.getCurrentTimeMillis() - connectionStartTime) > activePeriodMillis) {
@@ -545,6 +537,6 @@ public class ReschoolProtocol extends AbstractProtocol<ReschoolAgent, DefaultAge
     private void disconnectActiveDevices() {
         activeEarneDevices.clear();
         activeEarneDevicesSizePrevious = 0;
-        sendAttributeEvent(new AttributeEvent(agent.getId(), ReschoolAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), null, timerService.getCurrentTimeMillis()));
+        sendAttributeEvent(new AttributeEvent(agent.getId(), EarneAgent.NUMBER_OF_ACTIVE_DEVICES.getName(), null, timerService.getCurrentTimeMillis()));
     }
 }

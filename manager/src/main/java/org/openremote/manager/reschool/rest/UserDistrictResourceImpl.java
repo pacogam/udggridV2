@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.ReschoolDistrictAsset;
+import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -50,7 +50,7 @@ public class UserDistrictResourceImpl extends ManagerWebResource implements User
         Asset<?> asset = assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ReschoolDistrictAsset.class)
+                .types(OurgridMeterAsset.class)
                 .names(details.assetName)
         );
         if (asset == null) {
@@ -101,7 +101,7 @@ public class UserDistrictResourceImpl extends ManagerWebResource implements User
         return assetStorageService.findAll(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(realm))
-                .types(ReschoolDistrictAsset.class)
+                .types(OurgridMeterAsset.class)
                 .ids(assetIds)
         );
     }

@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.reschool.OurGridPeaksAsset;
+import org.openremote.agent.custom.ourgrid.OurgridPeaksAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -50,7 +50,7 @@ public class UserPeakPointsResourceImpl extends ManagerWebResource implements Us
         Asset<?> asset = assetStorageService.find(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurGridPeaksAsset.class)
+                .types(OurgridPeaksAsset.class)
                 .ids(details.assetId)
         );
         if (asset == null) {
@@ -101,7 +101,7 @@ public class UserPeakPointsResourceImpl extends ManagerWebResource implements Us
         return assetStorageService.findAll(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(realm))
-                .types(OurGridPeaksAsset.class)
+                .types(OurgridPeaksAsset.class)
                 .ids(assetIds)
         );
     }

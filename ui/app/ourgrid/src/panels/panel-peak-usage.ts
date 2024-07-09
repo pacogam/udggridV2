@@ -5,7 +5,7 @@ import {OgDataPanel} from '../components/og-data-panel';
 import {AssetModelUtil} from '@openremote/model';
 import {Util} from '@openremote/core';
 import {i18next} from '@openremote/or-translate';
-import {ReschoolMeterAsset} from '../util/util';
+import {OurgridMeterAsset} from '../util/util';
 import { until } from 'lit/directives/until.js';
 
 const styling = css`
@@ -33,7 +33,7 @@ export class PanelPeakUsage extends OgDataPanel {
         `;
     }
 
-    protected async getSummaryTemplate(meterAsset?: ReschoolMeterAsset): Promise<TemplateResult> {
+    protected async getSummaryTemplate(meterAsset?: OurgridMeterAsset): Promise<TemplateResult> {
         return html`
             <div>
                 <span class="text-primary">

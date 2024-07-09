@@ -257,7 +257,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected async fetchUserAsset(userId: string, delay?: number): Promise<Asset> {
         if(!this.userAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
-                types: ["ReschoolMeterAsset"],
+                types: ["OurgridMeterAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
@@ -336,7 +336,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected async fetchDistrictAsset(userId: string, delay = true): Promise<Asset> {
         if(!this.districtAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
-                types: ["ReschoolDistrictAsset"],
+                types: ["OurgridDistrictAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {

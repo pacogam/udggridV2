@@ -208,7 +208,7 @@ export class Page1Setup extends OgOnboardingPage {
         try {
             const asset = (await manager.rest.api.AssetResource.queryAssets({
                 realm: {name: manager.displayRealm},
-                types: ['ReschoolMeterAsset']
+                types: ['OurgridMeterAsset']
             })).data[0];
             if (asset) {
                 this._store.dispatch(setUserAsset(asset));
