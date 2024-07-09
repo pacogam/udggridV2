@@ -125,15 +125,15 @@ public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
             new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 366)
     ).withUnits(UNITS_WATT);
 
-    private enum ChallengePowerLimitValueType {
+    public enum ChallengePowerLimitMeterValueType {
         manual,
         constant,
         ladder
     }
 
-    private static final ValueDescriptor<OurgridMeterAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitValueType", OurgridMeterAsset.ChallengePowerLimitValueType.class);
+    public static final ValueDescriptor<OurgridMeterAsset.ChallengePowerLimitMeterValueType> CHALLENGE_POWER_LIMIT_METER_VALUE_TYPE = new ValueDescriptor<>("ChallengePowerLimitMeterValueType", OurgridMeterAsset.ChallengePowerLimitMeterValueType.class);
 
-    public static final AttributeDescriptor<OurgridMeterAsset.ChallengePowerLimitValueType> CHALLENGE_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengePowerLimitMethod", CHALLENGE_POWER_LIMIT_VALUE_TYPE,
+    public static final AttributeDescriptor<OurgridMeterAsset.ChallengePowerLimitMeterValueType> CHALLENGE_POWER_LIMIT_METHOD = new AttributeDescriptor<>("challengePowerLimitMethod", CHALLENGE_POWER_LIMIT_METER_VALUE_TYPE,
             new MetaItem<>(MetaItemType.LABEL, "  Challenge power limit method"),
             new MetaItem<>(MetaItemType.RULE_STATE)
     );
