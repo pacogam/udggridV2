@@ -3,8 +3,8 @@ package ourgrid.rules
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset
-import org.openremote.agent.custom.ourgrid.OurgridPeaksAsset
 import org.openremote.agent.custom.ourgrid.OurgridMeterAsset
+import org.openremote.agent.custom.ourgrid.OurgridPeaksAsset
 import org.openremote.container.persistence.PersistenceService
 import org.openremote.manager.rules.RulesBuilder
 import org.openremote.manager.rules.RulesFacts
@@ -16,14 +16,9 @@ import org.openremote.model.rules.Users
 import org.openremote.model.util.ValueUtil
 import org.postgresql.util.PGobject
 
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLException
-import java.sql.Statement
-import java.sql.Timestamp
+import java.sql.*
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.logging.Logger
 
 Logger LOG = binding.LOG
@@ -40,11 +35,12 @@ String researchAsset1Id = "uniqueId4"
 String challengesAssetId = "uniqueId5"
 String peaksAssetId = "uniqueId6"
 
-// Put the attribute names that need to be summed here:
+// Put the attribute names for summation here (or leave empty to include all child asset attribute names with 'Rule state'):
 String[] attributeNames = ["power", "energyImportTotal", "energyExportTotal", "energyNetTotal", "gasImportTotal", "gasFlowRate"]
 
 
 // Time triggers for rules
+long previousMillisRule1 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
 long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis() % (5 * 60 * 1000) + (5 * 60 * 1000)
 long previousMillisRule3 = System.currentTimeMillis() - System.currentTimeMillis() % (60 * 1000) + (60 * 1000)
 
@@ -69,233 +65,227 @@ boolean turnOnPeakPointsPrevious = false
 
 rules.add()
         .priority(1)
-        .name("Sum all data from children to parent meter rule")
+        .name("Group summation rule")
         .when({ facts ->
+            boolean triggerRule = false
+            long currentMillis = facts.clock.currentTimeMillis
+
+            // Trigger rule every 1 minute = 60000 ms
+            if (currentMillis > previousMillisRule1) {
+                previousMillisRule1 += 60000
+                triggerRule = true
+            } else {
+                return false
+            }
 
             // Check if parent asset ID is valid
-            def parentAsset = facts.matchFirstAssetState(
-                    new AssetQuery().ids(parentMeterAssetId))
+            Optional<AttributeInfo> parent = facts.matchFirstAssetState(new AssetQuery().ids(parentMeterAssetId))
 
-            if (parentAsset.isEmpty()) {
+            if (parent.isEmpty()) {
                 LOG.warning("No Parent Asset found with ID: '" + parentMeterAssetId + "'; Check Parent Asset ID and if the rule state configuration is added to the attribute")
                 return false
             }
 
             // Find attribute changes in group
-            def changes = facts.matchAssetState(
-                    new AssetQuery()
-                            .parents(parentMeterAssetId)
-                            .types(OurgridMeterAsset)
-                            .attributeNames(attributeNames)
-            ).filter { state ->
-                def changed = false
+            List<AttributeInfo> changes = facts
+                    .matchAssetState(
+                            new AssetQuery()
+                                    .parents(parentMeterAssetId)
+                                    .types(OurgridMeterAsset)
+                                    .attributeNames(attributeNames)
+                    )
+                    .filter { attributeInfo ->
+                        boolean timestampChanged = false
 
-                // Get previous state from facts
-                def previous = facts.matchFirst(state.id + state.name) as Optional<AttributeInfo>
+                        // Get previous attribute state from facts
+                        Optional<AttributeInfo> previous = facts.matchFirst(attributeInfo.id + attributeInfo.name)
 
-                // State has been updated (value may be the same but still push this to the children)
-                if (state.timestamp > previous.map { it.timestamp }.orElse(0)) {
-                    changed = true
-                }
+                        // Check if attribute timestamp has been updated (attribute value can be the same)
+                        if (attributeInfo.timestamp > previous.map { it.timestamp }.orElse(0)) {
+                            timestampChanged = true
+                        }
+                        return timestampChanged
+                    }
+                    .toList()
 
-                return changed
-            }.toList()
-
-            // Get desired attribute names. (You can disable attribute name filtering by commenting out the .findAll line)
+            // Get attribute names of changes
             String[] changesAttributeNames = changes
                     .collect { it.name }
-                    .findAll { attrName -> attrName in attributeNames }
                     .unique()
 
-            // Check if there are any power attribute changes
-            if (!changesAttributeNames.any { it == "power" }) {
-                return false
-            }
-
-            // Find all relevant children's attributes
+            // Find all relevant children attributes
             List<AttributeInfo> children = Collections.synchronizedList(new ArrayList<>())
 
-            if (changesAttributeNames.length > 0) {
+            if (attributeNames.length > 0) {
                 children = facts.matchAssetState(
                         new AssetQuery()
                                 .parents(parentMeterAssetId)
-                                .attributeNames(changesAttributeNames)
+                                .attributeNames(attributeNames)
                 ).toList()
             }
 
-            // Bind assetStates for the then trigger
+            // Bind attribute info for the then trigger
+            facts.bind("changesAttributeNames", changesAttributeNames)
+
             if (!changes.isEmpty()) {
                 facts.bind("changes", changes)
-
-                if (!children.isEmpty()) {
-                    facts.bind("children", children)
-                }
             }
 
-            // Trigger rule if there are changes to process
-            return !changes.isEmpty()
+            if (!children.isEmpty()) {
+                facts.bind("children", children)
+            }
+
+            // Trigger rule
+            return triggerRule
         })
         .then({ facts ->
+            String[] changesAttributeNames = facts.bound("changesAttributeNames")
             def changes = facts.bound("changes") as List<AttributeInfo>
             def children = facts.bound("children") as List<AttributeInfo>
 
-            // Create fact for state of attribute
-            changes.forEach { state ->
-                facts.put(state.id + state.name, state as Object)
+            // Create fact for each attribute change
+            if (changes != null) {
+                changes.forEach { attributeInfo -> facts.put(attributeInfo.id + attributeInfo.name, attributeInfo as Object) }
             }
 
-            // Get current timestamp of changes
-            long currentTimestamp = changes.timestamp.max()
+            // Calculate number of devices
+            def numberOfDevices = children
+                    .findAll { it.name == "power" }
+                    .size()
 
-            if (children != null) {
-                // Calculate number of devices
-                def numberOfDevices = children
-                        .findAll { it.name == "power" }
-                        .size()
+            // Get previous number of devices from district parent
+            def numberOfDevicesPrevious = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("numberOfDevices")
+            ).flatMap { it.value }.orElse(null)
 
-                // Get previous number of devices from district parent
-                def numberOfDevicesPrevious = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("numberOfDevices")
-                ).flatMap { it.value }.orElse(null)
+            // Update district parent - number of devices attribute
+            if (numberOfDevices != numberOfDevicesPrevious) {
+                assets.dispatch(parentDistrictAssetId, "numberOfDevices", numberOfDevices)
+            }
 
-                // Update district parent - number of devices attribute
-                if (numberOfDevices != numberOfDevicesPrevious) {
-                    assets.dispatch(parentDistrictAssetId, "numberOfDevices", numberOfDevices)
+            // Get active period
+            def activePeriodMinutes = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("activePeriod")
+            ).flatMap { it.value }.orElse(null)
+
+            if (activePeriodMinutes == null) {
+                activePeriodMinutes = 5
+                assets.dispatch(parentDistrictAssetId, "activePeriod", activePeriodMinutes)
+            }
+
+            long activePeriodMillis = activePeriodMinutes * 60000
+            long currentTimestamp = facts.clock.currentTimeMillis
+
+            // Find all active children
+            def childrenActive = children
+                    .findAll { (currentTimestamp - it.timestamp) < activePeriodMillis }
+
+            // Calculate number of active power readings
+            def numberOfActivePowerReadings = childrenActive
+                    .findAll { it.name == "power" }
+                    .findAll { it.value.isPresent() }
+                    .size()
+
+            // Get previous number of active devices from district parent
+            def numberOfActivePowerReadingsPrevious = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("numberOfActivePowerReadings")
+            ).flatMap { it.value }.orElse(null)
+
+            // Update district parent - number of active devices attribute
+            if (numberOfActivePowerReadings != numberOfActivePowerReadingsPrevious) {
+                assets.dispatch(parentDistrictAssetId, "numberOfActivePowerReadings", numberOfActivePowerReadings)
+            }
+
+            // Stop here when group is empty
+            if (children == null) {
+                return
+            }
+
+            Double sumPower = null
+
+            // Sum values per attribute
+            for (attributeName in changesAttributeNames) {
+                List<AttributeInfo> childrenFiltered = children
+
+                // Attributes that need custom processing
+                if (attributeName == "gasFlowRate" || attributeName == "power") {
+                    childrenFiltered = childrenActive
                 }
 
-                // Get active period
-                def activePeriodValue = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("activePeriod")
-                ).flatMap { it.value }.orElse(null)
-
-                long activePeriodMillis = 300000
-
-                if (activePeriodValue == null) {
-                    assets.dispatch(parentDistrictAssetId, "activePeriod", 5)
-                } else {
-                    activePeriodMillis = activePeriodValue * 60000
-                }
-
-                // Find all active children
-                def childrenActive = children
-                        .findAll(state -> (currentTimestamp - state.timestamp) < activePeriodMillis)
-
-                // Calculate number of active power readings
-                def numberOfActivePowerReadings = childrenActive
-                        .findAll { it.name == "power" }
-                        .findAll { it.value.isPresent() }
-                        .size()
-
-                // Get previous number of active devices from district parent
-                def numberOfActivePowerReadingsPrevious = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("numberOfActivePowerReadings")
-                ).flatMap { it.value }.orElse(null)
-
-                // Update district parent - number of active devices attribute
-                if (numberOfActivePowerReadings != numberOfActivePowerReadingsPrevious) {
-                    assets.dispatch(parentDistrictAssetId, "numberOfActivePowerReadings", numberOfActivePowerReadings)
-                }
-
-
-                // Sum values per attribute
-                for (attributeName in attributeNames) {
-                    // Skip attributes that need custom processing
-                    if (attributeName == "power" || attributeName == "gasFlowRate") {
-                        continue
-                    }
-
-                    def value = children
-                            .findAll { it.name == attributeName }
-                            .findAll { it.value.isPresent() }
-                            .collect { it.value.get() }
-                            .sum()
-
-                    // Update parent
-                    if (value != null) {
-                        assets.dispatch(parentMeterAssetId, attributeName, value)
-                    }
-                }
-
-                // Sum attribute values from active children and update parent
-                def gasFlowRateValue = childrenActive
-                        .findAll { it.name == "gasFlowRate" }
+                def sum = childrenFiltered
+                        .findAll { it.name == attributeName }
                         .findAll { it.value.isPresent() }
                         .collect { it.value.get() }
                         .sum()
 
-                if (gasFlowRateValue != null) {
-                    assets.dispatch(parentMeterAssetId, "gasFlowRate", gasFlowRateValue)
+                // Update parent
+                if (sum != null) {
+                    if (attributeName == "power") {
+                        sumPower = (sum as Double).round()
+                        assets.dispatch(parentMeterAssetId, attributeName, sumPower)
+                    } else {
+                        assets.dispatch(parentMeterAssetId, attributeName, sum)
+                    }
+                }
+            }
+
+            // Get number of households from district parent
+            Integer numberOfHouseholds = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("numberOfHouseholds")
+            ).flatMap { it.value }.orElse(null) as Integer
+
+            // Get previous power correction factor from district parent
+            Double powerCorrectionFactorPrevious = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("powerCorrectionFactor")
+            ).flatMap { it.value }.orElse(null) as Double
+
+            // Get solar power from district parent
+            Double solarPowerDistrict = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("powerSolarDistrict")
+            ).flatMap { it.value }.orElse(null) as Double
+
+            // Get power import max from district parent
+            Double powerImportMax = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("powerImportMax")
+            ).flatMap { it.value }.orElse(null) as Double
+
+            // Update district parent
+            if (sumPower != null && numberOfHouseholds != null && numberOfActivePowerReadings > 0) {
+                Double powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings
+                Double netPowerDistrict = (((powerCorrectionFactor * sumPower) / 1000) as Double).round(3)
+
+                // Update district parent - net power attribute
+                assets.dispatch(parentDistrictAssetId, "powerDistrict", netPowerDistrict)
+
+                // Update district parent - power correction factor attribute
+                if (powerCorrectionFactor != powerCorrectionFactorPrevious) {
+                    assets.dispatch(parentDistrictAssetId, "powerCorrectionFactor", powerCorrectionFactor)
                 }
 
-                def powerValue = childrenActive
-                        .findAll { it.name == "power" }
-                        .findAll { it.value.isPresent() }
-                        .collect { it.value.get() }
-                        .sum()
-
-                if (powerValue != null) {
-                    assets.dispatch(parentMeterAssetId, "power", powerValue)
+                // Update district parent - power consumption attribute
+                if (solarPowerDistrict != null) {
+                    def consumptionPowerDistrict = netPowerDistrict - solarPowerDistrict
+                    assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", consumptionPowerDistrict)
                 }
 
-
-                // Get number of households from district parent
-                def numberOfHouseholds = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("numberOfHouseholds")
-                ).flatMap { it.value }.orElse(null)
-
-                // Get previous power correction factor from district parent
-                def powerCorrectionFactorPrevious = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("powerCorrectionFactor")
-                ).flatMap { it.value }.orElse(null)
-
-                // Get solar power from district parent
-                def solarPowerValue = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("powerSolarDistrict")
-                ).flatMap { it.value }.orElse(null)
-
-                // Get power import max from district parent
-                def powerImportMaxValue = facts.matchFirstAssetState(
-                        new AssetQuery()
-                                .ids(parentDistrictAssetId)
-                                .attributeName("powerImportMax")
-                ).flatMap { it.value }.orElse(null)
-
-                // Update district parent
-                if (powerValue != null && numberOfHouseholds != null && numberOfActivePowerReadings != 0) {
-                    def powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings
-                    def netPowerValue = (powerCorrectionFactor * powerValue) / 1000
-
-                    // Update district parent - net power attribute
-                    assets.dispatch(parentDistrictAssetId, "powerDistrict", netPowerValue)
-
-                    // Update district parent - power correction factor attribute
-                    if (powerCorrectionFactor != powerCorrectionFactorPrevious) {
-                        assets.dispatch(parentDistrictAssetId, "powerCorrectionFactor", powerCorrectionFactor)
-                    }
-
-                    // Update district parent - power consumption attribute
-                    if (solarPowerValue != null) {
-                        def powerConsumptionValue = netPowerValue - solarPowerValue
-                        assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", powerConsumptionValue)
-                    }
-
-                    // Update district parent - power import percentage attribute
-                    if (powerImportMaxValue != null) {
-                        def netPowerDistrictPercentage = netPowerValue / powerImportMaxValue * 100
-                        assets.dispatch(parentDistrictAssetId, "powerImportPercentage", netPowerDistrictPercentage)
-                    }
+                // Update district parent - power import percentage attribute
+                if (powerImportMax != null) {
+                    def netPowerDistrictPercentage = netPowerDistrict / powerImportMax * 100
+                    assets.dispatch(parentDistrictAssetId, "powerImportPercentage", netPowerDistrictPercentage)
                 }
             }
         })
