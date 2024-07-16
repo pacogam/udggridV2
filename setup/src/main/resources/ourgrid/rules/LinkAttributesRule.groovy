@@ -11,21 +11,19 @@ Logger LOG = binding.LOG
 RulesBuilder rules = binding.rules
 Assets assets = binding.assets
 
-// Put the "input power meter name", "input power meter Asset ID" and "output OurGrid meter Asset ID" here:
-def powerMeters = [
-        ["Meter 1", "inputAssetId1", "outputAssetId1"],
-        ["Meter 2", "inputAssetId2", "outputAssetId2"],
-        ["Meter 3", "inputAssetId3", "outputAssetId3"]
+// Put the ["asset name", "attribute name" ,"input asset ID" and "output asset ID"] here:
+def attributes = [
+        ["AssetName1", "attributeName1", "inputAssetId1", "outputAssetId1"],
+        ["AssetName2", "attributeName2", "inputAssetId2", "outputAssetId2"],
+        ["AssetName3", "attributeName3", "inputAssetId3", "outputAssetId3"]
 ]
 
-// Put here if you want to convert power value from kiloWatt to Watt:
-boolean convertKiloWattToWatt = true
-
-def inputAssetIds = powerMeters.collect { it[1] } as String[]
-def inputOutputAssetIdsMap = powerMeters.collectEntries { [(it[1]), it[2]] } as HashMap<String, String>
+def attributeNames = attributes.collect { it[1] }.unique() as String[]
+def inputAssetIds = attributes.collect { it[2] } as String[]
+def inputOutputAssetIdsMap = attributes.collectEntries { [(it[2]), it[3]] } as HashMap<String, String>
 
 rules.add()
-        .name("Power meter to OurGrid meter connection")
+        .name("Link attributes rule")
         .when({ facts ->
 
             // Find attribute changes
@@ -33,7 +31,7 @@ rules.add()
                     .matchAssetState(
                             new AssetQuery()
                                     .ids(inputAssetIds)
-                                    .attributeName("power")
+                                    .attributeNames(attributeNames)
                     )
                     .filter { attributeInfo ->
                         boolean timestampChanged = false
@@ -65,22 +63,13 @@ rules.add()
                 changes.forEach { attributeInfo -> facts.put(attributeInfo.id + attributeInfo.name, attributeInfo as Object) }
             }
 
-            // Collect input Asset ID's and power values from changes
-            def inputAssetIdsValuesMap = changes.collectEntries { [(it.id), it.value.orElse(null)] } as HashMap<String, Double>
+            // Update linked output attributes
+            changes.forEach {
+                String outputAssetId = inputOutputAssetIdsMap[it.id]
+                String attributeName = it.name
+                String value = it.value.orElse(null)
 
-            // Create a new HashMap linking output ID's to the corresponding power values
-            def outputAssetIdsValuesMap = inputAssetIdsValuesMap.collectEntries { inputId, value ->
-                String outputId = inputOutputAssetIdsMap[inputId]
-
-                // Convert power value from kiloWatt to Watt
-                if (value != null & convertKiloWattToWatt) {
-                    value = (1000 * (value as Double)).round()
-                }
-                [(outputId), value]
-            } as HashMap<String, Double>
-
-            // Update OurGrid Meter: power attribute
-            outputAssetIdsValuesMap.forEach { outputId, value ->
-                assets.dispatch(outputId, "power", value)
+                // Update attribute
+                assets.dispatch(outputAssetId, attributeName, value)
             }
         })
