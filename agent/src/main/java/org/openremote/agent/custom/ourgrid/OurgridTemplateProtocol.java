@@ -257,7 +257,7 @@ public class OurgridTemplateProtocol extends AbstractProtocol<OurgridTemplateAge
                 "    - Total points year prediction manual\n" +
                 "  Solar Production Asset:\n" +
                 "    - Power export max (kW)\n" +
-                "    - location\n" +
+                "    - Location\n" +
                 "3) Adjust the default input variables to your specific district requirements\n" +
                 "4) Connect power meters manually or with the Earn-E Agent\n" +
                 "5) Turn on challenges and peak points\n" +
