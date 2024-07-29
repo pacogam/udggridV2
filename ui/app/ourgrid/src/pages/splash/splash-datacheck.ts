@@ -214,11 +214,20 @@ export class SplashDatacheck extends OgSplashPage {
                 await manager.rest.api.UserRolesResource.verifyUserRoles();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }
             } catch (e) {
-                // If 'verify roles request' responds with FORBIDDEN,
-                // correct the user roles, and wait 500ms to let the manager/keycloak process possible changes.
-                if(isAxiosError(e) && e.response.status === 403) {
-                    await manager.rest.api.UserRolesResource.correctUserRoles();
-                    await new Promise(resolve => setTimeout(resolve, 250));
+                if(isAxiosError(e)) {
+
+                    // If 'verify roles request' responds with FORBIDDEN,
+                    // correct the user roles, and wait 500ms to let the manager/keycloak process possible changes.
+                    if(e.response.status === 403) {
+                        await manager.rest.api.UserRolesResource.correctUserRoles();
+                        await new Promise(resolve => setTimeout(resolve, 250));
+
+                    // If responding with 400, the user does not have access to OurGrid. (for example due to being in master realm)
+                    } else if(e.response.status === 400) {
+                        this.statusText = i18next.t("error.noOurGridAccess");
+                        throw e;
+                    }
+
                 } else {
                     this.statusText = i18next.t("error.unknown");
                     throw e;

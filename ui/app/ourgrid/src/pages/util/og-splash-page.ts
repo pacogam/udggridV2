@@ -97,8 +97,6 @@ export abstract class OgSplashPage extends OgPage<GridAppStateKeyed> {
 
     abstract stateChanged(state: GridAppStateKeyed): void;
 
-    abstract getLoadingPromise(): Promise<void>;
-
     abstract getActionsTemplate(): TemplateResult;
 
     static get styles() {
@@ -135,7 +133,7 @@ export abstract class OgSplashPage extends OgPage<GridAppStateKeyed> {
 
                                 <!-- Other content such as loading indicator, status text, and retry button -->
                                 <div id="loading-content">
-                                    ${when(this.status === SplashStatus.LOADING, () => html`
+                                    ${when(this.status === SplashStatus.LOADING || this.status === SplashStatus.SUCCESS, () => html`
                                         <og-loading id="loading-indicator" .dark="${this.dark}"></og-loading>
                                     `)}
                                     ${when(this.statusText, () => html`

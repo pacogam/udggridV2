@@ -5,11 +5,12 @@ import manager, {DefaultColor2, DefaultColor3, DefaultColor4} from '@openremote/
 import {updateMetadata} from 'pwa-helpers/metadata';
 import {when} from 'lit/directives/when.js';
 import {guard} from 'lit/directives/guard.js';
+import {repeat} from 'lit/directives/repeat.js';
 import '../components/og-header';
 import {PageMenu, pageMenuProvider} from '../pages/page-menu';
 import {i18next} from '@openremote/or-translate';
 import {showLanguageDialog} from '../components/og-dialog';
-import {NeedsOnboardingError, NoAssetLinkedError, RequiresPrivacyConfirmationError, SplashDatacheck, splashDataCheckProvider} from '../pages/splash/splash-datacheck';
+import {NeedsOnboardingError, NoAssetLinkedError, RequiresPrivacyConfirmationError, splashDataCheckProvider} from '../pages/splash/splash-datacheck';
 import {OgPage, OgPageProvider} from '../pages/util/og-page';
 import {attributeEventReceived, challengeAssetIdSelector, districtAssetIdSelector, GridAppStateKeyed, realmSelector, setLanguage, userAssetIdSelector} from './og-state';
 import {Asset} from '@openremote/model';
@@ -55,6 +56,10 @@ const styling = css`
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+    
+  #main-container:has(page-splash-datacheck) {
+      overflow: hidden;
+  }
 
   main > * {
     /*display: flex;*/
@@ -94,8 +99,8 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     @state()
     protected _loading = false;
 
-    @state() // the page content that is being displayed (active)
-    protected _activePage: OgPage<any>;
+    @state() // the page content that should be displayed (first item in the array is active)
+    protected _activePages: OgPage<any>[];
 
     @state()
     protected _dark = false;
@@ -226,8 +231,8 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         }
 
         // Copied over code from or-app, since using super.updated() will break page loading.
-        if (changedProps.has('_activePage') && this._activePage) {
-            this.updateWindowTitle(this._activePage);
+        if (changedProps.has('_activePage') && this._activePages?.[0]) {
+            this.updateWindowTitle(this._activePages[0]);
         }
     }
 
@@ -261,9 +266,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
                 <main role="main" class="main-content d-none">
 
                     <div id="main-container">
-                        ${guard([this._activePage], () => html`
-                            ${this._activePage}
-                        `)}
+                        ${repeat(this._activePages, (item) => item.tagName, (item) => item)}
                     </div>
 
                 </main>
@@ -276,7 +279,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     // Method that switches pages using enter/exit animations.
     // Checks whether a loading check should be in place, and waits for it to finish.
     protected async switchPage(provider: OgPageProvider<any>, animate?: boolean) {
-        const currentPage = this._activePage;
+        const currentPage = this._activePages?.[0];
         const newPage = provider.pageCreator();
         if(animate === undefined) {
             animate = !this._isMenuActive;
@@ -288,15 +291,17 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
             await currentPage.doExitAnimation();
         }
 
+        this._loading = true;
+
         // Insert loading animation if necessary
+        let loadingPage: OgPage<any> | undefined;
         if(!provider.skipDataCheck) {
-            const loadingPage = splashDataCheckProvider(this._store).pageCreator();
-            this._activePage = loadingPage;
+            loadingPage = splashDataCheckProvider(this._store).pageCreator();
+            this._setActivePage(loadingPage, true);
             this._loading = true;
             try {
                 if(animate) await loadingPage.doEnterAnimation();
-                await (loadingPage as SplashDatacheck).getLoadingPromise(); // wait for loading to finish
-                if(animate) await loadingPage.doExitAnimation();
+                await loadingPage.getLoadingPromise(); // wait for loading to finish
             } catch (e) {
                 if(e instanceof NoAssetLinkedError && this._page !== 'setup') {
                     console.log('No asset found, redirecting to setup...');
@@ -309,14 +314,36 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
                     router.navigate('confirm-privacy');
                     return;
                 }
-            } finally {
-                this._loading = false;
             }
         }
 
+        // Append new page as an HTML child
+        this._setActivePage(newPage);
+
+        // Waiting until the new page is properly loaded...
+        await newPage.getLoadingPromise(currentPage?.name);
+
+        // Play exit animation of the loading page
+        if(loadingPage && animate) {
+            await loadingPage.doExitAnimation();
+        }
+
+        // Remove loading page, and force new page
+        this._setActivePage(newPage, true);
+        this._loading = false;
+
         // Enter new page
-        this._activePage = newPage;
         if(animate) await newPage.doEnterAnimation();
+    }
+
+    // Sets or appends a new page (this can be a regular page, or a splash loader)
+    protected _setActivePage(page: OgPage<any>, force = false) {
+        if(force) {
+            this._activePages = [page];
+        } else {
+            this._activePages.push(page);
+            this.requestUpdate('_activePages');
+        }
     }
 
     protected getPageProvider(page: string): OgPageProvider<any> | undefined {

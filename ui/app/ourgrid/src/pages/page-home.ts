@@ -73,13 +73,13 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         return super.stateChanged(state);
     }
 
-    /*public connectedCallback() {
-        super.connectedCallback();
-        setInterval(() => {
-            console.log("Changing temp variable");
-            this.temp = !this.temp;
-        }, 30000);
-    }*/
+    async getLoadingPromise(prev?: string): Promise<void> {
+        if(!prev) {
+            // If new to the home page, force wait 1,5 seconds, so all data can properly load.
+            await new Promise((r) => setTimeout(r, 1500));
+        }
+        return super.getLoadingPromise();
+    }
 
     protected willUpdate(changedProps: PropertyValues) {
         if(changedProps.has('meterAsset') && this.meterAsset) {

@@ -36,6 +36,7 @@
     "percentOfPointsEarned": "% van de punten verdiend"
   },
   "error": {
+    "noOurGridAccess": "Je hebt geen toegang tot OurGrid.",
     "districtAssetDataFailed": "Kon data van de wijk niet ophalen.",
     "districtAssetDataPermission": "Je hebt geen toestemming on de data van de wijk in te zien.",
     "historicalAssetData": "Fout tijdens het ophalen van sensordata uit het verleden.",

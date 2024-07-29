@@ -33,6 +33,10 @@ export abstract class OgPage<S extends AppStateKeyed> extends Page<S> {
 
     abstract get name(): string;
 
+    async getLoadingPromise(prev?: string): Promise<void> {
+        return;
+    };
+
     static get styles(): any[] {
         return [getAppStyle(), styling];
     }
