@@ -1,0 +1,161 @@
+:root {
+    --app-primary-color: #F44F1A;
+    --app-secondary-color: #F9F5F2;
+    --app-background-color: transparent;
+    --input-main-color: #4F2D39;
+    --input-background-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--app-background-color);
+}
+
+#outer-wrapper {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+#wrapper {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#header-wrapper {
+    display: inline-block;
+}
+
+#header-wrapper > div {
+    overflow: hidden;
+    display: inline-block;
+}
+
+#logo {
+    pointer-events: none;
+    margin-right: 0.3em;
+    float: left;
+}
+
+#logo svg {
+    width: 4em;
+    height: 4em;
+}
+
+#header {
+    font-weight: bold;
+    margin: 0;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#sub-header {
+    margin-top: 0.3em;
+    display: inline-block;
+}
+
+i.material-icons {
+    vertical-align: middle;
+    margin-right: 0.2em;
+}
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(MaterialIcons-Regular.eot); /* For IE6-8 */
+    src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(MaterialIcons-Regular.woff2) format('woff2'),
+    url(MaterialIcons-Regular.woff) format('woff'),
+    url(MaterialIcons-Regular.ttf) format('truetype');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+/* NAV RELATED CSS */
+
+header, main, footer {
+    padding-left: 300px;
+}
+
+@media only screen and (max-width : 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+}
+
+.input-field:has(input:disabled) {
+    background-color: rgba(79, 45, 57, 0.02) !important;
+}
+
+.input-field:not(#remember-field) {
+    background: rgba(79, 45, 57, 0.05);
+    border-radius: 4px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-field {
+    position: relative;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.input-field>label {
+    -webkit-transform: translateY(-18px) scale(0.8) !important;
+    transform: translateY(-18px) scale(0.8) !important;
+}
+
+.input-field > label.active {
+    color: var(--input-main-color) !important;
+}
+
+.input-field > input {
+    background-color: var(--input-background-color) !important;
+    border-bottom: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    margin: 4px 0 !important;
+    color: var(--input-main-color) !important;
+}
+
+.btn {
+    width: 100%;
+    border-radius: 28px;
+    background-color: var(--app-primary-color) !important;
+}
+
+[type="checkbox"]:checked + span:not(.lever):before {
+    border-right: 2px solid var(--app-primary-color) !important;
+    border-bottom: 2px solid var(--app-primary-color) !important;
+}
+
+a.top-nav.sidenav-trigger {
+    color: var(--app-primary-color) !important;
+}
