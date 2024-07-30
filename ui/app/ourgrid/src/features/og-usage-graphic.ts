@@ -135,11 +135,10 @@ export class OgUsageGraphic extends LitElement {
         const videoStyling = styleMap({
             'animation': animate ? 'breathe-opacity 4000ms infinite' : undefined,
             '-webkit-animation': animate ? 'breathe-opacity 4000ms infinite' : undefined,
-            'object-fit': fill ? 'cover' : 'unset',
-            'height': fill ? '100%' : 'auto',
+            'object-fit': fill ? 'cover' : undefined,
+            'height': fill ? '100%' : undefined,
             'position': animate ? 'absolute' : undefined,
             'left': animate ? '0' : undefined,
-            'width': '100%'
         });
 
         // Switching video sources in HTML is apparently really tricky.

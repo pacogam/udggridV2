@@ -36,6 +36,7 @@
     "percentOfPointsEarned": "% of points earned"
   },
   "error": {
+    "noOurGridAccess": "You do not have access to OurGrid.",
     "districtAssetDataFailed": "Could not retrieve data from the district.",
     "districtAssetDataPermission": "You do not have permission to read data from the district.",
     "historicalAssetData": "Error when receiving historical sensor data.",

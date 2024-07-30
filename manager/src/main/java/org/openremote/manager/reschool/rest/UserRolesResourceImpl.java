@@ -37,6 +37,12 @@ public class UserRolesResourceImpl extends ManagerWebResource implements UserRol
         if (!isAuthenticated()) {
             throw new WebApplicationException(UNAUTHORIZED);
         }
+        if(getAuthenticatedRealmName().equals(Constants.MASTER_REALM)) {
+            throw new WebApplicationException(BAD_REQUEST);
+        }
+        if(isSuperUser()) {
+            throw new WebApplicationException(BAD_REQUEST);
+        }
 
         // Get state of the READ_ASSETS and RESTRICTED_USER roles
         Role[] userRealmRoles = identityService.getIdentityProvider().getUserRealmRoles(getAuthenticatedRealmName(), getUserId());
