@@ -73,6 +73,11 @@ public class CustomKeycloakSetup extends AbstractKeycloakSetup {
         realm.setEmailTheme("ourgrid");
         realm.setEnabled(true);
         realm = keycloakProvider.createRealm(realm);
+
+        // After creation, update "login with email" config
+        realm.setLoginWithEmail(true);
+        keycloakProvider.updateRealm(realm);
+
         return realm;
     }
 }
