@@ -21,7 +21,6 @@ package org.openremote.manager.setup.custom;
 
 import org.openremote.manager.setup.AbstractKeycloakSetup;
 import org.openremote.model.Container;
-import org.openremote.model.security.ClientRole;
 import org.openremote.model.security.Realm;
 import org.openremote.model.util.TextUtil;
 
@@ -32,6 +31,7 @@ public class CustomKeycloakSetup extends AbstractKeycloakSetup {
 
     public static final String CUSTOM_USER_PASSWORD = "CUSTOM_USER_PASSWORD";
     public static final String CUSTOM_USER_PASSWORD_DEFAULT = "custom";
+
     protected final String customUserPassword;
 
     public CustomKeycloakSetup(Container container, boolean isProduction) {
@@ -48,19 +48,31 @@ public class CustomKeycloakSetup extends AbstractKeycloakSetup {
     public void onStart() throws Exception {
 
         Realm realmMaster = keycloakProvider.getRealm(MASTER_REALM);
-        realmMaster.setAccountTheme("reschool");
-        realmMaster.setLoginTheme("reschool");
-        realmMaster.setEmailTheme("reschool");
+        realmMaster.setAccountTheme("openremote");
+        realmMaster.setLoginTheme("openremote");
+        realmMaster.setEmailTheme("openremote");
         keycloakProvider.updateRealm(realmMaster);
 
         // Create custom realm
         Realm realmAmsterdam = createRealm("amsterdam", "Amsterdam", true);
-        realmAmsterdam.setAccountTheme("amsterdam");
-        realmAmsterdam.setLoginTheme("amsterdam");
-        realmAmsterdam.setEmailTheme("amsterdam");
-        realmAmsterdam.setRegistrationAllowed(true);
-        realmAmsterdam.setResetPasswordAllowed(true);
         keycloakProvider.updateRealm(realmAmsterdam);
 
+    }
+
+    protected Realm createRealm(String realmName, String displayName, boolean rememberMe) {
+        Realm realm = new Realm();
+        realm.setName(realmName);
+        realm.setDisplayName(displayName);
+        realm.setRememberMe(rememberMe);
+        realm.setRegistrationAllowed(true);
+        realm.setDuplicateEmailsAllowed(false);
+        realm.setRegistrationEmailAsUsername(true);
+        realm.setResetPasswordAllowed(true);
+        realm.setAccountTheme("ourgrid");
+        realm.setLoginTheme("ourgrid");
+        realm.setEmailTheme("ourgrid");
+        realm.setEnabled(true);
+        realm = keycloakProvider.createRealm(realm);
+        return realm;
     }
 }
