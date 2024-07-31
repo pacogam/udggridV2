@@ -39,7 +39,7 @@ const MINIMUM_WAIT = 1500; // 1.5 seconds of wait
 export class SplashDatacheck extends OgSplashPage {
 
     // Static asset name to use when fetching district asset
-    protected RESCHOOL_DISTRICT_NAME = "Sporenburg";
+    /*protected RESCHOOL_DISTRICT_NAME = "Sporenburg";*/
 
     // Objects used during check
     protected user?: User;
@@ -298,7 +298,7 @@ export class SplashDatacheck extends OgSplashPage {
                 // If 'verify district request' responds with NOT_FOUND, no district is linked.
                 // So, link the district, and wait 500ms to let the manager/keycloak process possible changes.
                 if(isAxiosError(e) && e.response.status === 404) {
-                    await this.linkDistrict(this.RESCHOOL_DISTRICT_NAME);
+                    await this.linkDistrict(/*this.RESCHOOL_DISTRICT_NAME*/);
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
                     this.statusText = i18next.t("error.unknown");
@@ -308,7 +308,7 @@ export class SplashDatacheck extends OgSplashPage {
         }
     }
 
-    protected async linkDistrict(districtName: string) {
+    protected async linkDistrict(districtName?: string) {
         try {
             await manager.rest.api.UserDistrictResource.linkDistrict({ assetName: districtName });
         } catch (e) {
@@ -445,7 +445,7 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.challengeAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [challengeId],
-                types: ["OurGridChallengesAsset"],
+                types: ["OurgridChallengesAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
@@ -531,7 +531,7 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.peakPointsAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [peakPointsId],
-                types: ["OurGridPeaksAsset"],
+                types: ["OurgridPeaksAsset"],
                 userIds: [userId]
             })).data;
             if(assets === undefined || assets.length === 0) {
