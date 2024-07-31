@@ -217,7 +217,8 @@ export class Page1Setup extends OgOnboardingPage {
             }
 
         } catch (e) {
-            throw new Error(i18next.t('error.setupDeviceServerError'));
+            window.location.hash = "";
+            window.location.reload();
         }
 
         // Upload characteristics using the fetched asset

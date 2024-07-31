@@ -2,7 +2,7 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
+import org.openremote.agent.custom.ourgrid.OurgridDistrictAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -13,6 +13,7 @@ import org.openremote.model.http.RequestParams;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.query.filter.RealmPredicate;
 import org.openremote.model.reschool.UserDistrictResource;
+import org.openremote.model.util.TextUtil;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,12 +48,16 @@ public class UserDistrictResourceImpl extends ManagerWebResource implements User
         }
 
         // If the asset name exists within the realm
-        Asset<?> asset = assetStorageService.find(new AssetQuery()
+        AssetQuery query = new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(OurgridMeterAsset.class)
-                .names(details.assetName)
-        );
+                .types(OurgridDistrictAsset.class);
+        if(!TextUtil.isNullOrEmpty(details.assetName)) {
+            query.names(details.assetName);
+        }
+        query.limit = 1;
+
+        Asset<?> asset = assetStorageService.find(query);
         if (asset == null) {
             throw new WebApplicationException("District could not be found", NOT_FOUND);
         }
@@ -91,7 +96,7 @@ public class UserDistrictResourceImpl extends ManagerWebResource implements User
     /* ----------------------------------------------------- */
 
     protected boolean userHasLinkedDistrict(String realm, String userId) {
-        return getLinkedDistrictsOfUser(realm, userId).size() > 0;
+        return !getLinkedDistrictsOfUser(realm, userId).isEmpty();
     }
 
     protected Collection<Asset<?>> getLinkedDistrictsOfUser(String realm, String userId) {
@@ -101,7 +106,7 @@ public class UserDistrictResourceImpl extends ManagerWebResource implements User
         return assetStorageService.findAll(new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(realm))
-                .types(OurgridMeterAsset.class)
+                .types(OurgridDistrictAsset.class)
                 .ids(assetIds)
         );
     }
