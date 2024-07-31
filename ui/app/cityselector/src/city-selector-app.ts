@@ -104,8 +104,11 @@ export class CitySelectorApp extends LitElement {
     @state() // state of search field value
     protected _citySearchText?: string;
 
-    @state()
+    @state() // uses a string if invalid, uses OurGridGatewayCity if it is.
     protected _selectedCity?: OurGridGatewayCity | string;
+
+    @state() // selected alt name if present
+    protected _selectedAlt?: string;
 
     constructor(baseUrl?: string, configUrl?: string, langFolder?: string, lang?: string) {
         super();
@@ -148,7 +151,8 @@ export class CitySelectorApp extends LitElement {
                         <!-- Search input -->
                         <div style="position: relative; width: 100%;">
                             ${when(this._selectedCity, () => html`
-                                <og-city-input id="selected-city-field" .type="${InputType.BUTTON}" .label="${(this._selectedCity as any)?.name || this._selectedCity}" svgIcon="close"
+                                <og-city-input id="selected-city-field" .type="${InputType.BUTTON}" svgIcon="close"
+                                               .label="${this._selectedAlt || (this._selectedCity as any)?.name || this._selectedCity}"
                                                rounded raised fullWidth @or-mwc-input-changed="${(ev) => this._onCityRemove(ev)}"
                                 ></og-city-input>
                             `, () => html`
@@ -249,16 +253,34 @@ export class CitySelectorApp extends LitElement {
      * It looks up whether the City is present in the {@link OurGridGatewayConfig}, and selects it.
      */
     protected _onCitySelect(ev: CustomEvent) {
-        const selected = (ev.detail[0] as ListItem).data as City;
-        const ogCity = this._fetchConfigTask.value.gateway.cities.find(c => c.name === selected.name);
-        if(ogCity) {
-            this._selectedCity = ogCity;
-            this._citySearchText = undefined;
+        const selected = (ev.detail[0] as ListItem).data as City | AltCity;
+        let ogCity: OurGridGatewayCity;
+
+        // If of type AltCity...
+        if((selected as any).city) {
+            ogCity = this._fetchConfigTask.value.gateway.cities.find(c => (selected as AltCity).city === c.name);
+            if(ogCity) {
+                this._selectedCity = ogCity;
+                this._selectedAlt = selected.name;
+            } else {
+                console.warn("This city does not have an OurGrid installation.");
+                this._selectedCity = selected.name;
+                this._selectedAlt = undefined;
+            }
+
+        // Else, the user is using the original city name
         } else {
-            this._selectedCity = selected.name;
-            this._citySearchText = undefined;
-            console.warn("This city does not have an OurGrid installation.")
+            ogCity = this._fetchConfigTask.value.gateway.cities.find(c => (selected as City).name === c.name);
+            if(ogCity) {
+                this._selectedCity = ogCity;
+            } else {
+                console.warn("This city does not have an OurGrid installation.");
+                this._selectedCity = selected.name;
+            }
         }
+        // Always reset search text
+        this._citySearchText = undefined;
+
     }
 
     /**
@@ -267,6 +289,7 @@ export class CitySelectorApp extends LitElement {
      */
     protected _onCityRemove(ev: CustomEvent) {
         this._selectedCity = undefined;
+        this._selectedAlt = undefined;
         this._citySearchText = undefined;
     }
 

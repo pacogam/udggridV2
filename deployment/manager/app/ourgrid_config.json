@@ -6,6 +6,21 @@
         "name": "Amsterdam",
         "ourGridUrl": "https://staging.reschool.openremote.app/ourgrid",
         "realm": "amsterdam"
+      },
+      {
+        "name": "Arnhem",
+        "ourGridUrl": "https://ourgrid.openremote.app/ourgrid",
+        "realm": "arnhem"
+      },
+      {
+        "name": "Scheveningen",
+        "ourGridUrl": "https://denhaag.openremote.app/ourgrid",
+        "realm": "gems"
+      },
+      {
+        "name": "The Hague",
+        "ourGridUrl": "https://denhaag.openremote.app/ourgrid",
+        "realm": "gems"
       }
     ]
   }
