@@ -85,7 +85,7 @@
     "question_heatPump": "Ik heb een warmtepomp.",
     "select_electricVehicleBrand": "Kies het automerk",
     "select_vehicleChargerBrand": "Kies merk van de laadpaal",
-    "select_heatPumpBrand": "Kies merk van de warmtepomp.",
+    "select_heatPumpBrand": "Kies merk van de thermostaat.",
     "notApplicable": "Niet van toepassing."
   },
   "panel_deviceInfo": {
