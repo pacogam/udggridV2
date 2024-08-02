@@ -85,7 +85,7 @@
     "question_heatPump": "I have a heat pump.",
     "select_electricVehicleBrand": "Select the vehicle brand",
     "select_vehicleChargerBrand": "Select the charger brand",
-    "select_heatPumpBrand": "Select the heat pump brand",
+    "select_heatPumpBrand": "Select the thermostat brand",
     "notApplicable": "Not applicable."
   },
   "panel_deviceInfo": {
