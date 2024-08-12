@@ -39,7 +39,7 @@ const styling = css`
     width: 100%;
   }
   #onboarding-topgraphic {
-    width: inherit;
+    width: 100%;
   }
   #onboarding-content {
     flex: 1;
@@ -120,7 +120,8 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
         const isLargeFooter = (!page.noBottomGraphic && !!page.getActionText);
         const footerStyling = {
             'min-height': anyPageHasActionText ? '48px' : undefined,
-            'height': isLargeFooter ? '20vh' : undefined,
+            'height': isLargeFooter ? '35vw' : undefined,
+            'max-height': isLargeFooter ? '20vh' : undefined,
             'position': isLargeFooter ? 'relative' : undefined,
             'overflow': 'hidden'
         };
@@ -136,8 +137,8 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                             `)}
                             ${when(!!page.getHeading, () => {
                                 return html`
-                                    <div style="margin-top: -15%; --animate-offset: 0.2s; display: flex; flex-direction: column; max-width: 65vw; text-align: center;">
-                                        <span class="text-title">
+                                    <div style="margin-top: -12%; --animate-offset: 0.2s; display: flex; flex-direction: column; max-width: 65vw; text-align: center; gap: 16px;">
+                                        <span class="text-title" style="line-height: 90%;">
                                             <or-translate value="appName"></or-translate>
                                         </span>
                                         <span class="text-heading2" style="margin-top: -12px;">
