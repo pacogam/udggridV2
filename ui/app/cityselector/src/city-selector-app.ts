@@ -156,7 +156,7 @@ export class CitySelectorApp extends LitElement {
                                                rounded raised fullWidth @or-mwc-input-changed="${(ev) => this._onCityRemove(ev)}"
                                 ></og-city-input>
                             `, () => html`
-                                <og-city-input id="search-field" .type="${InputType.TEXT}" placeholder="Amsterdam" svgIcon="magnify"
+                                <og-city-input id="search-field" .type="${InputType.TEXT}" placeholder="${this._t('search')}" svgIcon="magnify"
                                                rounded outlined compact comfortable style="width: 100%; max-width: 480px;"
                                                @city-input-changed="${(ev) => this._onCitySearch(ev)}"
                                 ></og-city-input>

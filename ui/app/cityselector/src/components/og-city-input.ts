@@ -27,6 +27,10 @@ const styling = css`
         text-transform: initial;
     }
 
+    .mdc-text-field .mdc-text-field__input {
+        caret-color: white;
+    }
+
     .mdc-button--outlined:not(:disabled), .mdc-text-field--outlined:not(:disabled) {
         border: var(--og-city-input-border, 2px solid var(--og-color-primary));
     }
