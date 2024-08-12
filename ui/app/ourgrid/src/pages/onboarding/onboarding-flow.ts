@@ -65,7 +65,7 @@ export class OnboardingFlow extends OgOnboardingPage {
 
     protected pages: OnboardPage[] = [
         {
-            getHeading: () => 'appName',
+            getHeading: () => 'intro',
             getActionText: () => 'continue',
             pageContent: (): TemplateResult => html`
                 ${onboardingOneProvider(this._store).pageCreator()}
