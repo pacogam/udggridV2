@@ -26,6 +26,10 @@ export enum OgHeatPumpBrand {
     RESIDEO_HONEYWELL = 'heatPumpBrands.RESIDEO_HONEYWELL', TOON = 'heatPumpBrands.TOON', NEST = 'heatPumpBrands.NEST', OTHER = 'heatPumpBrands.other'
 }
 
+export enum OgBatteryBrand {
+    MYGRID = 'batteryBrands.MYGRID', LG = 'batteryBrands.LG', SONNEN_BATTERIE = 'batteryBrands.SONNEN_BATTERIE', TESLA_POWERWALL = 'batteryBrands.TESLA_POWERWALL', OTHER = 'batteryBrands.OTHER'
+}
+
 export function getVehicleBrandAppUrl(brand?: OgVehicleBrand, store?: 'google' | 'apple'): string | undefined {
     if (store === 'google') {
         switch (brand) {

@@ -3,7 +3,7 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introduction",
-  "houseCharacteristics": "House Characteristics",
+  "houseCharacteristics": "My House",
   "privacyStatement": "Privacy Statement",
   "continue": "Continue",
   "remove": "Remove",
@@ -82,10 +82,12 @@
     "question_solarPanels": "I have solar panels.",
     "question_electricVehicle": "I have an electric vehicle.",
     "question_vehicleCharger": "I have a vehicle charger.",
+    "question_battery": "I have a battery.",
     "question_heatPump": "I have a heat pump.",
     "select_electricVehicleBrand": "Select the vehicle brand",
     "select_vehicleChargerBrand": "Select the charger brand",
     "select_heatPumpBrand": "Select the thermostat brand",
+    "select_batteryBrand": "Select the battery brand",
     "notApplicable": "Not applicable."
   },
   "panel_deviceInfo": {

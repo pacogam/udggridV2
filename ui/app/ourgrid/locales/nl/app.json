@@ -82,10 +82,12 @@
     "question_solarPanels": "Ik heb zonnepanelen.",
     "question_electricVehicle": "Ik heb een elektrische auto.",
     "question_vehicleCharger": "Ik heb een laadpaal.",
+    "question_battery": "Ik heb een batterij.",
     "question_heatPump": "Ik heb een warmtepomp.",
     "select_electricVehicleBrand": "Kies het automerk",
     "select_vehicleChargerBrand": "Kies merk van de laadpaal",
     "select_heatPumpBrand": "Kies merk van de thermostaat.",
+    "select_batteryBrand": "Kies merk van de batterij",
     "notApplicable": "Niet van toepassing."
   },
   "panel_deviceInfo": {
