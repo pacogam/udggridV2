@@ -27,7 +27,7 @@ export enum OgHeatPumpBrand {
 }
 
 export enum OgBatteryBrand {
-    MYGRID = 'batteryBrands.MYGRID', LG = 'batteryBrands.LG', SONNEN_BATTERIE = 'batteryBrands.SONNEN_BATTERIE', TESLA_POWERWALL = 'batteryBrands.TESLA_POWERWALL', OTHER = 'batteryBrands.OTHER'
+    MYGRID = 'batteryBrands.MYGRID', LG = 'batteryBrands.LG', SONNEN_BATTERIE = 'batteryBrands.SONNEN_BATTERIE', TESLA_POWERWALL = 'batteryBrands.TESLA_POWERWALL', OTHER = 'batteryBrands.other'
 }
 
 export function getVehicleBrandAppUrl(brand?: OgVehicleBrand, store?: 'google' | 'apple'): string | undefined {

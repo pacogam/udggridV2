@@ -190,6 +190,13 @@
     "TOON": "Go to your Toon app",
     "NEST": "Go to your Nest app"
   },
+  "batteryBrands": {
+    "MYGRID": "MyGrid",
+    "LG": "LG",
+    "SONNEN_BATTERIE": "sonnenBatterie",
+    "TESLA_POWERWALL": "Tesla Powerwall",
+    "other": "Other"
+  },
   "privacy-statement": "With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighborhood consumption; determining which challenges we send to which user, and keeping track of your wisely earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\n\nYour anonymized energy consumption data is only shared with the City of Amsterdam, OpenRemote, Resourcefully, University of Utrecht and University of Gerona. These organizations only use this data to; use the power values for preventing network congestion too often; further improving the application, and to ensure it functions properly.\n\nIf you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
   "switchCity": "Switch city"
 }
