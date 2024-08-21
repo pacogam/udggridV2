@@ -8,8 +8,9 @@ import {OgListItem} from '../components/og-mwc-list';
 import '../components/og-mwc-list';
 import {OrMwcListChangedEvent} from '@openremote/or-mwc-components/or-mwc-list';
 import '../panels/panel-device-info';
+import '../panels/panel-battery-info';
 import '../panels/panel-challenge-earnings';
-import {AppStateKeyed, router} from '@openremote/or-app';
+import {AppStateKeyed} from '@openremote/or-app';
 import {GridAppStateKeyed, removeUserAsset} from '../util/og-state';
 import {OurgridMeterAsset} from '../util/util';
 import {when} from 'lit/directives/when.js';
@@ -144,6 +145,9 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected userAsset?: OurgridMeterAsset;
 
     @state()
+    protected batteryAsset?: Asset;
+
+    @state()
     protected challengeAsset?: Asset;
 
     @state()
@@ -162,6 +166,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
 
     stateChanged(state: GridAppStateKeyed): void {
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
+        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.currentPage = state.app.page;
         this.language = state.gridApp.language;
@@ -265,6 +270,11 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                                         <div class="menu-earnings-card">
                                             <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
                                         </div>
+                                        ${when(this.batteryAsset, () => html`
+                                            <div class="menu-asset-card">
+                                                <panel-battery-info .batteryAsset="${this.batteryAsset}" .meterAsset="${this.userAsset}" .language="${this.language}"></panel-battery-info>
+                                            </div>
+                                        `)}
                                         <div class="menu-asset-card">
                                             <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
                                                                @remove="${() => this.onDeviceRemove()}"

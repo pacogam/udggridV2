@@ -12,7 +12,7 @@ import {i18next} from '@openremote/or-translate';
 import {showLanguageDialog} from '../components/og-dialog';
 import {NeedsOnboardingError, NoAssetLinkedError, RequiresPrivacyConfirmationError, splashDataCheckProvider} from '../pages/splash/splash-datacheck';
 import {OgPage, OgPageProvider} from '../pages/util/og-page';
-import {attributeEventReceived, challengeAssetIdSelector, districtAssetIdSelector, GridAppStateKeyed, realmSelector, setLanguage, userAssetIdSelector} from './og-state';
+import {attributeEventReceived, batteryAssetIdSelector, challengeAssetIdSelector, districtAssetIdSelector, GridAppStateKeyed, realmSelector, setLanguage, userAssetIdSelector} from './og-state';
 import {Asset} from '@openremote/model';
 import {OgManager} from './og-manager';
 import {Defaults} from "./defaults";
@@ -151,10 +151,10 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         this._dark = state.gridApp.dark;
         console.warn(state);
 
-        // Once all assets are fetched (meter asset, district asset, and challenges asset),
+        // Once all assets are fetched (meter asset, battery asset, district asset, and challenges asset),
         // we subscribe to attribute changes of the specific assets
         if(!this._attributeSubscriptionId) {
-            if(userAssetIdSelector(state) && districtAssetIdSelector(state) && challengeAssetIdSelector(state) && state.gridApp.assets.length >= 3) {
+            if(userAssetIdSelector(state) && batteryAssetIdSelector(state) && districtAssetIdSelector(state) && challengeAssetIdSelector(state) && state.gridApp.assets.length >= 3) {
                 const assetIds = state.gridApp.assets.map(a => a.id);
                 this.subscribeAssets(manager.displayRealm, assetIds).catch(e => console.error(e));
             }

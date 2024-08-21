@@ -19,6 +19,7 @@ export function getAppStyle() {
         --og-color-secondary-dark: #5F424C;
         --og-color-secondary-dark-rgb: 95, 66, 76;
         --og-color-success: #00AA45;
+        --og-color-success-rgb: 0, 170, 69;
         --og-color-success-light: #80d5a2;
         --og-color-neutral: #F2B344;
         --og-color-warning: #F26E44;

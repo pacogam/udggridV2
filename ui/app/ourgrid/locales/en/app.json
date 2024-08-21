@@ -102,6 +102,17 @@
     "refreshData": "Refresh data",
     "removePromptText": "Your device will be unlinked from your household."
   },
+  "panel_batteryInfo": {
+    "yourBattery": "Your battery",
+    "noBatteryFound": "No battery connected",
+    "unknownManufacturer": "Unknown manufacturer",
+    "version": "Version",
+    "unknownID": "Unknown ID",
+    "unknownVersion": "Unknown version",
+    "autoCharge": "Automatic control",
+    "turnOnSnackbar": "Automatic control is now on!",
+    "turnOffSnackbar": "Automatic control is now off!"
+  },
   "panel_peakUsage": {
     "heading": "Our district has a peak load!"
   },

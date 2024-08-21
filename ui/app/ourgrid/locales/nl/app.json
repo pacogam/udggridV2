@@ -102,6 +102,17 @@
     "refreshData": "Eigenschappen",
     "removePromptText": "Je apparaat word losgekoppeld van je huishouden."
   },
+  "panel_batteryInfo": {
+    "yourBattery": "Jouw batterij",
+    "noBatteryFound": "Geen batterij gevonden",
+    "unknownManufacturer": "Onbekende fabrikant",
+    "version": "Versie",
+    "unknownID": "Onbekend ID",
+    "unknownVersion": "Onbekende versie",
+    "autoCharge": "Automatisch laden",
+    "turnOnSnackbar": "Automatisch opladen staat nu aan!",
+    "turnOffSnackbar": "Automatisch opladen staat nu uit."
+  },
   "panel_peakUsage": {
     "heading": "Onze wijk heeft piekbelasting!"
   },

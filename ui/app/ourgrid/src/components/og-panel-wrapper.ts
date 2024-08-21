@@ -76,6 +76,9 @@ export class OgPanelWrapper extends LitElement {
     public meterAsset: Asset;
 
     @property({type: Object})
+    public batteryAsset: Asset;
+
+    @property({type: Object})
     public challengeAsset: Asset;
 
     @property({type: Object})
@@ -133,7 +136,7 @@ export class OgPanelWrapper extends LitElement {
         if(changedProps.has('meterAsset') || changedProps.has('challengeAsset')) {
             this.loadedPanels.forEach(panel => {
                 if(panel instanceof OgDataPanel) {
-                    panel.setUser(this.user).setMeterAsset(this.meterAsset).setChallengeAsset(this.challengeAsset).setDistrictAsset(this.districtAsset).setPeakPointsAsset(this.peakPointsAsset);
+                    panel.setUser(this.user).setMeterAsset(this.meterAsset).setBatteryAsset(this.batteryAsset).setChallengeAsset(this.challengeAsset).setDistrictAsset(this.districtAsset).setPeakPointsAsset(this.peakPointsAsset);
                 }
             });
         }
