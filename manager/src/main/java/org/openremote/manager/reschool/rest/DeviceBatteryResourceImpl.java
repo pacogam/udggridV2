@@ -10,15 +10,15 @@ import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.UserAssetLink;
 import org.openremote.model.asset.impl.ElectricityBatteryAsset;
 import org.openremote.model.attribute.Attribute;
-import org.openremote.model.attribute.AttributeMap;
+import org.openremote.model.attribute.MetaItem;
 import org.openremote.model.http.RequestParams;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.query.filter.RealmPredicate;
 import org.openremote.model.reschool.DeviceBatteryResource;
+import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueType;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static jakarta.ws.rs.core.Response.Status.*;
 
@@ -47,7 +47,9 @@ public class DeviceBatteryResourceImpl extends ManagerWebResource implements Dev
 
         Asset<?> batteryAsset = getBatteryById(details.meterId);
         if(!batteryAsset.hasAttribute("automaticControl")) {
-            batteryAsset.addAttributes(new Attribute<>("automaticControl", ValueType.BOOLEAN));
+            batteryAsset.addAttributes(new Attribute<>("automaticControl", ValueType.BOOLEAN)
+                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
+            );
         }
 
         batteryAsset.getAttribute("automaticControl").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.automaticControl);
