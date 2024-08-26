@@ -74,14 +74,14 @@
     "text4": "Turn down the heater",
     "text5": "Don't boil any water",
     "text6-alt": "Discharge your battery",
-    "text6-on": "We will be discharging your battery.",
-    "text6-on-inactive": "We won't be discharging your battery.",
+    "text6-on": "Battery is discharging",
+    "text6-on-inactive": "Battery is not discharging",
     "text6-off": "Discharge your battery?",
-    "text6-off-active": "We are discharging your battery.",
+    "text6-off-active": "We are discharging your battery",
     "action6-on": "Please don't discharge",
     "action6-off": "Yes, go ahead",
-    "action6-success-on": "Discharging your battery!",
-    "action6-success-off": "Stopped discharging."
+    "action6-success-on": "Discharging your battery",
+    "action6-success-off": "Stopped discharging"
   },
   "panel_characteristics": {
     "SOLAR_PANELS": "Solar panels",
