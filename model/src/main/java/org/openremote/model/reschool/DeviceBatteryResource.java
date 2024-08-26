@@ -27,6 +27,20 @@ public interface DeviceBatteryResource {
         }
     }
 
+    class ActionButtonDetails implements Serializable {
+
+        public String meterId;
+        public boolean buttonState;
+
+        public ActionButtonDetails() {
+
+        }
+        public ActionButtonDetails(String meterId, boolean buttonState) {
+            this.meterId = meterId;
+            this.buttonState = buttonState;
+        }
+    }
+
     @GET
     @Path("{meterId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -36,4 +50,9 @@ public interface DeviceBatteryResource {
     @Path("automaticControl")
     @Consumes(MediaType.APPLICATION_JSON)
     Response automaticControl(@BeanParam RequestParams params, AutomaticControlDetails details);
+
+    @POST
+    @Path("actionButton")
+    @Consumes(MediaType.APPLICATION_JSON)
+    Response actionButton(@BeanParam RequestParams params, ActionButtonDetails details);
 }

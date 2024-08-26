@@ -46,17 +46,48 @@ public class DeviceBatteryResourceImpl extends ManagerWebResource implements Dev
         }
 
         Asset<?> batteryAsset = getBatteryById(details.meterId);
+
+        // Create automaticControl attribute if necessary
         if(!batteryAsset.hasAttribute("automaticControl")) {
             batteryAsset.addAttributes(new Attribute<>("automaticControl", ValueType.BOOLEAN)
                     .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
             );
         }
 
+        // Also create the challengeActionButton attribute if necessary
+        if(!batteryAsset.hasAttribute("challengeActionButton")) {
+            batteryAsset.addAttributes(new Attribute<>("challengeActionButton", ValueType.BOOLEAN)
+                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
+            );
+        }
+
+        // Update its values
         batteryAsset.getAttribute("automaticControl").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.automaticControl);
+        batteryAsset.getAttribute("challengeActionButton").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.automaticControl);
 
         assetStorageService.merge(batteryAsset);
 
         return Response.ok().build();
+    }
+
+    @Override
+    public Response actionButton(RequestParams params, ActionButtonDetails details) {
+        if (!isAuthenticated()) {
+            throw new WebApplicationException(UNAUTHORIZED);
+        }
+
+        Asset<?> batteryAsset = getBatteryById(details.meterId);
+        if(!batteryAsset.hasAttribute("challengeActionButton")) {
+            batteryAsset.addAttributes(new Attribute<>("challengeActionButton", ValueType.BOOLEAN)
+                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
+            );
+        }
+
+        batteryAsset.getAttribute("challengeActionButton").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.buttonState);
+
+        assetStorageService.merge(batteryAsset);
+
+        return null;
     }
 
     /**

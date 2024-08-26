@@ -66,7 +66,7 @@
     "page3-text": "Door de aangesloten dongle krijg je live inzicht in je eigen verbruik. Als het netwerk overbelast dreigt te raken zal je scherm rood kleuren."
   },
   "panel_tips": {
-    "heading": "Tips",
+    "heading": "Tips & Acties",
     "subtitle": "Manieren om te besparen",
     "text1": "Even niet koken",
     "text2": "Auto laden uitstellen",
@@ -75,7 +75,9 @@
     "text5": "Even geen water koken",
     "text6-alt": "Ontlaad uw accu",
     "text6-on": "Wij gaan uw accu ontladen.",
+    "text6-on-inactive": "We stoppen met uw accu ontladen.",
     "text6-off": "Uw accu ontladen?",
+    "text6-off-active": "We gaan uw accu ontladen.",
     "action6-on": "Stop met ontladen",
     "action6-off": "Ja, ga je gang",
     "action6-success-on": "Battery aan het ontladen!",
@@ -204,6 +206,6 @@
     "TESLA_POWERWALL": "Tesla Powerwall",
     "other": "Anders"
   },
-  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote, Resourcefully, Universiteit Utrecht en Universiteit van Gerona. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
+  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote en Resourcefully. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
   "switchCity": "Verander van stad"
 }

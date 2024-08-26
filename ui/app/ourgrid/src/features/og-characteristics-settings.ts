@@ -115,6 +115,11 @@ export class OgCharacteristicsSettings extends LitElement {
                 this.heatPumpState = heatPump.shown ? 1 : 0;
                 this.heatPumpBrand = heatPump.brand as OgHeatPumpBrand | undefined;
             }
+            const battery = this.characteristics.find(c => c.id === WellknownCharacteristics.BATTERY);
+            if(battery) {
+                this.batteryState = battery.shown ? 1 : 0;
+                this.batteryBrand = battery.brand as OgBatteryBrand | undefined;
+            }
         }
 
         if(!changedProps.has('characteristics') || changedProps.size > 1) {
@@ -167,7 +172,7 @@ export class OgCharacteristicsSettings extends LitElement {
                                       @or-mwc-input-changed="${ev => this.onElectricCarUpdate(ev)}"></og-input>
                         </div>
                         <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" comfortable ?disabled="${this.electricCarState === 0}" style="width: 100%;"
+                            <og-input .type="${InputType.SELECT}" ?disabled="${this.electricCarState === 0}" style="width: 100%;"
                                       label="${this.electricCarState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_electricVehicleBrand')}"
                                       .options="${[OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.OTHER]}" .value="${this.electricCarBrand}"
                                       @or-mwc-input-changed="${ev => this.onElectricCarBrandUpdate(ev)}"
@@ -192,7 +197,7 @@ export class OgCharacteristicsSettings extends LitElement {
                                       @or-mwc-input-changed="${ev => this.onHeatPumpUpdate(ev)}"></og-input>
                         </div>
                         <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" comfortable ?disabled="${this.heatPumpState === 0}" style="width: 100%; position: relative; display: block;"
+                            <og-input .type="${InputType.SELECT}" ?disabled="${this.heatPumpState === 0}" style="width: 100%; position: relative; display: block;"
                                       label="${this.heatPumpState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_heatPumpBrand')}"
                                       .options="${[OgHeatPumpBrand.RESIDEO_HONEYWELL, OgHeatPumpBrand.TOON, OgHeatPumpBrand.NEST, OgHeatPumpBrand.OTHER]}" .value="${this.heatPumpBrand}"
                                       @or-mwc-input-changed="${ev => this.onHeatPumpBrandUpdate(ev)}"
@@ -208,7 +213,7 @@ export class OgCharacteristicsSettings extends LitElement {
                                       @or-mwc-input-changed="${ev => this.onBatteryUpdate(ev)}"></og-input>
                         </div>
                         <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" comfortable ?disabled="${this.batteryState === 0}" style="width: 100%; position: relative; display: block;"
+                            <og-input .type="${InputType.SELECT}" ?disabled="${this.batteryState === 0}" style="width: 100%; position: relative; display: block;"
                                       label="${this.batteryState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_batteryBrand')}"
                                       .options="${[OgBatteryBrand.MYGRID, OgBatteryBrand.LG, OgBatteryBrand.SONNEN_BATTERIE, OgBatteryBrand.TESLA_POWERWALL, OgBatteryBrand.OTHER]}" .value="${this.batteryBrand}"
                                       @or-mwc-input-changed="${ev => this.onBatteryBrandUpdate(ev)}"

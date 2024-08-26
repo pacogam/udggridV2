@@ -26,14 +26,14 @@ export class PanelBatteryInfo extends OgDataPanel {
 
     @state()
     protected _chips: Chip[] = [{
-        leadingIcon: "ev-plug-type2",
+        leadingIcon: "toggle-switch-off",
         text: html`<or-translate value="panel_batteryInfo.autoCharge"></or-translate>`,
         loading: false,
         action: () => {
             const automaticControl = !this._chips[0].selected;
             this.setAutomaticControl(automaticControl);
-        }}
-    ];
+        }
+    }];
 
     @query('og-chips')
     protected _chipsElem?: OgChips;
@@ -62,7 +62,7 @@ export class PanelBatteryInfo extends OgDataPanel {
             <div style="position: relative;">
                 <div style="display: flex; align-items: center; gap: 24px;">
                     <div>
-                        <or-icon icon="${this.batteryAsset ? "power-plug-battery" : "power-plug-off"}" style="${styleMap(iconStyles)}"></or-icon>
+                        <or-icon icon="battery-charging" style="${styleMap(iconStyles)}"></or-icon>
                     </div>
                     <div>
                         <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
@@ -147,6 +147,7 @@ export class PanelBatteryInfo extends OgDataPanel {
      */
     protected _updateAutomaticControlButtonState(automaticControl: boolean): void {
         this._chips[0].selected = automaticControl;
+        this._chips[0].leadingIcon = automaticControl ? "toggle-switch" : "toggle-switch-off";
         this._chips = [...this._chips]; // trigger a UI update, by recreating the array. (as it also needs to trigger og-chips UI update)
     }
 
