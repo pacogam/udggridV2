@@ -52,7 +52,7 @@ export class PanelChallengeTips extends OgDataPanel {
                     
                     ${when(check(WellknownCharacteristics.BATTERY), () => {
                         const automaticControl: boolean = this.batteryAsset?.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false;
-                        const challengeActionButton: boolean = this.batteryAsset.attributes?.[this.ACTION_BUTTON_ATTRIBUTE_NAME]?.value || false;
+                        const challengeActionButton: boolean = this.batteryAsset?.attributes?.[this.ACTION_BUTTON_ATTRIBUTE_NAME]?.value || false;
                         const isManuallyActivated: boolean = automaticControl !== challengeActionButton;
                         const powerExportMaxKW: number = this.batteryAsset?.attributes?.[this.POWER_EXPORT_MAX_ATTRIBUTE_NAME]?.value || 1;
                         const unknownBattery = !this.batteryAsset;
