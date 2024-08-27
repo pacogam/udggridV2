@@ -71,7 +71,7 @@ export class PanelChallengeTips extends OgDataPanel {
                                     ${getStatisticTemplate('images/battery-power-charge.svg', true, html`
                                         <div style="display: flex; flex-direction: column;">
                                         <span class="statistic-medium" style="color: var(--og-color-danger)">
-                                            ${`-${powerExportMaxKW * 1000}W`}
+                                            ${`-${Math.round(powerExportMaxKW * 1000)}W`}
                                         </span>
                                             <span class="text-primary">
                                                 <or-translate value="${label}"></or-translate>
