@@ -30,6 +30,7 @@ const styling = css`
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
     padding: 16px 32px 32px 32px;
     gap: 32px;
   }
