@@ -1,0 +1,161 @@
+import {TemplateResult, html, css, PropertyValues } from "lit";
+import { customElement, query, state} from "lit/decorators.js";
+import {when} from "lit/directives/when.js";
+import {styleMap} from "lit/directives/style-map.js";
+import {Chip, OgChips} from "../components/og-chips";
+import {i18next} from "@openremote/or-translate";
+import "../components/og-chips";
+import {OgDataPanel} from "../components/og-data-panel";
+import {showSnackbar} from "../components/og-snackbar";
+import {Asset} from "@openremote/model";
+import manager from "@openremote/core";
+
+const styling = css`
+    #panel-wrapper {
+      padding: 16px;
+    }
+`;
+
+@customElement("panel-battery-info")
+export class PanelBatteryInfo extends OgDataPanel {
+
+    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "automaticControl";
+
+    public transparent = false;
+    public rounded = true;
+
+    @state()
+    protected _chips: Chip[] = [{
+        leadingIcon: "toggle-switch-off",
+        text: html`<or-translate value="panel_batteryInfo.autoCharge"></or-translate>`,
+        loading: false,
+        action: () => {
+            const automaticControl = !this._chips[0].selected;
+            this.setAutomaticControl(automaticControl);
+        }
+    }];
+
+    @query('og-chips')
+    protected _chipsElem?: OgChips;
+
+    static get styles() {
+        return [...super.styles, styling];
+    }
+
+    protected willUpdate(changedProps: PropertyValues) {
+
+        // If the battery asset gets updated, correct the "automaticControl" button state
+        if(changedProps.has("batteryAsset") && this.batteryAsset) {
+            if(this.batteryAsset.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value) {
+                this._updateAutomaticControlButtonState(this._isAutomaticControlEnabled(this.batteryAsset));
+            }
+        }
+        return super.willUpdate(changedProps);
+    }
+
+    protected async getPanelContent(): Promise<TemplateResult> {
+        const iconStyles = {
+            "font-size": "var(--og-font-size-statistic-large)",
+            "color": this.batteryAsset !== undefined ? "var(--og-color-success)" : "var(--og-color-danger)"
+        };
+        return html`
+            <div style="position: relative;">
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <div>
+                        <or-icon icon="battery-charging" style="${styleMap(iconStyles)}"></or-icon>
+                    </div>
+                    <div>
+                        <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
+                            <span class="text-heading2" style="text-align: start;">
+                                ${this.batteryAsset ? i18next.t("panel_batteryInfo.yourBattery") : i18next.t("panel_batteryInfo.noBatteryFound")}
+                            </span>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                ${when(this.batteryAsset, () => {
+                                    const manufacturer = this.batteryAsset.attributes["manufacturer"]?.value;
+                                    const deviceId = this.batteryAsset.attributes["deviceId"]?.value;
+                                    const version = this.batteryAsset.attributes["softwareVersion"]?.value;
+                                    return html`
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="domain"></or-icon>
+                                            <span class="text-tertiary" style="text-align: start;">
+                                                ${when(manufacturer, () => manufacturer, () => html`<or-translate value="panel_batteryInfo.unknownManufacturer"></or-translate>`)}
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="identifier"></or-icon>
+                                            <span class="text-tertiary" style="text-align: start;">
+                                                ${when(deviceId, () => deviceId, () => html`<or-translate value="panel_batteryInfo.unknownID"></or-translate>`)}
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="download"></or-icon>
+                                            <span class="text-tertiary" style="text-align: start;">
+                                                ${when(version, () => html`
+                                                    <or-translate value="panel_batteryInfo.version"></or-translate>
+                                                    ${version}
+                                                `, () => html`
+                                                    <or-translate value="panel_batteryInfo.unknownVersion"></or-translate>
+                                                `)}
+                                            </span>
+                                        </div>
+                                    `;
+                                }, () => html`
+                                    <or-translate value="panel_batteryInfo.noBatteryText" style="margin-bottom: 20px;"></or-translate>
+                                `)}
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${when(this.batteryAsset, () => html`
+                    <div style="display: flex; justify-content: end; margin: 12px -12px -12px -12px;">
+                        <og-chips .chips="${this._chips}" outlined choice></og-chips>
+                    </div>
+                `)}
+            </div>
+        `;
+    }
+
+    /**
+     * Updates the 'automaticControl' attribute on the battery asset using the HTTP API.
+     * It uses the custom endpoint in {@link DeviceBatteryResource}, where all "user access checks" are performed.
+     * Shows a snackbar afterwards, and will update the button state automatically.
+     */
+    protected setAutomaticControl(automaticControl: boolean): void {
+        if (this.batteryAsset && this.meterAsset) {
+
+            manager.rest.api.DeviceBatteryResource.automaticControl({meterId: this.meterAsset.id, automaticControl: automaticControl}).then(() => {
+                if (automaticControl) {
+                    showSnackbar(undefined, i18next.t("panel_batteryInfo.turnOnSnackbar"));
+                } else {
+                    showSnackbar(undefined, i18next.t("panel_batteryInfo.turnOffSnackbar"));
+                }
+                this._updateAutomaticControlButtonState(automaticControl);
+
+            }).catch(() => {
+                showSnackbar(undefined, i18next.t("errorOccurred"));
+            });
+        } else {
+            showSnackbar(undefined, i18next.t("errorOccurred"));
+            console.warn("Could not toggle automatic control; assets are not cached correctly.");
+        }
+    }
+
+    /**
+     * Convenient function that updates the button state.
+     */
+    protected _updateAutomaticControlButtonState(automaticControl: boolean): void {
+        this._chips[0].selected = automaticControl;
+        this._chips[0].leadingIcon = automaticControl ? "toggle-switch" : "toggle-switch-off";
+        this._chips = [...this._chips]; // trigger a UI update, by recreating the array. (as it also needs to trigger og-chips UI update)
+    }
+
+    protected _isAutomaticControlEnabled(batteryAsset: Asset) {
+        if(batteryAsset?.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]) {
+            return Boolean(batteryAsset.attributes[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME].value);
+        } else {
+            return false;
+        }
+    }
+}

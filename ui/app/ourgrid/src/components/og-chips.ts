@@ -14,6 +14,7 @@ const chipStyle = require('@material/chips/dist/mdc.chips.min.css');
 // Apparently the links to official documentation are incorrect, and we're using a Material 2 (deprecated) version.
 
 export interface Chip {
+    selected?: boolean,
     leadingIcon?: string,
     text: string | TemplateResult
     trailingIcon?: string
@@ -31,21 +32,31 @@ interface MDCChipEvent extends Event {
 }
 
 const styling = css`
-  .mdc-chip__text {
-    font-family: var(--og-font-family);
-    font-size: var(--og-font-size-button-small);
-    font-weight: var(--og-font-weight-button-small);
-  }
+    .mdc-chip__text {
+        font-family: var(--og-font-family);
+        font-size: var(--og-font-size-button-small);
+        font-weight: var(--og-font-weight-button-small);
+    }
+
+    .mdc-chip .mdc-chip__ripple::before, .mdc-chip .mdc-chip__ripple::after {
+        background-color: var(--mdc-ripple-color, rgba(0, 0, 0, 0.35));
+    }
 `;
 
 @customElement('og-chips')
 export class OgChips extends LitElement {
 
-    @property()
-    protected chips: Chip[] = [];
+    @property({type: Object})
+    public chips: Chip[] = [];
 
-    @property()
-    protected outlined = false;
+    @property({type: Boolean})
+    public outlined = false;
+
+    /**
+     * Whether the chips should act as "toggleable", and listen to the 'selected' state of the {@link Chip}.
+     */
+    @property({type: Boolean})
+    public choice = false;
 
     protected chipsObj: MDCChipSet;
 
@@ -69,29 +80,35 @@ export class OgChips extends LitElement {
 
     protected render(): TemplateResult {
         const chipSetClasses = {
-            'mdc-chip-set': true,
-            'mdc-chip-set--input': true
+            "mdc-chip-set": true,
+            "mdc-chip-set--input": true
         };
         return html`
             <div class="${classMap(chipSetClasses)}" role="grid">
                 ${map(this.chips, (chip, index) => {
                     const chipStyles = {
-                        'position': 'relative',
-                        'background-color': this.outlined ? 'transparent' : undefined,
-                        'border': this.outlined ? '1px solid rgba(0, 0, 0, 0.12)' : undefined,
-                        'cursor': chip.loading || chip.disabled ? 'default' : undefined
+                        "position": "relative",
+                        "background": this._getBackground(chip.selected, this.outlined),
+                        "border": this._getBorder(chip.selected, this.outlined),
+                        "cursor": chip.loading || chip.disabled ? "default" : undefined,
+                        "transition": "all 200ms"
+                    };
+                    const rippleStyles = {
+                        "background": this._getRippleBackground(chip.selected, this.outlined),
+                        "transition": "all 200ms"
                     };
                     const iconStyles = {
-                        'opacity': chip.loading ? '0' : undefined,
-                        'color': chip.color ? chip.color : 'rgba(0, 0, 0, 0.54)'
+                        "opacity": chip.loading ? "0" : undefined,
+                        "color": chip.selected ? "var(--og-color-success)" : chip.color ? chip.color : "rgba(0, 0, 0, 0.54)"
                     };
                     const textStyles = {
-                        'opacity': chip.loading ? '0' : undefined
+                        "opacity": chip.loading ? "0" : undefined,
+                        "color": this._getTextColor(chip.selected, this.outlined)
                     };
                     return html`
                         <div id="chip-${index}" class="mdc-chip" style="${styleMap(chipStyles)}" role="row">
                             ${when(!chip.disabled && !chip.loading, () => html`
-                                <div class="mdc-chip__ripple"></div>
+                                <div class="mdc-chip__ripple" style="${styleMap(rippleStyles)}"></div>
                             `)}
                             ${when(chip.leadingIcon, () => html`
                                 <or-icon class="mdc-chip__icon mdc-chip__icon--leading" icon="${chip.leadingIcon}" style="${styleMap(iconStyles)}"></or-icon>
@@ -116,5 +133,37 @@ export class OgChips extends LitElement {
                 })}
             </div>
         `;
+    }
+
+    protected _getBackground(selected = false, outlined = false): string | undefined {
+        if(!outlined) {
+            return undefined;
+        } else {
+            return "transparent";
+        }
+    }
+
+    protected _getRippleBackground(selected = false, outlined = false): string | undefined {
+        if(!outlined) {
+            return undefined;
+        } else {
+            return selected ? "rgba(var(--og-color-success-rgb), 0.1)" : "transparent";
+        }
+    }
+
+    protected _getBorder(selected = false, outlined = false): string | undefined {
+        if(!outlined) {
+            return undefined;
+        } else {
+            return selected ? "1px solid var(--og-color-success)" : "1px solid rgba(0, 0, 0, 0.12)";
+        }
+    }
+
+    protected _getTextColor(selected = false, outlined = false): string | undefined {
+        if(!outlined) {
+            return undefined;
+        } else {
+            return selected ? "var(--og-color-success)" : undefined;
+        }
     }
 }

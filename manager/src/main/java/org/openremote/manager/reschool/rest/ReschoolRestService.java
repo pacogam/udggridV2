@@ -26,6 +26,8 @@ public class ReschoolRestService implements ContainerService {
 
         webService.addApiSingleton(new DeviceResourceImpl(timerService, identityService, assetStorageService));
 
+        webService.addApiSingleton(new DeviceBatteryResourceImpl(timerService, identityService, assetStorageService));
+
         webService.addApiSingleton(new UserChallengesResourceImpl(timerService, identityService, assetStorageService));
 
         webService.addApiSingleton(new UserDistrictResourceImpl(timerService, identityService, assetStorageService));

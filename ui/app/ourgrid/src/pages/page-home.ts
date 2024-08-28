@@ -46,6 +46,9 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     protected meterAsset?: Asset;
 
     @state()
+    protected batteryAsset?: Asset;
+
+    @state()
     protected districtAsset?: Asset;
 
     @state()
@@ -66,6 +69,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
     stateChanged(state: GridAppStateKeyed): void {
         this.meterAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
+        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.language = state.gridApp.language;
@@ -169,7 +173,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
                 <panel-usage-overview .dark="${isInChallenge}" .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .challengeAsset="${this.challengeAsset}"></panel-usage-overview>
                 
-                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
+                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
                 <div style="background: var(--og-background-shade)">
                     <panel-usage-history .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .language="${this.language}"></panel-usage-history>

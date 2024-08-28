@@ -1,13 +1,14 @@
 import {OrMwcSnackbar, OrMwcSnackbarChangedEvent} from '@openremote/or-mwc-components/or-mwc-snackbar';
 import { css } from 'lit';
 import {getAppStyle} from '../styles';
+import { customElement } from 'lit/decorators.js';
 
 export function showSnackbar(hostElement: HTMLElement | undefined, text: string, buttonText?: string, buttonAction?: () => void): OgSnackbar {
     if (!hostElement) {
-        hostElement = OrMwcSnackbar.DialogHostElement || document.body;
+        hostElement = OgSnackbar.DialogHostElement || document.body;
     }
 
-    const snackbar = new OrMwcSnackbar();
+    const snackbar = new OgSnackbar();
     snackbar.text = text;
     snackbar.buttonText = buttonText;
     snackbar.buttonAction = buttonAction;
@@ -27,8 +28,12 @@ export function showSnackbar(hostElement: HTMLElement | undefined, text: string,
 }
 
 const styling = css`
+    .mdc-snackbar {
+        z-index: 50;
+    }
 `;
 
+@customElement("og-snackbar")
 export class OgSnackbar extends OrMwcSnackbar {
 
     static get styles() {

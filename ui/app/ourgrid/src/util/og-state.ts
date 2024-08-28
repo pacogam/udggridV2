@@ -9,6 +9,7 @@ export interface GridAppState {
     dark?: boolean;
     assets: Asset[];
     userAssetId?: string;
+    batteryAssetId?: string;
     districtAssetId?: string;
     challengeAssetId?: string;
     peakPointsAssetId?: string;
@@ -52,7 +53,7 @@ const gridAppSlice = createSlice({
             return {
                 ...state,
                 dark: action.payload
-            }
+            };
         },
         setUserData(state, action: PayloadAction<User>) {
             return {
@@ -70,8 +71,22 @@ const gridAppSlice = createSlice({
         removeUserAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.userAssetId),
+                assets: state.assets.filter(a => a.id === state.batteryAssetId),
                 userAssetId: null
+            };
+        },
+        setBatteryAsset(state, action: PayloadAction<Asset>) {
+            return {
+                ...state,
+                assets: [...state.assets, action.payload],
+                batteryAssetId: action.payload.id
+            };
+        },
+        removeBatteryAsset(state) {
+            return {
+                ...state,
+                assets: state.assets.filter(a => a.id === state.batteryAssetId),
+                batteryAssetId: null
             };
         },
         setDistrictAsset(state, action: PayloadAction<Asset>) {
@@ -133,6 +148,8 @@ export const {
     setUserData,
     setUserAsset,
     removeUserAsset,
+    setBatteryAsset,
+    removeBatteryAsset,
     setDistrictAsset,
     removeDistrictAsset,
     setChallengeAsset,
@@ -145,6 +162,7 @@ export const {
 export const realmSelector = (state: GridAppStateKeyed) => state.app?.realm || manager.displayRealm;
 export const assetsSelector = (state: GridAppStateKeyed) => state.gridApp.assets;
 export const userAssetIdSelector = (state: GridAppStateKeyed) => state.gridApp.userAssetId;
+export const batteryAssetIdSelector = (state: GridAppStateKeyed) => state.gridApp.batteryAssetId;
 export const districtAssetIdSelector = (state: GridAppStateKeyed) => state.gridApp.districtAssetId;
 export const challengeAssetIdSelector = (state: GridAppStateKeyed) => state.gridApp.challengeAssetId;
 export const peakPointsAssetIdSelector = (state: GridAppStateKeyed) => state.gridApp.peakPointsAssetId;

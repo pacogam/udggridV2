@@ -5,6 +5,7 @@ import {getAppStyle} from '../styles';
 import {classMap} from 'lit/directives/class-map.js';
 import {when} from 'lit/directives/when.js';
 import {styleMap} from 'lit/directives/style-map.js';
+import {OrTranslate} from "@openremote/or-translate";
 
 const styling = css`
     .mdc-button {
@@ -145,7 +146,11 @@ export class OgInput extends OrMwcInput {
         if (this.buttonLabelElem) {
             this.buttonLabelElem.animate([{opacity: 1}, {opacity: 0}], {duration: 200, fill: 'both'});
             setTimeout(() => {
-                this.buttonLabelElem.innerText = this.label;
+                if(!this.doTranslate) {
+                    this.buttonLabelElem.innerText = this.label;
+                } else {
+                    (this.buttonLabelElem.firstElementChild as OrTranslate).value = this.label;
+                }
                 this.buttonLabelElem.animate([{opacity: 0}, {opacity: 1}], {duration: 200, fill: 'both'});
             }, 200);
         }

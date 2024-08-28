@@ -66,13 +66,22 @@
     "page3-text": "Door de aangesloten dongle krijg je live inzicht in je eigen verbruik. Als het netwerk overbelast dreigt te raken zal je scherm rood kleuren."
   },
   "panel_tips": {
-    "heading": "Tips",
+    "heading": "Tips & Acties",
     "subtitle": "Manieren om te besparen",
     "text1": "Even niet koken",
     "text2": "Auto laden uitstellen",
     "text3": "Een wasje draaien",
     "text4": "Verwarming omlaag",
-    "text5": "Even geen water koken"
+    "text5": "Even geen water koken",
+    "text6-alt": "Ontlaad je batterij",
+    "text6-on": "Batterij is aan het ontladen",
+    "text6-on-inactive": "Batterij ontlaadt niet",
+    "text6-off": "Je batterij ontladen?",
+    "text6-off-active": "We ontladen je batterij",
+    "action6-on": "Stop met ontladen",
+    "action6-off": "Ja, ga je gang",
+    "action6-success-on": "Batterij aan het ontladen",
+    "action6-success-off": "Gestopt met ontladen"
   },
   "panel_characteristics": {
     "SOLAR_PANELS": "Zonnepanelen",
@@ -82,10 +91,12 @@
     "question_solarPanels": "Ik heb zonnepanelen.",
     "question_electricVehicle": "Ik heb een elektrische auto.",
     "question_vehicleCharger": "Ik heb een laadpaal.",
+    "question_battery": "Ik heb een batterij.",
     "question_heatPump": "Ik heb een warmtepomp.",
     "select_electricVehicleBrand": "Kies het automerk",
     "select_vehicleChargerBrand": "Kies merk van de laadpaal",
     "select_heatPumpBrand": "Kies merk van de thermostaat.",
+    "select_batteryBrand": "Kies merk van de batterij",
     "notApplicable": "Niet van toepassing."
   },
   "panel_deviceInfo": {
@@ -99,6 +110,17 @@
     "buttonText": "Stel apparaat in",
     "refreshData": "Eigenschappen",
     "removePromptText": "Je apparaat word losgekoppeld van je huishouden."
+  },
+  "panel_batteryInfo": {
+    "yourBattery": "Jouw batterij",
+    "noBatteryFound": "Geen batterij gevonden",
+    "unknownManufacturer": "Onbekende fabrikant",
+    "version": "Versie",
+    "unknownID": "Onbekend ID",
+    "unknownVersion": "Onbekende versie",
+    "autoCharge": "Automatisch laden",
+    "turnOnSnackbar": "Automatisch opladen staat nu aan!",
+    "turnOffSnackbar": "Automatisch opladen staat nu uit."
   },
   "panel_peakUsage": {
     "heading": "Onze wijk heeft piekbelasting!"
@@ -177,6 +199,13 @@
     "TOON": "Ga naar je Toon app",
     "NEST": "Ga naar je Nest app"
   },
-  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met de gemeente Amsterdam, OpenRemote, Resourcefully, Universiteit Utrecht en Universiteit van Gerona. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
+  "batteryBrands": {
+    "MYGRID": "MyGrid",
+    "LG": "LG",
+    "SONNEN_BATTERIE": "sonnenBatterie",
+    "TESLA_POWERWALL": "Tesla Powerwall",
+    "other": "Anders"
+  },
+  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote en Resourcefully. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
   "switchCity": "Verander van stad"
 }

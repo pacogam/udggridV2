@@ -4,7 +4,7 @@ import {Asset, ClientRole, User} from "@openremote/model";
 import {isAxiosError} from "@openremote/rest";
 import {i18next} from "@openremote/or-translate";
 import manager from "@openremote/core";
-import {GridAppStateKeyed, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData} from "../../util/og-state";
+import {GridAppStateKeyed, setBatteryAsset, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData} from "../../util/og-state";
 import {InputType} from "@openremote/or-mwc-components/or-mwc-input";
 import {Store} from "@reduxjs/toolkit";
 import {OgPageProvider} from "../util/og-page";
@@ -44,6 +44,7 @@ export class SplashDatacheck extends OgSplashPage {
     // Objects used during check
     protected user?: User;
     protected userAsset?: Asset;
+    protected batteryAsset?: Asset;
     protected districtAsset?: Asset;
     protected challengeAsset?: Asset;
     protected peakPointsAsset?: Asset;
@@ -75,6 +76,7 @@ export class SplashDatacheck extends OgSplashPage {
     stateChanged(state: GridAppStateKeyed): void {
         this.user = state.gridApp.user;
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
+        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.page = state.app.page;
@@ -133,7 +135,8 @@ export class SplashDatacheck extends OgSplashPage {
 
             const user = await this.checkUserData();
             await this.verifyUserRoles();
-            await this.checkUserAsset(user.id);
+            const meterAsset = await this.checkUserAsset(user.id);
+            await this.checkBatteryAsset(meterAsset.id);
             await this.checkDistrictLink();
             const districtAsset = await this.checkDistrictAsset(user.id);
             const challengeAssetId = await this.checkChallengeAssetId(districtAsset);
@@ -242,9 +245,9 @@ export class SplashDatacheck extends OgSplashPage {
     //              Which is the energy meter at the household, that is required
     //              for showing any data on the app.
 
-    protected async checkUserAsset(userId: string): Promise<void> {
+    protected async checkUserAsset(userId: string): Promise<Asset> {
         try {
-            await this.fetchUserAsset(userId);
+            return await this.fetchUserAsset(userId);
         } catch (e) {
             if(isAxiosError(e)) {
                 if(e.response.status === 403) {
@@ -282,6 +285,40 @@ export class SplashDatacheck extends OgSplashPage {
             return assets[0];
         } else {
             return this.userAsset;
+        }
+    }
+
+
+    /* ---------------------------------------- */
+    // CHECK 4:     Fetch and check the linked asset of a user
+    //              Which is the energy meter at the household, that is required
+    //              for showing any data on the app.
+
+    protected async checkBatteryAsset(meterId: string): Promise<Asset> {
+        try {
+            return await this.fetchBatteryAsset(meterId);
+        } catch (e) {
+            return;
+        }
+    }
+
+    protected async fetchBatteryAsset(meterId: string, delay?: number): Promise<Asset> {
+        if(!this.batteryAsset) {
+            const asset = (await manager.rest.api.DeviceBatteryResource.getBattery(meterId)).data;
+            if(!asset) {
+                return null;
+            }
+
+            // Add additional delay if necessary
+            if(delay !== undefined) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            // cache the asset and its ID.
+            this._store.dispatch(setBatteryAsset(asset));
+
+            return asset;
+        } else {
+            return this.batteryAsset;
         }
     }
 

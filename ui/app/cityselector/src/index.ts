@@ -15,7 +15,7 @@ const langFolder = "locales";
     navigateToCity(window, {
         ourGridUrl: FORCE_REDIRECT_URL,
         realm: FORCE_REDIRECT_REALM || "default"
-    }, false);
+    }, true);
 }*/
 
 // Get query parameters

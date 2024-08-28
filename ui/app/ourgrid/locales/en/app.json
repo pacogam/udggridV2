@@ -3,7 +3,7 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introduction",
-  "houseCharacteristics": "House Characteristics",
+  "houseCharacteristics": "My House",
   "privacyStatement": "Privacy Statement",
   "continue": "Continue",
   "remove": "Remove",
@@ -66,13 +66,22 @@
     "page3-text": "The connected dongle gives you live insight into your own consumption. If the network is in danger of becoming overloaded, your screen will turn red."
   },
   "panel_tips": {
-    "heading": "Tips",
+    "heading": "Tips & Actions",
     "subtitle": "Ways to save energy",
     "text1": "Cook at a later time",
     "text2": "Delay charging your car",
     "text3": "Washing your laundry",
     "text4": "Turn down the heater",
-    "text5": "Don't boil any water"
+    "text5": "Don't boil any water",
+    "text6-alt": "Discharge your battery",
+    "text6-on": "Battery is discharging",
+    "text6-on-inactive": "Battery is not discharging",
+    "text6-off": "Discharge your battery?",
+    "text6-off-active": "We are discharging your battery",
+    "action6-on": "Please don't discharge",
+    "action6-off": "Yes, go ahead",
+    "action6-success-on": "Discharging your battery",
+    "action6-success-off": "Stopped discharging"
   },
   "panel_characteristics": {
     "SOLAR_PANELS": "Solar panels",
@@ -82,10 +91,12 @@
     "question_solarPanels": "I have solar panels.",
     "question_electricVehicle": "I have an electric vehicle.",
     "question_vehicleCharger": "I have a vehicle charger.",
+    "question_battery": "I have a battery.",
     "question_heatPump": "I have a heat pump.",
     "select_electricVehicleBrand": "Select the vehicle brand",
     "select_vehicleChargerBrand": "Select the charger brand",
     "select_heatPumpBrand": "Select the thermostat brand",
+    "select_batteryBrand": "Select the battery brand",
     "notApplicable": "Not applicable."
   },
   "panel_deviceInfo": {
@@ -99,6 +110,17 @@
     "buttonText": "Setup device",
     "refreshData": "Refresh data",
     "removePromptText": "Your device will be unlinked from your household."
+  },
+  "panel_batteryInfo": {
+    "yourBattery": "Your battery",
+    "noBatteryFound": "No battery connected",
+    "unknownManufacturer": "Unknown manufacturer",
+    "version": "Version",
+    "unknownID": "Unknown ID",
+    "unknownVersion": "Unknown version",
+    "autoCharge": "Automatic control",
+    "turnOnSnackbar": "Automatic control is now on!",
+    "turnOffSnackbar": "Automatic control is now off!"
   },
   "panel_peakUsage": {
     "heading": "Our district has a peak load!"
@@ -177,6 +199,13 @@
     "TOON": "Go to your Toon app",
     "NEST": "Go to your Nest app"
   },
-  "privacy-statement": "With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighborhood consumption; determining which challenges we send to which user, and keeping track of your wisely earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\n\nYour anonymized energy consumption data is only shared with the City of Amsterdam, OpenRemote, Resourcefully, University of Utrecht and University of Gerona. These organizations only use this data to; use the power values for preventing network congestion too often; further improving the application, and to ensure it functions properly.\n\nIf you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
+  "batteryBrands": {
+    "MYGRID": "MyGrid",
+    "LG": "LG",
+    "SONNEN_BATTERIE": "sonnenBatterie",
+    "TESLA_POWERWALL": "Tesla Powerwall",
+    "other": "Other"
+  },
+  "privacy-statement": "For OurGrid privacy English: With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighbourhood consumption; determining which challenges we send to which user, and keeping track of your earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\\n\\nYour anonymised energy consumption data is only shared with your city, OpenRemote, and Resourcefully. These organisations only use this data to: use the power values for preventing network congestion, further improving the application, and to ensure the application functions properly.  If you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
   "switchCity": "Switch city"
 }
