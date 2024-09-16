@@ -424,7 +424,7 @@ public class EarneProtocol extends AbstractProtocol<EarneAgent, DefaultAgentLink
     }
 
     public HashMap<String, String> parseMessage(String message) {
-        System.out.println("message:\n" + message);
+//        System.out.println("message:\n" + message);
         HashMap<String, String> map = new HashMap<>();
 
         try {
