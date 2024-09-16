@@ -120,7 +120,7 @@ public class OurgridTemplateProtocol extends AbstractProtocol<OurgridTemplateAge
 
         // Create OurGrid District Asset
         OurgridDistrictAsset ourgridDistrictAsset = new OurgridDistrictAsset(districtAssetName);
-        ourgridDistrictAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(assetService.findAsset(agent.getId()));
+        ourgridDistrictAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(agent);
 
         // Create OurGrid Meter Sum Asset
         OurgridMeterSumAsset ourgridMeterSumAsset = new OurgridMeterSumAsset("OurGrid " + districtName + " Household Meters");

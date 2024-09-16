@@ -58,7 +58,7 @@ public class OurgridDistrictAsset extends Asset<OurgridDistrictAsset> {
     );
 
     public static final AttributeDescriptor<Integer> NUMBER_OF_DEVICES = new AttributeDescriptor<>("numberOfDevices", ValueType.POSITIVE_INTEGER,
-            new MetaItem<>(MetaItemType.LABEL, "  Number of Earn-E devices"),
+            new MetaItem<>(MetaItemType.LABEL, "  Number of OurGrid meters"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.RULE_STATE),
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
