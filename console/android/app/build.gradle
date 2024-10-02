@@ -7,13 +7,12 @@ plugins {
 
 android {
     namespace 'io.openremote.ourgrid'
-    compileSdk 33
-    buildToolsVersion "33.0.2"
+    compileSdk 34
 
     defaultConfig {
         applicationId "io.openremote.ourgrid"
         minSdk 25
-        targetSdk 33
+        targetSdk 34
         versionCode 5
         versionName "1.0"
 
