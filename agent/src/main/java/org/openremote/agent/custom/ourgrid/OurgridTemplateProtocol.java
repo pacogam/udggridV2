@@ -3,7 +3,6 @@ package org.openremote.agent.custom.ourgrid;
 import org.apache.commons.io.IOUtils;
 import org.openremote.agent.protocol.AbstractProtocol;
 import org.openremote.container.persistence.PersistenceService;
-import org.openremote.container.util.UniqueIdentifierGenerator;
 import org.openremote.model.Constants;
 import org.openremote.model.Container;
 import org.openremote.model.asset.Asset;
@@ -16,6 +15,7 @@ import org.openremote.model.attribute.MetaItem;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.rules.RealmRuleset;
 import org.openremote.model.syslog.SyslogCategory;
+import org.openremote.model.util.UniqueIdentifierGenerator;
 import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueType;
 

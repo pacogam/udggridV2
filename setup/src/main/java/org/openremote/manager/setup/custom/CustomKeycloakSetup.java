@@ -59,7 +59,7 @@ public class CustomKeycloakSetup extends AbstractKeycloakSetup {
 
     }
 
-    protected Realm createRealm(String realmName, String displayName, boolean rememberMe) {
+    public Realm createRealm(String realmName, String displayName, boolean rememberMe) {
         Realm realm = new Realm();
         realm.setName(realmName);
         realm.setDisplayName(displayName);

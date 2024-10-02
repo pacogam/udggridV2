@@ -1,22 +1,24 @@
 package org.openremote.agent.custom.ourgrid;
 
-import org.openremote.agent.protocol.AbstractProtocol;
-import org.openremote.container.util.UniqueIdentifierGenerator;
-import org.openremote.model.Container;
-import org.openremote.model.asset.Asset;
-import org.openremote.model.asset.agent.ConnectionStatus;
-import org.openremote.model.asset.agent.DefaultAgentLink;
-import org.openremote.model.attribute.*;
-import org.openremote.model.geo.GeoJSONPoint;
-import org.openremote.model.syslog.SyslogCategory;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+import org.openremote.agent.protocol.AbstractProtocol;
+import org.openremote.model.Container;
+import org.openremote.model.asset.Asset;
+import org.openremote.model.asset.agent.ConnectionStatus;
+import org.openremote.model.asset.agent.DefaultAgentLink;
+import org.openremote.model.attribute.Attribute;
+import org.openremote.model.attribute.AttributeEvent;
+import org.openremote.model.geo.GeoJSONPoint;
+import org.openremote.model.syslog.SyslogCategory;
+import org.openremote.model.util.UniqueIdentifierGenerator;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
