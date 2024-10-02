@@ -250,21 +250,21 @@ public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
             new MetaItem<>(MetaItemType.RULE_STATE)
     ).withUnits(UNITS_METRE, UNITS_CUBED, UNITS_PER, UNITS_MINUTE);
 
-    public static final AttributeDescriptor<Double> BASELINE_POWER = new AttributeDescriptor<>("baselinePower", ValueType.NUMBER,
-            new MetaItem<>(MetaItemType.LABEL, "Baseline power"),
+    public static final AttributeDescriptor<Double> POWER_BASELINE = new AttributeDescriptor<>("powerBaseline", ValueType.NUMBER,
+            new MetaItem<>(MetaItemType.LABEL, "Power baseline"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE),
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
     ).withUnits(UNITS_WATT);
 
-    public static final AttributeDescriptor<Double> POWER_EXPORT_MAXIMUM = new AttributeDescriptor<>("powerExportMaximum", ValueType.NUMBER,
-            new MetaItem<>(MetaItemType.LABEL, "Power export maximum"),
+    public static final AttributeDescriptor<Double> POWER_MINIMUM = new AttributeDescriptor<>("powerMinimum", ValueType.NUMBER,
+            new MetaItem<>(MetaItemType.LABEL, "Power minimum"),
             new MetaItem<>(MetaItemType.READ_ONLY),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE),
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
-    ).withUnits(UNITS_KILO, UNITS_WATT);
+    ).withUnits(UNITS_WATT);
 
     public static final AttributeDescriptor<Double> ESTIMATED_SOLAR_CAPACITY = new AttributeDescriptor<>("estimatedSolarCapacity", ValueType.NUMBER,
             new MetaItem<>(MetaItemType.LABEL, "Estimated solar capacity"),
@@ -272,7 +272,7 @@ public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE),
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
-    ).withUnits(UNITS_WATT);
+    ).withUnits(UNITS_KILO, UNITS_WATT);
 
 
     public static final AssetDescriptor<OurgridMeterAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterAsset.class);

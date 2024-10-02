@@ -65,6 +65,14 @@ public class OurgridDistrictAsset extends Asset<OurgridDistrictAsset> {
             new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 62)
     );
 
+    public static final AttributeDescriptor<Double> ESTIMATED_SOLAR_CAPACITY_DISTRICT = new AttributeDescriptor<>("estimatedSolarCapacityDistrict", ValueType.NUMBER,
+            new MetaItem<>(MetaItemType.LABEL, " Estimated solar capacity district"),
+            new MetaItem<>(MetaItemType.READ_ONLY),
+            new MetaItem<>(MetaItemType.RULE_STATE),
+            new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
+            new MetaItem<>(MetaItemType.DATA_POINTS_MAX_AGE_DAYS, 62)
+    ).withUnits(UNITS_KILO, UNITS_WATT);
+
     public static final AttributeDescriptor<Double> POWER_DISTRICT = new AttributeDescriptor<>("powerDistrict", ValueType.NUMBER,
             new MetaItem<>(MetaItemType.LABEL, " Net power district"),
             new MetaItem<>(MetaItemType.HAS_PREDICTED_DATA_POINTS),
@@ -112,6 +120,11 @@ public class OurgridDistrictAsset extends Asset<OurgridDistrictAsset> {
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE)
     ).withUnits(UNITS_PERCENTAGE);
+
+    public static final AttributeDescriptor<Boolean> TURN_ON_DYNAMIC_SOLAR_CAPACITY = new AttributeDescriptor<>("turnOnDynamicSolarCapacity", ValueType.BOOLEAN,
+            new MetaItem<>(MetaItemType.LABEL, "Turn on dynamic solar capacity"),
+            new MetaItem<>(MetaItemType.RULE_STATE)
+    );
 
 
     public static final AssetDescriptor<OurgridDistrictAsset> DESCRIPTOR = new AssetDescriptor<>("city", "64404c", OurgridDistrictAsset.class); // set icon and colour of asset

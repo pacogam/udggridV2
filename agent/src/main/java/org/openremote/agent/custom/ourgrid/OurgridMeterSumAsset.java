@@ -50,6 +50,12 @@ public class OurgridMeterSumAsset extends Asset<OurgridMeterSumAsset> {
             new MetaItem<>(MetaItemType.RULE_STATE)
     ).withUnits(UNITS_METRE, UNITS_CUBED, UNITS_PER, UNITS_MINUTE);
 
+    public static final AttributeDescriptor<Double> ESTIMATED_SOLAR_CAPACITY = new AttributeDescriptor<>("estimatedSolarCapacity", ValueType.NUMBER,
+            new MetaItem<>(MetaItemType.LABEL, "Estimated solar capacity (active meters)"),
+            new MetaItem<>(MetaItemType.READ_ONLY),
+            new MetaItem<>(MetaItemType.RULE_STATE)
+    ).withUnits(UNITS_KILO, UNITS_WATT);
+
 
     public static final AssetDescriptor<OurgridMeterSumAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterSumAsset.class);
 

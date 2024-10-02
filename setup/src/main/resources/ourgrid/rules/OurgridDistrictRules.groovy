@@ -18,6 +18,9 @@ import org.postgresql.util.PGobject
 
 import java.sql.*
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.Date
 import java.util.logging.Logger
 
@@ -42,12 +45,13 @@ String[] attributeNames = ["power", "energyImportTotal", "energyExportTotal", "e
 // Time triggers for rules
 long previousMillisRule1 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
 long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis() % (5 * 60 * 1000) + (5 * 60 * 1000)
-long previousMillisRule3 = System.currentTimeMillis() - System.currentTimeMillis() % (60 * 1000) + (60 * 1000)
+long previousMillisRule3 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
 
 // Date triggers for rules
 SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd")
 String datePreviousRule5 = dateOnlyFormat.format(new Date())
 String datePreviousRule6 = dateOnlyFormat.format(new Date())
+String datePreviousRule8 = dateOnlyFormat.format(new Date())
 
 // Forecast variables
 TreeMap<String, Double> previousDatapoints = new TreeMap<>()
@@ -207,7 +211,7 @@ rules.add()
                 return
             }
 
-            Double sumPower = null
+            Double netPowerMetersWatt = null
 
             // Sum values per attribute
             for (attributeName in changesAttributeNames) {
@@ -227,12 +231,37 @@ rules.add()
                 // Update parent
                 if (sum != null) {
                     if (attributeName == "power") {
-                        sumPower = (sum as Double).round()
-                        assets.dispatch(parentMeterAssetId, attributeName, sumPower)
+                        netPowerMetersWatt = (sum as Double).round()
+                        assets.dispatch(parentMeterAssetId, attributeName, netPowerMetersWatt)
                     } else {
                         assets.dispatch(parentMeterAssetId, attributeName, sum)
                     }
                 }
+            }
+
+            // Collect asset ID's of active meters
+            def activePowerReadingsIds = childrenActive
+                    .findAll { it.name == "power" }
+                    .findAll { it.value.isPresent() }
+                    .collect { it.id }
+
+            // Get estimated solar capacity of all children
+            def estimatedSolarCapacityList = facts
+                    .matchAssetState(new AssetQuery()
+                            .parents(parentMeterAssetId)
+                            .attributeName("estimatedSolarCapacity"))
+                    .toList()
+
+            // Calculate the total estimated solar capacity of active meters
+            def estimatedSolarCapacityMeters = estimatedSolarCapacityList
+                    .findAll { activePowerReadingsIds.contains(it.id) }
+                    .findAll { it.value.isPresent() }
+                    .collect { it.value.get() }
+                    .sum() as Double
+
+            // Update meter parent - estimated solar capacity attribute
+            if (estimatedSolarCapacityMeters != null) {
+                assets.dispatch(parentMeterAssetId, "estimatedSolarCapacity", estimatedSolarCapacityMeters)
             }
 
             // Get number of households from district parent
@@ -263,10 +292,32 @@ rules.add()
                             .attributeName("powerImportMax")
             ).flatMap { it.value }.orElse(null) as Double
 
+            // Get turn on dynamic solar capacity from district parent
+            Boolean turnOnDynamicSolarCapacity = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("turnOnDynamicSolarCapacity")
+            ).flatMap { it.value }.orElse(false) as Boolean
+
+            // Get dynamic estimated solar capacity from district parent
+            Double estimatedSolarCapacityDistrictPrevious = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("estimatedSolarCapacityDistrict")
+            ).flatMap { it.value }.orElse(null) as Double
+
+            // Get static solar capacity from solar asset
+            Double solarCapacitySolarAsset = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(solarAssetId)
+                            .attributeName("powerExportMax")
+            ).flatMap { it.value }.orElse(null) as Double
+
             // Update district parent
-            if (sumPower != null && numberOfHouseholds != null && numberOfActivePowerReadings > 0) {
-                Double powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings
-                Double netPowerDistrict = (((powerCorrectionFactor * sumPower) / 1000) as Double).round(3)
+            if (netPowerMetersWatt != null && numberOfHouseholds != null && numberOfActivePowerReadings > 0) {
+                def powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings as Double
+                def netPowerDistrict = (powerCorrectionFactor * netPowerMetersWatt).round() / 1000 as Double
+                def consumptionPowerDistrict = netPowerDistrict as Double
 
                 // Update district parent - net power attribute
                 assets.dispatch(parentDistrictAssetId, "powerDistrict", netPowerDistrict)
@@ -276,15 +327,31 @@ rules.add()
                     assets.dispatch(parentDistrictAssetId, "powerCorrectionFactor", powerCorrectionFactor)
                 }
 
-                // Update district parent - power consumption attribute
-                if (solarPowerDistrict != null) {
-                    def consumptionPowerDistrict = netPowerDistrict - solarPowerDistrict
-                    assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", consumptionPowerDistrict)
+                if (solarPowerDistrict != null && solarCapacitySolarAsset != null && solarCapacitySolarAsset > 0) {
+                    // Calculate static solar power production
+                    def solarPowerMetersWatt = (solarPowerDistrict * 1000) / powerCorrectionFactor as Double
+
+                    // Calculate dynamic solar power production
+                    if (turnOnDynamicSolarCapacity && estimatedSolarCapacityMeters != null) {
+                        solarPowerMetersWatt = (solarPowerDistrict * 1000) * (estimatedSolarCapacityMeters / solarCapacitySolarAsset)
+
+                        // Update district parent - estimated solar capacity attribute
+                        def estimatedSolarCapacityDistrict = (powerCorrectionFactor * estimatedSolarCapacityMeters * 1000).round() / 1000 as Double
+
+                        if (estimatedSolarCapacityDistrict != estimatedSolarCapacityDistrictPrevious) {
+                            assets.dispatch(parentDistrictAssetId, "estimatedSolarCapacityDistrict", estimatedSolarCapacityDistrict)
+                        }
+                    }
+
+                    consumptionPowerDistrict = (powerCorrectionFactor * (netPowerMetersWatt - solarPowerMetersWatt)).round() / 1000
                 }
+
+                // Update district parent - power consumption attribute
+                assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", consumptionPowerDistrict)
 
                 // Update district parent - power import percentage attribute
                 if (powerImportMax != null) {
-                    def netPowerDistrictPercentage = netPowerDistrict / powerImportMax * 100
+                    def netPowerDistrictPercentage = (netPowerDistrict / powerImportMax * 100).round() as Integer
                     assets.dispatch(parentDistrictAssetId, "powerImportPercentage", netPowerDistrictPercentage)
                 }
             }
@@ -322,11 +389,13 @@ rules.add()
 
             // Update district parent - solar power attribute
             if (interpolatedSolarValue != null) {
+                interpolatedSolarValue = (interpolatedSolarValue * 1000).round() /1000
                 assets.dispatch(parentDistrictAssetId, "powerSolarDistrict", interpolatedSolarValue)
             }
 
             // Update research asset 1 - net power forecast attribute
             if (interpolatedNetPowerValue != null && researchAsset1Id != "") {
+                interpolatedNetPowerValue =(interpolatedNetPowerValue * 1000).round() / 1000
                 assets.dispatch(researchAsset1Id, "netPowerForecast", interpolatedNetPowerValue)
             }
         })
@@ -1403,7 +1472,7 @@ rules.add()
                                 .ids(assetIds)
                                 .attributeNames(
                                         OurgridMeterAsset.CHALLENGE_POINTS.name,
-                                        OurgridMeterAsset.PEAK_POINTS.name,
+                                        OurgridMeterAsset.PEAK_POINTS.name
                                 )
                 ).toList()
 
@@ -1446,6 +1515,128 @@ rules.add()
                         assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_EARNINGS.name, earnings)
                     }
                 }
+        })
+
+rules.add()
+        .priority(8)
+        .name("Estimate solar capacity rule")
+        .when({ facts ->
+            // Rule triggers
+            boolean triggerRule = false
+            long currentMillis = facts.clock.currentTimeMillis
+
+            // Trigger rule at 11:00pm
+            String dateCurrent = dateOnlyFormat.format(new Date(currentMillis + 3600000L))
+
+            if (dateCurrent != datePreviousRule8) {
+                facts.bind("dateFromStr", datePreviousRule8)
+                facts.bind("dateToStr", dateCurrent)
+                datePreviousRule8 = dateCurrent
+                triggerRule = true
+            }
+
+            return triggerRule
+        })
+        .then({ facts ->
+            def dateFromStr = facts.bound("dateFromStr") as String
+            def dateToStr = facts.bound("dateToStr") as String
+
+            // Find all relevant children's attributes
+            def children = facts.matchAssetState(
+                    new AssetQuery()
+                            .parents(parentMeterAssetId)
+                            .types(OurgridMeterAsset)
+                            .attributeNames(
+                                    OurgridMeterAsset.POWER.name,
+                                    OurgridMeterAsset.POWER_MINIMUM.name
+                            )
+            ).toList()
+
+            // Stop if group is empty
+            if (children.isEmpty()) {
+                return
+            }
+
+            // Create a map using child asset ID as key and corresponding attributes as value
+            Map<String, Map<Object, Object>> childrenAttributes = [:].withDefault { [:].withDefault { null } }
+
+            children.each { attributeInfo ->
+                String assetId = attributeInfo.id
+                String attributeName = attributeInfo.name
+                def value = attributeInfo.value.orElse(null)
+
+                childrenAttributes[assetId][attributeName] = value
+            }
+
+            // Get static solar capacity from solar asset
+            def solarCapacitySolarAsset = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(solarAssetId)
+                            .attributeName("powerExportMax")
+            ).flatMap { it.value }.orElse(null) as Double
+
+            // Get solar forecast of previous day
+            TreeMap<String, Double> solarForecastDatapoints = getDatabaseDatapoints("asset_datapoint", solarAssetId, "powerForecast", dateFromStr, dateToStr)
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+            childrenAttributes.forEach { assetId, values ->
+                def powerMinimumPrevious = values.get(OurgridMeterAsset.POWER_MINIMUM.name) as Double
+
+                // Get power data-points of previous day
+                TreeMap<String, Double> powerDatapoints = getDatabaseDatapoints("asset_datapoint", assetId, OurgridMeterAsset.POWER.name, dateFromStr, dateToStr)
+
+                // Find power data-points before 4:00am
+                def powerDatapointsBefore4am = powerDatapoints.findAll { timestamp, power ->
+                    // Handle different timestamp formats from database
+                    long timestampMillis = sdf.parse(timestamp).getTime()
+                    LocalTime localTime = Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalTime()
+                    localTime.isBefore(LocalTime.of(4, 0))
+                }
+
+                // Calculate baseline power by finding the minimum power value between 0:00-4:00 hour
+                def powerBaselineEntry = null as Map.Entry<String, Double>
+
+                if (!powerDatapointsBefore4am.isEmpty()) {
+                    powerBaselineEntry = powerDatapointsBefore4am.entrySet().min { it.value }
+                }
+
+                // Find minimum power value between 0:00-23:00 hour
+                def powerMinimumEntry = powerDatapoints.entrySet().min { it.value }
+
+                if (powerBaselineEntry != null && powerMinimumEntry != null) {
+                    // Format timestamp to correct dateTime
+                    long powerMinimumTimestampMillis = sdf.parse(powerMinimumEntry.key).getTime()
+                    String dateTimeStr = sdf.format(new Date(powerMinimumTimestampMillis))
+
+                    // List with desired date-times for forecast interpolation
+                    List<String> dateTimeList = new ArrayList<>()
+                    dateTimeList.add(dateTimeStr)
+
+                    // Interpolate forecast
+                    TreeMap<String, Double> interpolatedForecast = interpolateForecast(dateTimeList, sdf, solarForecastDatapoints)
+                    def interpolatedSolarPower = interpolatedForecast.get(dateTimeStr) as Double
+
+                    def powerBaseline = powerBaselineEntry.value as Double
+                    def powerMinimum = powerMinimumEntry.value as Double
+
+                    // Update power baseline attribute
+                    assets.dispatch(assetId, OurgridMeterAsset.POWER_BASELINE.name, powerBaseline)
+
+                    // Only calculate new estimated solar capacity on new power minimum
+                    if (powerMinimumPrevious == null || powerMinimum < powerMinimumPrevious) {
+                        // Update power minimum attribute
+                        assets.dispatch(assetId, OurgridMeterAsset.POWER_MINIMUM.name, powerMinimum)
+
+                        if (interpolatedSolarPower != null && solarCapacitySolarAsset != null) {
+                            def estimatedSolarCapacity = (((powerMinimum - powerBaseline) / interpolatedSolarPower) * solarCapacitySolarAsset).round() / 1000 as Double
+
+                            // Update estimated solar capacity attribute
+                            assets.dispatch(assetId, OurgridMeterAsset.ESTIMATED_SOLAR_CAPACITY.name, estimatedSolarCapacity)
+                        }
+                    }
+                }
+            }
         })
 
 
