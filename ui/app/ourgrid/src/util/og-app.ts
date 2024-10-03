@@ -135,8 +135,8 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         super.disconnectedCallback();
     }
 
-    protected onVisibilityChange(ev: Event) {
-        super.onVisibilityChange(ev);
+    protected _handleVisibilityChange(ev: Event) {
+        super._handleVisibilityChange(ev);
         if(manager.console.isMobile && document.visibilityState === 'visible') {
             const exclusions = ['setup'];
             if(!exclusions.includes(this._page)) {
