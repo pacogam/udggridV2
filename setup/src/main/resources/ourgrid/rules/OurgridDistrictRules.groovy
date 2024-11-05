@@ -389,13 +389,13 @@ rules.add()
 
             // Update district parent - solar power attribute
             if (interpolatedSolarValue != null) {
-                interpolatedSolarValue = (interpolatedSolarValue * 1000).round() /1000
+                interpolatedSolarValue = (interpolatedSolarValue * 1000).round() / 1000
                 assets.dispatch(parentDistrictAssetId, "powerSolarDistrict", interpolatedSolarValue)
             }
 
             // Update research asset 1 - net power forecast attribute
             if (interpolatedNetPowerValue != null && researchAsset1Id != "") {
-                interpolatedNetPowerValue =(interpolatedNetPowerValue * 1000).round() / 1000
+                interpolatedNetPowerValue = (interpolatedNetPowerValue * 1000).round() / 1000
                 assets.dispatch(researchAsset1Id, "netPowerForecast", interpolatedNetPowerValue)
             }
         })
@@ -1525,8 +1525,8 @@ rules.add()
             boolean triggerRule = false
             long currentMillis = facts.clock.currentTimeMillis
 
-            // Trigger rule at 11:00pm
-            String dateCurrent = dateOnlyFormat.format(new Date(currentMillis + 3600000L))
+            // Trigger rule at 1:00am
+            String dateCurrent = dateOnlyFormat.format(new Date(currentMillis - 3600000L))
 
             if (dateCurrent != datePreviousRule8) {
                 facts.bind("dateFromStr", datePreviousRule8)
@@ -1586,19 +1586,19 @@ rules.add()
                 // Get power data-points of previous day
                 TreeMap<String, Double> powerDatapoints = getDatabaseDatapoints("asset_datapoint", assetId, OurgridMeterAsset.POWER.name, dateFromStr, dateToStr)
 
-                // Find power data-points before 4:00am
-                def powerDatapointsBefore4am = powerDatapoints.findAll { timestamp, power ->
-                    // Handle different timestamp formats from database
+                // Find power data-points between 0:00am and 4:00am, or between 11:00pm and 12:00pm
+                def powerDataPointsNightTime = powerDatapoints.findAll { timestamp, power ->
+                    // Handle different timestamp formats from the database
                     long timestampMillis = sdf.parse(timestamp).getTime()
                     LocalTime localTime = Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).toLocalTime()
-                    localTime.isBefore(LocalTime.of(4, 0))
+                    localTime.isBefore(LocalTime.of(4, 0)) || localTime.isAfter(LocalTime.of(23, 0))
                 }
 
-                // Calculate baseline power by finding the minimum power value between 0:00-4:00 hour
+                // Calculate baseline power by finding the minimum power value between 0:00am and 4:00am, or between 11:00pm and 12:00pm
                 def powerBaselineEntry = null as Map.Entry<String, Double>
 
-                if (!powerDatapointsBefore4am.isEmpty()) {
-                    powerBaselineEntry = powerDatapointsBefore4am.entrySet().min { it.value }
+                if (!powerDataPointsNightTime.isEmpty()) {
+                    powerBaselineEntry = powerDataPointsNightTime.entrySet().min { it.value }
                 }
 
                 // Find minimum power value between 0:00-23:00 hour
@@ -1615,10 +1615,13 @@ rules.add()
 
                     // Interpolate forecast
                     TreeMap<String, Double> interpolatedForecast = interpolateForecast(dateTimeList, sdf, solarForecastDatapoints)
-                    def interpolatedSolarPower = interpolatedForecast.get(dateTimeStr) as Double
+                    def interpolatedSolarPowerSolarAsset = (interpolatedForecast.get(dateTimeStr) * 1000).round() as Double
 
-                    def powerBaseline = powerBaselineEntry.value as Double
-                    def powerMinimum = powerMinimumEntry.value as Double
+                    def powerBaseline = powerBaselineEntry.value.round() as Double
+                    def powerMinimum = powerMinimumEntry.value.round() as Double
+                    def powerSolarMinimum = powerMinimum - powerBaseline
+
+                    LOG.info("AssetId: '" + assetId + "'; New power minimum found. Interpolated Solar Forecast: " + interpolatedForecast)
 
                     // Update power baseline attribute
                     assets.dispatch(assetId, OurgridMeterAsset.POWER_BASELINE.name, powerBaseline)
@@ -1628,9 +1631,13 @@ rules.add()
                         // Update power minimum attribute
                         assets.dispatch(assetId, OurgridMeterAsset.POWER_MINIMUM.name, powerMinimum)
 
-                        if (interpolatedSolarPower != null && solarCapacitySolarAsset != null) {
-                            def estimatedSolarCapacity = (((powerMinimum - powerBaseline) / interpolatedSolarPower) * solarCapacitySolarAsset).round() / 1000 as Double
+                        if (interpolatedSolarPowerSolarAsset != null && solarCapacitySolarAsset != null) {
+                            def estimatedSolarCapacity = 0.0 as Double
 
+                            // Calculate solar capacity when power minimum is during daytime and estimated solar power minimum is more than -100 Watt
+                            if (interpolatedSolarPowerSolarAsset < 0 && powerSolarMinimum <= -100) {
+                                estimatedSolarCapacity = ((powerSolarMinimum / interpolatedSolarPowerSolarAsset) * solarCapacitySolarAsset * 1000).round() / 1000
+                            }
                             // Update estimated solar capacity attribute
                             assets.dispatch(assetId, OurgridMeterAsset.ESTIMATED_SOLAR_CAPACITY.name, estimatedSolarCapacity)
                         }
