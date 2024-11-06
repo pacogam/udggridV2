@@ -131,7 +131,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has("challengeNotification") && urlParams.get("challengeNotification") === "true") {
+        if(urlParams.has(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME) && urlParams.get(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME) === "true") {
             this.checkForChallengeMissedModal(this.challengeAsset);
         }
 
@@ -180,6 +180,10 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
     protected showChallengeMissedModal() {
         showChallengeMissedDialog();
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.delete(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME);
+        const newUrl = `${window.location.origin + window.location.pathname}?${urlParams.toString()}`;
+        window.history.pushState({path: newUrl},'',newUrl);
     }
 
     static get styles() {
