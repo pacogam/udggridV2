@@ -165,6 +165,11 @@
     "minutesJoined": "Joined for {{value}} minutes",
     "action": "End challenge"
   },
+  "panel_challengeMissed": {
+    "heading": "Sorry!",
+    "text": "You missed the challenge, try again next time!",
+    "action": "Close"
+  },
   "setup": {
     "page1-heading": "My house",
     "page1-text": "With this information, we can provide personalized tips.",
