@@ -97,6 +97,24 @@ export function showLanguageDialog(languages: Languages, hostElement?: HTMLEleme
     return show ? showDialog(dialog, hostElement) : dialog;
 }
 
+export function showChallengeMissedDialog(hostElement?: HTMLElement, show = true) {
+    const action = {
+        content: 'panel_challengeMissed.action'
+    } as OgDialogAction;
+    const dialog = (new OgDialog()
+        .setHeading('panel_challengeMissed.heading')
+        .setDismissAction(null)
+        .setContent(() => html`
+            <div class="text-primary bold">
+                <or-translate style="color: var(--og-color-secondary)" value="${'panel_challengeMissed.text'}"></or-translate>
+            </div>
+        `) as OgDialog
+
+    ).setDark(true).setAlign('center').setActionBtn(action);
+
+    return show ? showDialog(dialog, hostElement) : dialog;
+}
+
 export function showLastChallengeResultDialog(meterAsset: Asset, challengeAsset: Asset, hostElement?: HTMLElement, show = true): OgDialog {
     const challengeDuration: number = challengeAsset?.attributes?.[Constants.CHALLENGE_DURATION_ATTRIBUTE]?.value || Defaults.CHALLENGE_DURATION_MINUTES;
     const challengeWait: number = challengeAsset?.attributes?.[Constants.CHALLENGE_WAIT_ATTRIBUTE]?.value || Defaults.CHALLENGE_WAIT_MINUTES;

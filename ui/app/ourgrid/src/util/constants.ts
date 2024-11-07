@@ -19,4 +19,7 @@ export class Constants {
 
     // Local storage related
     static LOCALSTORAGE_LAST_CHALLENGE_COMPLETED_KEY: string = 'lastChallengeCompleted';
+
+    // URL parameters related
+    static CHALLENGE_NOTIFICATION_PARAMS_NAME: string = 'challengeNotification'
 }

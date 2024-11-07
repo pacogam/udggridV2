@@ -17,7 +17,7 @@ import {OgMeterChallengeState, OgMeterConnectedState} from '../util/util';
 import {Constants} from '../util/constants';
 import manager from '@openremote/core';
 import moment from 'moment';
-import {showLastChallengeResultDialog} from '../components/og-dialog';
+import {showChallengeMissedDialog, showLastChallengeResultDialog} from '../components/og-dialog';
 import {Defaults} from '../util/defaults';
 
 export function pageHomeProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
@@ -119,7 +119,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         }
     }
 
-    protected firstUpdated(_changedProps: PropertyValues) {
+    protected firstUpdated(changedProps: PropertyValues) {
         if(this.meterAsset && this.challengeAsset) {
             this.checkForChallengeFinishModal(this.meterAsset, this.challengeAsset).then(result => {
                 if(result) {
@@ -129,6 +129,13 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         } else {
             console.warn('meterAsset and/or challengeAsset were not present during firstUpdated()');
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME) && urlParams.get(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME) === "true") {
+            this.checkForChallengeMissedModal(this.challengeAsset);
+        }
+
+        return super.firstUpdated(changedProps);
     }
 
     // Returns true or false depending on whether a "challenge finished" modal should be shown
@@ -158,6 +165,25 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     protected showChallengeCompletedModal(meterAsset: Asset, challengeAsset: Asset) {
         showLastChallengeResultDialog(meterAsset, challengeAsset);
         localStorage.setItem(Constants.LOCALSTORAGE_LAST_CHALLENGE_COMPLETED_KEY, new Date().getTime().toString());
+    }
+
+    protected async checkForChallengeMissedModal(challengeAsset?: Asset) {
+        const challengeEnd = challengeAsset?.attributes?.[Constants.CHALLENGE_END_TIME_ATTRIBUTE]?.value;
+        if(challengeEnd) {
+            const endMoment = moment(challengeEnd);
+            const now = moment();
+            if(now.isAfter(endMoment)) {
+                this.showChallengeMissedModal();
+            }
+        }
+    }
+
+    protected showChallengeMissedModal() {
+        showChallengeMissedDialog();
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.delete(Constants.CHALLENGE_NOTIFICATION_PARAMS_NAME);
+        const newUrl = `${window.location.origin + window.location.pathname}?${urlParams.toString()}`;
+        window.history.pushState({path: newUrl},'',newUrl);
     }
 
     static get styles() {

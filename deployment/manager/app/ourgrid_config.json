@@ -21,6 +21,11 @@
         "name": "The Hague",
         "ourGridUrl": "https://denhaag.openremote.app/ourgrid",
         "realm": "gems"
+      },
+      {
+        "name": "Weert",
+        "ourGridUrl": "https://staging.ourgrid.openremote.app/ourgrid",
+        "realm": "amsterdam"
       }
     ]
   }
