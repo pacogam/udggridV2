@@ -143,6 +143,10 @@ public class OurgridTemplateProtocol extends AbstractProtocol<OurgridTemplateAge
         solarAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
 
         solarAsset.addOrReplaceAttributes(
+                new Attribute<>("location", ValueType.GEO_JSON_POINT)
+                        .addOrReplaceMeta(
+                                new MetaItem<>(MetaItemType.RULE_STATE)
+                        ),
                 new Attribute<>("powerForecast", ValueType.NUMBER)
                         .addOrReplaceMeta(
                                 new MetaItem<>(MetaItemType.HAS_PREDICTED_DATA_POINTS),
@@ -261,6 +265,7 @@ public class OurgridTemplateProtocol extends AbstractProtocol<OurgridTemplateAge
                 "3) Adjust the default input variables to your specific district requirements\n" +
                 "4) Connect power meters manually or with the Earn-E Agent\n" +
                 "5) Turn on challenges and peak points\n" +
+                "6) Turn on dynamic solar capacity" +
                 "\n" +
                 "You can remove this setup agent after you have created a district";
 

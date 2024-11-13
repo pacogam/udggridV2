@@ -274,6 +274,12 @@ public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
             new MetaItem<>(MetaItemType.STORE_DATA_POINTS)
     ).withUnits(UNITS_KILO, UNITS_WATT);
 
+    public static final AttributeDescriptor<Boolean> ESTIMATE_SOLAR_CAPACITY_MANUALLY = new AttributeDescriptor<>("estimateSolarCapacityManually", ValueType.BOOLEAN,
+            new MetaItem<>(MetaItemType.LABEL, "Estimate solar capacity manually"),
+            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+            new MetaItem<>(MetaItemType.RULE_STATE)
+    );
+
 
     public static final AssetDescriptor<OurgridMeterAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterAsset.class);
 
