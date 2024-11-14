@@ -1577,7 +1577,7 @@ rules.add()
                     assets.dispatch(assetId, OurgridMeterAsset.TOTAL_POINTS.name, totalPoints)
 
                     if (challengeExchangeRateValue != null) {
-                        def earnings = challengeExchangeRateValue * totalPoints
+                        def earnings = (challengeExchangeRateValue * totalPoints as Double).round(2)
                         assets.dispatch(assetId, OurgridMeterAsset.CHALLENGE_EARNINGS.name, earnings)
                     }
                 }
