@@ -275,13 +275,6 @@ rules.add()
                     .toList()
                     .collectEntries { [it.id, it.value.orElse(null)] }
 
-            // Get turn on dynamic solar capacity from district parent
-            Boolean turnOnDynamicSolarCapacity = facts.matchFirstAssetState(
-                    new AssetQuery()
-                            .ids(parentDistrictAssetId)
-                            .attributeName("turnOnDynamicSolarCapacity")
-            ).flatMap { it.value }.orElse(false) as Boolean
-
             // Get solar asset location
             def solarAssetLocation = facts.matchFirstAssetState(
                     new AssetQuery()
@@ -291,7 +284,7 @@ rules.add()
 
             def solarIrradiance = null as Double
 
-            if (turnOnDynamicSolarCapacity && solarAssetLocation != null) {
+            if (solarAssetLocation != null) {
                 // Calculate maximum solar irradiance for given day and location
                 def latitude = solarAssetLocation.getY() as double
                 def longitude = solarAssetLocation.getX() as double
@@ -325,8 +318,8 @@ rules.add()
                         }
                     }
                 }
-            } else if (turnOnDynamicSolarCapacity && solarAssetLocation == null) {
-                LOG.warning("Dynamic solar capacity calculation failed: solar asset location is missing; Set the location on the OurGrid Solar Production asset with ID: '${parentMeterAssetId}'")
+            } else if (solarAssetLocation == null) {
+                LOG.warning("Solar irradiance calculation failed: solar asset location is missing; Set the location on the OurGrid Solar Production asset with ID: '${parentMeterAssetId}'")
             }
 
             // Calculate the total estimated solar capacity of active meters
@@ -378,6 +371,13 @@ rules.add()
                             .ids(solarAssetId)
                             .attributeName("powerExportMax")
             ).flatMap { it.value }.orElse(null) as Double
+
+            // Get turn on dynamic solar capacity from district parent
+            Boolean turnOnDynamicSolarCapacity = facts.matchFirstAssetState(
+                    new AssetQuery()
+                            .ids(parentDistrictAssetId)
+                            .attributeName("turnOnDynamicSolarCapacity")
+            ).flatMap { it.value }.orElse(false) as Boolean
 
             // Update district parent
             if (netPowerMetersWatt != null && numberOfHouseholds != null && numberOfActivePowerReadings > 0) {
