@@ -248,21 +248,18 @@ rules.add()
             def activePowerReadingsIds = activePowerReadingsMap.keySet().toList() as String[]
 
             // Asset ID's of active power reading with automatic solar capacity estimation
-            def automaticSolarCapacityEstimationIds = facts
+            def automaticSolarCapacityEstimationIds = new HashSet(facts
                     .matchAssetState(new AssetQuery()
                             .ids(activePowerReadingsIds)
                             .attributeName("estimateSolarCapacityManually"))
                     .toList()
                     .findAll { it.value.orElse(false) == false }
-                    .collect { it.id } as String[]
+                    .collect { it.id })
 
-            def powerReadingsForSolarCapacityEstimationMap = activePowerReadingsMap
-                    .findAll { automaticSolarCapacityEstimationIds.contains(it.key) }
-
-            // Get power minimum of automatic solar capacity estimation children
+            // Get power minimum of all active children
             def powerMinimumMap = facts
                     .matchAssetState(new AssetQuery()
-                            .ids(automaticSolarCapacityEstimationIds)
+                            .ids(activePowerReadingsIds)
                             .attributeName("powerMinimum"))
                     .toList()
                     .collectEntries { [it.id, it.value.orElse(null)] }
@@ -291,8 +288,7 @@ rules.add()
 
                 solarIrradiance = calculateSolarIrradiance(currentTimestamp, latitude, longitude)
 
-                // Calculate estimated solar capacity
-                powerReadingsForSolarCapacityEstimationMap.each { entry ->
+                activePowerReadingsMap.each { entry ->
                     def assetId = entry.key as String
                     def power = (entry.value as Double).round() as Double
                     def powerMinimum = powerMinimumMap.get(assetId) as Double
@@ -300,21 +296,25 @@ rules.add()
                     if (powerMinimum == null || power <= powerMinimum) {
                         assets.dispatch(assetId, "powerMinimum", power)
 
-                        def estimatedSolarCapacityPrevious = estimatedSolarCapacityMap.get(assetId) as Double
+                        // Calculate estimated solar capacity
+                        if (automaticSolarCapacityEstimationIds.contains(assetId)) {
+                            def estimatedSolarCapacityPrevious = estimatedSolarCapacityMap.get(assetId) as Double
 
-                        if (power < 0) {
-                            def estimatedSolarCapacity = (power / 100).round() / -10 as Double
+                            if (power < 0) {
+                                def solarIrradianceFactor = 1.0 as Double
 
-                            // Standard testing conditions for solar panels = 1000 Watt/m2
-                            if (solarIrradiance > 0 && solarIrradiance < 1000) {
-                                def solarIrradianceFactor = 1000 / solarIrradiance as Double
-                                estimatedSolarCapacity = (solarIrradianceFactor * power / 100).round() / -10
+                                // Standard testing conditions for solar panels = 1000 Watt/m2
+                                if (solarIrradiance > 0 && solarIrradiance < 1000) {
+                                    solarIrradianceFactor = 1000 / solarIrradiance as Double
+                                }
+
+                                def estimatedSolarCapacity = (solarIrradianceFactor * power / 100).round() / -10
+
+                                estimatedSolarCapacityMap.put(assetId, estimatedSolarCapacity)
+                                assets.dispatch(assetId, "estimatedSolarCapacity", estimatedSolarCapacity)
+                            } else if (power >= 0 && estimatedSolarCapacityPrevious == null) {
+                                assets.dispatch(assetId, "estimatedSolarCapacity", 0.0)
                             }
-
-                            estimatedSolarCapacityMap.put(assetId, estimatedSolarCapacity)
-                            assets.dispatch(assetId, "estimatedSolarCapacity", estimatedSolarCapacity)
-                        } else if (power >= 0 && estimatedSolarCapacityPrevious == null) {
-                            assets.dispatch(assetId, "estimatedSolarCapacity", 0.0)
                         }
                     }
                 }
@@ -323,7 +323,7 @@ rules.add()
             }
 
             // Calculate the total estimated solar capacity of active meters
-            def estimatedSolarCapacityMeters = estimatedSolarCapacityMap.values().findAll { it != null }.sum() as Double
+            def estimatedSolarCapacityMeters = (estimatedSolarCapacityMap.values().findAll { it != null }.sum() * 1000).round() / 1000 as Double
 
             // Update meter parent - estimated solar capacity attribute
             if (estimatedSolarCapacityMeters != null) {
