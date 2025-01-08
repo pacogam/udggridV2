@@ -1,5 +1,5 @@
 {
-  "extends": "../../../openremote/ui/tsconfig",
+  "extends": "../../tsconfig",
   "compilerOptions": {
     "outDir": "./lib",
     "rootDir": "src",
@@ -9,6 +9,7 @@
     "./src"
   ],
   "references": [
-    { "path": "../../../openremote/ui/app/manager" }
+    { "path": "../../component/model" },
+    { "path": "../../component/rest" }
   ]
 }

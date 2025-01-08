@@ -4,13 +4,14 @@ import {customElement, query, state} from 'lit/decorators.js';
 import {Store} from '@reduxjs/toolkit';
 import {css, html, TemplateResult} from 'lit';
 import './../features/og-characteristics-settings';
-import {Asset, DeviceCharacteristic} from '@openremote/model';
+import {Asset, DeviceCharacteristic} from 'model';
 import { InputType } from '@openremote/or-mwc-components/or-mwc-input';
 import {OgCharacteristicsUpdateEvent} from '../features/og-characteristics-settings';
 import manager from '@openremote/core';
 import {OgInput} from '../components/og-input';
 import {i18next} from '@openremote/or-translate';
 import {Defaults} from '../util/defaults';
+import rest from "rest";
 
 export function pageCharacteristicsProvider(store: Store<GridAppStateKeyed>): OgPageProvider<GridAppStateKeyed> {
     return {
@@ -103,7 +104,7 @@ export class PageCharacteristics extends OgPage<GridAppStateKeyed> {
     protected onSaveButton(_ev: CustomEvent) {
         if(this.newCharacteristics && this.valid) {
             this.submitButton.loading = true;
-            manager.rest.api.DeviceCharacteristicsResource.setCharacteristics({
+            rest.api.DeviceCharacteristicsResource.setCharacteristics({
                 characteristics: this.newCharacteristics
 
             }).then(() => {

@@ -2,7 +2,7 @@ import {TemplateResult, html} from "lit";
 import {customElement, query} from "lit/decorators.js";
 import {OgDataPanel} from "../components/og-data-panel";
 import {getStatisticTemplate} from "./panel-trophies";
-import {DeviceCharacteristic, WellknownCharacteristics} from "@openremote/model";
+import {DeviceCharacteristic, WellknownCharacteristics} from "model";
 import manager from "@openremote/core";
 import {when} from "lit/directives/when.js";
 import {InputType, OrInputChangedEvent} from "@openremote/or-mwc-components/or-mwc-input";
@@ -12,6 +12,7 @@ import {showSnackbar} from "../components/og-snackbar";
 import {i18next} from "@openremote/or-translate";
 import {OgInput} from "../components/og-input";
 import { styleMap } from "lit/directives/style-map.js";
+import rest from "rest";
 
 @customElement('panel-challenge-tips')
 export class PanelChallengeTips extends OgDataPanel {
@@ -32,7 +33,7 @@ export class PanelChallengeTips extends OgDataPanel {
 
     protected async getHouseholdCharacteristics(): Promise<Map<string, DeviceCharacteristic>> {
         try {
-            const data = (await manager.rest.api.DeviceCharacteristicsResource.getCharacteristics()).data;
+            const data = (await rest.api.DeviceCharacteristicsResource.getCharacteristics()).data;
             return new Map<string, DeviceCharacteristic>(data.map(d => [d.id, d]));
         } catch (e) {
             console.error(e);
@@ -237,7 +238,7 @@ export class PanelChallengeTips extends OgDataPanel {
     protected _setActionButtonAttribute(newState: boolean): void {
         if (this.meterAsset) {
 
-            manager.rest.api.DeviceBatteryResource.actionButton({meterId: this.meterAsset.id, buttonState: newState}).then(() => {
+            rest.api.DeviceBatteryResource.actionButton({meterId: this.meterAsset.id, buttonState: newState}).then(() => {
                 if (newState) {
                     showSnackbar(undefined, i18next.t("panel_tips.action6-success-on"));
                 } else {

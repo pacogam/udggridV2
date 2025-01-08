@@ -1,6 +1,6 @@
 import {LitElement, TemplateResult, html, css} from "lit";
 import {customElement, property, state} from "lit/decorators.js";
-import {OurGridConfig, OurGridGatewayCity} from "@openremote/model";
+import {OurGridConfig, OurGridGatewayCity} from "model";
 import { Task } from "@lit/task";
 import { InputType } from "@openremote/or-mwc-components/or-mwc-input";
 import { ListItem } from "@openremote/or-mwc-components/or-mwc-list";

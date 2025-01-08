@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3F604C2CEC113E9629E004EA /* Pods_OurGrid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 538F136169B742A127CEB7BB /* Pods_OurGrid.framework */; };
 		4C69D99A2B838BF6004631C5 /* ORLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C69D9992B838BF6004631C5 /* ORLib.framework */; };
-		4C69D99B2B838BF6004631C5 /* ORLib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4C69D9992B838BF6004631C5 /* ORLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4C69D99E2B838E62004631C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4C69D9782B838B13004631C5 /* Assets.xcassets */; };
 		4C69D99F2B8394A6004631C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C69D96F2B838B12004631C5 /* AppDelegate.swift */; };
 		4C69D9A02B8394A8004631C5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C69D9712B838B12004631C5 /* SceneDelegate.swift */; };
@@ -26,7 +25,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				4C69D99B2B838BF6004631C5 /* ORLib.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;

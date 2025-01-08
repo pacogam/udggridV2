@@ -3,10 +3,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
+        maven {
+            url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+        }
     }
 }
 rootProject.name = "reschool"
 include ':app'
-include ':ORLib'
-project(':ORLib').projectDir = file('../../console-android/ORLib')

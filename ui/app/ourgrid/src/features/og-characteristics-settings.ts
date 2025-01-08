@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import {OgBatteryBrand, OgHeatPumpBrand, OgVehicleBrand} from '../util/util';
 import {OgInputButtonGroupOption, OgSpecialInputType} from '../components/og-input';
 import {i18next} from '@openremote/or-translate';
-import {DeviceCharacteristic, WellknownCharacteristics} from '@openremote/model';
+import {DeviceCharacteristic, WellknownCharacteristics} from 'model';
 import { InputType } from '@openremote/or-mwc-components/or-mwc-input';
 import {getAppStyle} from "../styles";
 

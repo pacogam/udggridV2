@@ -9,6 +9,7 @@ import {InputType} from "@openremote/or-mwc-components/or-mwc-input";
 import {Store} from "@reduxjs/toolkit";
 import {OgPageProvider} from "../util/og-page";
 import {OgSplashPage, SplashStatus} from "../util/og-splash-page";
+import rest from "rest";
 
 export class NeedsOnboardingError extends Error {}
 
@@ -214,7 +215,7 @@ export class SplashDatacheck extends OgSplashPage {
         const needsReadAssetsRole = !manager.hasRole(ClientRole.READ_ASSETS);
         if(needsRestrictedRole || needsReadAssetsRole) {
             try {
-                await manager.rest.api.UserRolesResource.verifyUserRoles();
+                await rest.api.UserRolesResource.verifyUserRoles();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }
             } catch (e) {
                 if(isAxiosError(e)) {
@@ -222,7 +223,7 @@ export class SplashDatacheck extends OgSplashPage {
                     // If 'verify roles request' responds with FORBIDDEN,
                     // correct the user roles, and wait 500ms to let the manager/keycloak process possible changes.
                     if(e.response.status === 403) {
-                        await manager.rest.api.UserRolesResource.correctUserRoles();
+                        await rest.api.UserRolesResource.correctUserRoles();
                         await new Promise(resolve => setTimeout(resolve, 250));
 
                     // If responding with 400, the user does not have access to OurGrid. (for example due to being in master realm)
@@ -304,7 +305,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     protected async fetchBatteryAsset(meterId: string, delay?: number): Promise<Asset> {
         if(!this.batteryAsset) {
-            const asset = (await manager.rest.api.DeviceBatteryResource.getBattery(meterId)).data;
+            const asset = (await rest.api.DeviceBatteryResource.getBattery(meterId)).data;
             if(!asset) {
                 return null;
             }
@@ -329,7 +330,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected async checkDistrictLink(delay?: number) {
         if(!this.districtAsset) {
             try {
-                await manager.rest.api.UserDistrictResource.verifyDistrict();
+                await rest.api.UserDistrictResource.verifyDistrict();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, 250)); }
             } catch (e) {
                 // If 'verify district request' responds with NOT_FOUND, no district is linked.
@@ -347,7 +348,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     protected async linkDistrict(districtName?: string) {
         try {
-            await manager.rest.api.UserDistrictResource.linkDistrict({ assetName: districtName });
+            await rest.api.UserDistrictResource.linkDistrict({ assetName: districtName });
         } catch (e) {
             this.statusText = i18next.t("error.unknown");
             throw new Error("Unknown error when linking the district.");
@@ -428,7 +429,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected async checkChallengeAssetLink(challengeAssetId: string, delay?: number) {
         if(!this.challengeAsset) {
             try {
-                await manager.rest.api.UserChallengesResource.verifyChallengesAsset();
+                await rest.api.UserChallengesResource.verifyChallengesAsset();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }
             } catch (e) {
                 // If 'verify challenge asset request' responds with NOT_FOUND, no challenge asset is linked.
@@ -446,7 +447,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     protected async linkChallengeAsset(challengeAssetId: string) {
         try {
-            await manager.rest.api.UserChallengesResource.linkChallengesAsset({ assetId: challengeAssetId });
+            await rest.api.UserChallengesResource.linkChallengesAsset({ assetId: challengeAssetId });
         } catch (e) {
             this.statusText = i18next.t("error.unknown");
             throw new Error("Unknown error when linking the challenges.");
@@ -518,7 +519,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected async checkPeakPointsAssetLink(peakPointsAssetId: string, delay?: number) {
         if(!this.peakPointsAsset) {
             try {
-                await manager.rest.api.UserPeakPointsResource.verifyPeakPointsAsset();
+                await rest.api.UserPeakPointsResource.verifyPeakPointsAsset();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }
             } catch (e) {
                 // If 'verify peak points asset request' responds with NOT_FOUND, no peak points asset is linked.
@@ -536,7 +537,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     protected async linkPeakPointsAsset(peakPointsAssetId: string) {
         try {
-            await manager.rest.api.UserPeakPointsResource.linkPeakPointsAsset({ assetId: peakPointsAssetId });
+            await rest.api.UserPeakPointsResource.linkPeakPointsAsset({ assetId: peakPointsAssetId });
         } catch (e) {
             console.error(e);
             this.statusText = i18next.t("error.unknown");

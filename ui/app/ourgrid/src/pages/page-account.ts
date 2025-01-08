@@ -14,6 +14,7 @@ import {OgDialog, OgDialogAction, showDialog} from '../components/og-dialog';
 import {User} from '@openremote/model';
 import {showSnackbar} from '../components/og-snackbar';
 import manager from '@openremote/core';
+import rest from "rest";
 
 export function pageAccountProvider(store: Store<GridAppStateKeyed>): OgPageProvider<GridAppStateKeyed> {
     return {
@@ -115,7 +116,7 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
         if (!userId || !realmName) {
             showSnackbar(undefined, 'error.unknown');
         } else {
-            manager.rest.api.UserAccountResource.deleteAccount().then(r => {
+            rest.api.UserAccountResource.deleteAccount().then(r => {
                 if (r.status === 200) {
                     manager.logout();
                 }

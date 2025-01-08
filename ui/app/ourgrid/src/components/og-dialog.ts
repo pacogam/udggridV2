@@ -3,7 +3,7 @@ import {css, html, TemplateResult, unsafeCSS} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {getAppStyle} from '../styles';
 import manager, {DefaultColor4, Languages} from '@openremote/core';
-import {Asset, Attribute, Challenge} from '@openremote/model';
+import {Asset, Attribute, Challenge} from 'model';
 import moment from 'moment';
 import {until} from 'lit/directives/until.js';
 import {InputType, OrMwcInput} from '@openremote/or-mwc-components/or-mwc-input';
@@ -11,6 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { i18next } from '@openremote/or-translate';
 import {Constants} from '../util/constants';
 import {Defaults} from "../util/defaults";
+import rest from "rest";
 
 const styling = css`
   :host {
@@ -126,7 +127,7 @@ export function showLastChallengeResultDialog(meterAsset: Asset, challengeAsset:
             return html`Error`;
         }
         const time = moment(challengePointAttr.timestamp).subtract(challengeDuration + challengeWait + 1, 'minutes');
-        const data = (await manager.rest.api.DeviceChallengesResource.getHistory({
+        const data = (await rest.api.DeviceChallengesResource.getHistory({
             startTimestamp: time.valueOf(),
             endTimestamp: new Date().getTime()
         })).data as Challenge[];

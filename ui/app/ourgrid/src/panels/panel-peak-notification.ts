@@ -10,6 +10,7 @@ import {OgMeterChallengeState} from '../util/util';
 import {PanelPeakUsage} from './panel-peak-usage';
 import {until} from 'lit/directives/until.js';
 import {Defaults} from '../util/defaults';
+import rest from "rest";
 
 const styling = css`
   :host {
@@ -227,7 +228,7 @@ export class PanelPeakNotification extends PanelPeakUsage {
 
         this.waitingForChallengeDeferred = new Util.Deferred();
 
-        await manager.rest.api.DeviceChallengesResource.joinChallenge({
+        await rest.api.DeviceChallengesResource.joinChallenge({
             meterId: this.meterAsset.id,
             challengeId: this.challengeAsset.id
         });

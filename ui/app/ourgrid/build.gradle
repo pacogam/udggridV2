@@ -1,6 +1,6 @@
 buildDir = "dist"
 
-task clean {
+tasks.register('clean') {
     dependsOn npmClean
 }
 

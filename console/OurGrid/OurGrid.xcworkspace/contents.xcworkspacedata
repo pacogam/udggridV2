@@ -7,7 +7,4 @@
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:../../console-ios/ORLib/ORLib.xcodeproj">
-   </FileRef>
 </Workspace>

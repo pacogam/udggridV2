@@ -9,6 +9,7 @@ import {OgDialog, OgDialogAction, showDialog} from '../components/og-dialog';
 import manager from '@openremote/core';
 import {router} from '@openremote/or-app';
 import {OgDataPanel} from '../components/og-data-panel';
+import rest from "rest";
 
 const styling = css`
     #panel-wrapper {
@@ -155,7 +156,7 @@ export class PanelDeviceInfo extends OgDataPanel {
 
     protected async removeDevice(deviceName: string): Promise<void> {
         this.removingState = true;
-        await manager.rest.api.DeviceResource.removeDevice({ deviceName: deviceName });
+        await rest.api.DeviceResource.removeDevice({ deviceName: deviceName });
         await new Promise(resolve => setTimeout(resolve, 500));
         this.removingState = false;
         this.dispatchEvent(new CustomEvent('remove'));

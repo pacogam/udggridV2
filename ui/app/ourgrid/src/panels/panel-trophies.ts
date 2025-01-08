@@ -15,6 +15,7 @@ import {Chip} from '../components/og-chips';
 import {showSnackbar} from '../components/og-snackbar';
 import {Constants} from '../util/constants';
 import {Defaults} from '../util/defaults';
+import rest from "rest";
 
 export function getStatisticTemplate(prefixIcon?: string, isPath = false, leftContent?: TemplateResult, rightContent?: TemplateResult, expandContent?: TemplateResult, expandable = true): TemplateResult {
     const content = html`
@@ -102,7 +103,7 @@ export class PanelTrophies extends OgDataPanel {
 
     // Fetching challenges between start and end date.
     protected async fetchTrophies(start: Date, end: Date): Promise<TrophyItem[]> {
-        const promise = manager.rest.api.DeviceChallengesResource.getHistory({ startTimestamp: start.getTime(), endTimestamp: end.getTime() });
+        const promise = rest.api.DeviceChallengesResource.getHistory({ startTimestamp: start.getTime(), endTimestamp: end.getTime() });
         promise.catch(e => {
             console.error(e);
             showSnackbar(undefined, 'error.challengeDataFailed');

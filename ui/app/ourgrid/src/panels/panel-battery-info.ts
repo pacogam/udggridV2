@@ -9,6 +9,7 @@ import {OgDataPanel} from "../components/og-data-panel";
 import {showSnackbar} from "../components/og-snackbar";
 import {Asset} from "@openremote/model";
 import manager from "@openremote/core";
+import rest from "rest";
 
 const styling = css`
     #panel-wrapper {
@@ -125,7 +126,7 @@ export class PanelBatteryInfo extends OgDataPanel {
     protected setAutomaticControl(automaticControl: boolean): void {
         if (this.batteryAsset && this.meterAsset) {
 
-            manager.rest.api.DeviceBatteryResource.automaticControl({meterId: this.meterAsset.id, automaticControl: automaticControl}).then(() => {
+            rest.api.DeviceBatteryResource.automaticControl({meterId: this.meterAsset.id, automaticControl: automaticControl}).then(() => {
                 if (automaticControl) {
                     showSnackbar(undefined, i18next.t("panel_batteryInfo.turnOnSnackbar"));
                 } else {

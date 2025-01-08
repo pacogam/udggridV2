@@ -12,11 +12,12 @@ import manager from '@openremote/core';
 import {isAxiosError} from '@openremote/rest';
 import {i18next} from '@openremote/or-translate';
 import {GridAppStateKeyed, setUserAsset} from '../../util/og-state';
-import {Asset, DeviceCharacteristic} from '@openremote/model';
+import {Asset, DeviceCharacteristic} from 'model';
 import {OgOnboardingPage, OnboardPage} from '../util/og-onboarding-page';
 import {OgPageProvider} from '../util/og-page';
 import {OgCharacteristicsUpdateEvent} from '../../features/og-characteristics-settings';
 import {Task} from '@lit/task';
+import rest from "rest";
 
 export function page1SetupProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
     return {
@@ -181,7 +182,7 @@ export class Page1Setup extends OgOnboardingPage {
 
         console.debug(`Connecting to ${dongleCode}`);
         try {
-            await manager.rest.api.DeviceResource.linkDevice({
+            await rest.api.DeviceResource.linkDevice({
                 deviceName: dongleCode
             });
         } catch (e) {
@@ -224,7 +225,7 @@ export class Page1Setup extends OgOnboardingPage {
         // Upload characteristics using the fetched asset
         if (this.characteristics) {
             console.debug(`Uploading household characteristics...`);
-            await manager.rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: this.characteristics}).catch((e) => {
+            await rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: this.characteristics}).catch((e) => {
                 console.warn(e);
             });
         }

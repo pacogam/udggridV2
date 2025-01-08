@@ -142,6 +142,7 @@ PODS:
     - nanopb/encode (= 2.30910.0)
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
+  - ORLib (0.3.0)
   - Popover (1.3.0)
   - PromisesObjC (2.4.0)
   - PromisesSwift (2.4.0):
@@ -153,6 +154,7 @@ DEPENDENCIES:
   - IQKeyboardManagerSwift
   - MaterialComponents/Buttons
   - MaterialComponents/TextFields
+  - ORLib (~> 0.3)
   - Popover
 
 SPEC REPOS:
@@ -173,6 +175,7 @@ SPEC REPOS:
     - MDFInternationalization
     - MDFTextAccessibility
     - nanopb
+    - ORLib
     - Popover
     - PromisesObjC
     - PromisesSwift
@@ -194,10 +197,11 @@ SPEC CHECKSUMS:
   MDFInternationalization: d697c55307816222a55685c4ccb1044ffb030c12
   MDFTextAccessibility: f4bb4cc2194286651b59a215fdeaa0e05dc90ba5
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
+  ORLib: 187a16512789564e61c19e43b98a792335dd0c77
   Popover: 10e1d9528f81d9504df984b7b3f491292bc1822d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
 
-PODFILE CHECKSUM: 46c981bcb515e47b42c1fcf8f13ab7c30128fdfe
+PODFILE CHECKSUM: 918f9ac2acc617a0362051d6380438cdb5d6e1f1
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

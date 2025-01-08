@@ -1,4 +1,4 @@
-import {OurGridGatewayCity} from "@openremote/model";
+import {OurGridGatewayCity} from "model";
 
 export const LOCALSTORAGE_KEY_CITY = "city"
 

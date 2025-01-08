@@ -2,7 +2,7 @@ import {css, html, PropertyValues, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {AppStateKeyed} from '@openremote/or-app';
 import {Store} from '@reduxjs/toolkit';
-import {Asset, Attribute, Challenge} from '@openremote/model';
+import {Asset, Attribute, Challenge} from 'model';
 import '../components/og-panel-wrapper';
 import '../panels/panel-usage-overview';
 import '../panels/panel-challenge-progress';
@@ -19,6 +19,7 @@ import manager from '@openremote/core';
 import moment from 'moment';
 import {showChallengeMissedDialog, showLastChallengeResultDialog} from '../components/og-dialog';
 import {Defaults} from '../util/defaults';
+import rest from "rest";
 
 export function pageHomeProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
     return {
@@ -147,7 +148,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         const challengePointAttr: Attribute<any> | undefined = meterAsset?.attributes?.[Constants.CHALLENGE_POINT_CURRENT_ATTRIBUTE];
 
         const time = moment(challengePointAttr.timestamp).subtract(challengeDuration + challengeWait + 1, 'minutes');
-        const data = (await manager.rest.api.DeviceChallengesResource.getHistory({
+        const data = (await rest.api.DeviceChallengesResource.getHistory({
             startTimestamp: time.valueOf(),
             endTimestamp: new Date().getTime()
         })).data as Challenge[];

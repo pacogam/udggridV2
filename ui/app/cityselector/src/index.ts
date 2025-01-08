@@ -1,6 +1,6 @@
 import {CitySelectorApp} from "./city-selector-app";
 import {LOCALSTORAGE_KEY_CITY, navigateToCity} from "./util";
-import {OurGridGatewayCity} from "@openremote/model";
+import {OurGridGatewayCity} from "model";
 import {CitySelectorLoader} from "./city-selector-loader";
 
 declare var CONFIG_URL_PREFIX: string;
