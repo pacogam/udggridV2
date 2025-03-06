@@ -47,9 +47,9 @@ export class PagePrivacy extends OgPage<GridAppStateKeyed> {
                 <div style="display: flex; flex-direction: column; align-items: center; padding: 16px;">
                     <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 7.5%;">
                         <img src="images/dots-onboarding.svg" style="width: 100%;"/>
-                        <span class="text-heading" style="margin-top: -10%; text-align: center; max-width: 65vw;">
-                            <or-translate value="page-privacy.heading"></or-translate>
-                        </span>
+                        <or-translate class="text-heading" value="page-privacy.heading"
+                                      style="margin-top: -10%; text-align: center; max-width: 65vw;"
+                        ></or-translate>
                     </div>
                     <div style="width: 100%;">
                         <panel-privacy-statement fullWidth="${true}" .language="${this.language}"></panel-privacy-statement>
