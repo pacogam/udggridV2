@@ -40,7 +40,7 @@ module.exports = (env, argv) => {
     config.plugins.push(
         new webpack.DefinePlugin({
             CONFIG_URL_PREFIX: JSON.stringify(IS_DEV_SERVER && customConfigDir ? "/ourgrid" : ""),
-            APP_VERSION: JSON.stringify(packageJson.version)
+            OURGRID_APP_VERSION: JSON.stringify(packageJson.version)
         })
     );
 

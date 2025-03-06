@@ -17,7 +17,7 @@ import {when} from 'lit/directives/when.js';
 import {guard} from 'lit/directives/guard.js';
 import {OgPage, OgPageProvider} from './util/og-page';
 import {Asset} from '@openremote/model';
-declare const APP_VERSION: string;
+declare const OURGRID_APP_VERSION: string;
 
 export function pageMenuProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
     return {
@@ -284,7 +284,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                                         <div style="display: flex; justify-content: center; gap: 8px;">
                                             <span>
                                                 <or-translate value="appName"></or-translate>
-                                                v${APP_VERSION}
+                                                v${OURGRID_APP_VERSION}
                                             </span>
                                             <span>-</span>
                                             <or-translate value="switchCity" class="text-tertiary bold" 
