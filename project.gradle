@@ -11,10 +11,6 @@ import static org.jetbrains.gradle.ext.ShortenCommandLine.MANIFEST
 import org.jetbrains.gradle.ext.Application
 import org.jetbrains.gradle.ext.JUnit
 
-// Configure versions in gradle.properties (putting a gradle.properties file
-// in a subproject only overrides root properties of same name for the actual
-// subproject, not for its children!)
-
 configurations.all {
     resolutionStrategy {
 
@@ -52,17 +48,12 @@ if (project == rootProject) {
                 def path = Paths.get(rootProject.projectDir.path, ".git/hooks/pre-commit")
                 def f = path.toFile()
                 f.text = """#!/bin/sh
-
 echo "***** Running gradle encryption plugin checkFilesGitIgnored task ******"
-
 ./gradlew checkFilesGitIgnoredNew
-
 status=\$?
-
 if [ \$status != 0 ]; then
    echo "***** One or more encrypted files are not listed in a .gitignore - please add to prevent unencrypted version of file(s) from being committed *****"
 fi
-
 exit \$status
 """
                 Set<PosixFilePermission> perms = Files.readAttributes(path, PosixFileAttributes.class).permissions()
@@ -111,7 +102,7 @@ if (project == rootProject) {
         idea.project.settings {
             compiler {
                 javac {
-                    javacAdditionalOptions "-parameters"
+                    javacAdditionalOptions = "-parameters"
                 }
             }
             runConfigurations {
@@ -138,18 +129,6 @@ if (project == rootProject) {
                 }
             }
         }
-
-        idea.project.settings.runConfigurations {
-            "Custom Deployment"(Application) {
-                moduleName = "${getProject().idea.module.name}.setup.main"
-                envs = [
-                    OR_MAP_SETTINGS_PATH: "deployment/map/mapsettings.json",
-                    OR_MAP_TILES_PATH: "deployment/map/mapdata.mbtiles",
-                    OR_CUSTOM_APP_DOCROOT: "deployment/manager/app",
-                    OR_CONSOLE_APP_CONFIG_DOCROOT: "deployment/manager/consoleappconfig"
-                ]
-            }
-        }
     }
 }
 
@@ -163,16 +142,16 @@ subprojects {
 // Default repositories for dependency resolution
 repositories {
     mavenLocal()
+    // Needs to be above central due to org.geotools:gt-main issues
     maven {
-        // Needs to be above central due to org.geotools:gt-main issues
         url = "https://repo.osgeo.org/repository/release/"
     }
     mavenCentral()
     maven {
-        url "https://pkgs.dev.azure.com/OpenRemote/OpenRemote/_packaging/OpenRemote/maven/v1"
+        url = "https://pkgs.dev.azure.com/OpenRemote/OpenRemote/_packaging/OpenRemote/maven/v1"
     }
     maven {
-        url "https://s01.oss.sonatype.org/content/repositories/snapshots"
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
     }
     maven {
         url = "https://repo.jenkins-ci.org/releases/"
@@ -190,8 +169,8 @@ apply plugin: 'idea'
 // Use the same output directories in IDE as in gradle
 idea {
     module {
-        outputDir file('build/classes/main')
-        testOutputDir file('build/classes/test')
+        outputDir = file('build/classes/main')
+        testOutputDir = file('build/classes/test')
         excludeDirs += file(".node")
         excludeDirs += file("node_modules")
         excludeDirs += file("dist")
@@ -276,8 +255,8 @@ def createTSGeneratorConfig(boolean outputAPIClient, String outputFileName, Proj
     }.toList()
 
     def baseClassPattern = outputAPIClient
-        ? customProjectsToScan.length == 0 ? [ "org.openremote.model.**Resource" ] : []
-        : [ "org.openremote.model.**" ]
+            ? customProjectsToScan.length == 0 ? [ "org.openremote.model.**Resource" ] : []
+            : [ "org.openremote.model.**" ]
 
     return {
         jsonLibrary = "jackson2"
