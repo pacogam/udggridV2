@@ -7,7 +7,7 @@
     "ui/demo/*"
   ],
   "devDependencies": {
-    "@openremote/util": "^1.2.1"
+    "@openremote/util": "^1.3.3"
   },
   "dependencies": {
     "@types/ws": "<8.5.5"
