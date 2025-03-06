@@ -266,7 +266,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
                 <main role="main" class="main-content d-none">
 
                     <div id="main-container">
-                        ${repeat(this._activePages, (item) => item.tagName, (item) => item)}
+                        ${when(this._activePages?.length, () => repeat(this._activePages, (item) => item.tagName, (item) => item))}
                     </div>
 
                 </main>
