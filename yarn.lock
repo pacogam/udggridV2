@@ -2869,6 +2869,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openremote/util@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "@openremote/util@npm:1.3.3"
+  bin:
+    orutil: ./cli.js
+  checksum: 10/d0fda45f569a223164f677d47cc7678d83841d34eb8c55681898cb1f73f3dbd7de2e12a6e9533891c070a6394275366e2c1cd18ec38b858ba24e2bb6a80126c2
+  languageName: node
+  linkType: hard
+
 "@polka/url@npm:^1.0.0-next.24":
   version: 1.0.0-next.25
   resolution: "@polka/url@npm:1.0.0-next.25"
@@ -8503,7 +8512,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@openremote/util": "npm:^1.2.1"
+    "@openremote/util": "npm:^1.3.3"
     "@types/ws": "npm:<8.5.5"
   languageName: unknown
   linkType: soft
