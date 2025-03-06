@@ -5,16 +5,13 @@ on:
   # Push excluding tags and workflow changes
   push:
     branches:
-      - 'main'
+      - '**'
     tags-ignore:
       - '*.*'
     paths-ignore:
       - '.github/**'
       - '.ci_cd/**'
       - '**/*.md'
-
-  # PR
-  pull_request:
 
   # When a release is published
   release:
