@@ -5,7 +5,7 @@ dependencies {
     api "io.openremote:openremote-agent:$openremoteVersion"
 
     // https://mvnrepository.com/artifact/com.rabbitmq/amqp-client
-    implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.16.0'
+    implementation group: 'com.rabbitmq', name: 'amqp-client', version: '5.25.0'
 }
 
 tasks.register('installDist') {
