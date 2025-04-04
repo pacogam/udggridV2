@@ -321,6 +321,23 @@ export function getAppStyle() {
         animation-fill-mode: forwards;
       }
 
+      /* Material design animation based on https://m2.material.io/design/motion/the-motion-system.html#fade-through */
+      /* But, it's customized without the 'zooming' */
+
+      .animate-slowfade-enter {
+        -webkit-animation: container-slowfade-enter 200ms cubic-bezier(0.0, 0.0, 0.2, 1) var(--animate-offset);
+        -webkit-animation-fill-mode: forwards;
+        animation: container-slowfade-enter 200ms cubic-bezier(0.0, 0.0, 0.2, 1) var(--animate-offset);
+        animation-fill-mode: forwards;
+      }
+
+      .animate-slowfade-exit {
+        -webkit-animation: container-fade-exit 100ms cubic-bezier(0.0, 0.0, 0.2, 1);
+        -webkit-animation-fill-mode: forwards;
+        animation: container-fade-exit 100ms cubic-bezier(0.0, 0.0, 0.2, 1);
+        animation-fill-mode: forwards;
+      }
+
 
       /* ------------------------------------------ */
 
@@ -494,6 +511,25 @@ export function getAppStyle() {
         }
         100% {
           opacity: 0;
+        }
+      }
+        
+      /* Material design animation based on https://m2.material.io/design/motion/the-motion-system.html#fade-through */
+      /* But, it's customized without the 'zooming' */
+      @-webkit-keyframes container-slowfade-enter {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes container-slowfade-enter {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
         }
       }
 

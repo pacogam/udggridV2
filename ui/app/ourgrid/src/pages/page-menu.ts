@@ -7,16 +7,10 @@ import {Store} from '@reduxjs/toolkit';
 import {OgListItem} from '../components/og-mwc-list';
 import '../components/og-mwc-list';
 import {OrMwcListChangedEvent} from '@openremote/or-mwc-components/or-mwc-list';
-import '../panels/panel-device-info';
-import '../panels/panel-battery-info';
-import '../panels/panel-challenge-earnings';
 import {AppStateKeyed} from '@openremote/or-app';
-import {GridAppStateKeyed, removeUserAsset} from '../util/og-state';
-import {OurgridMeterAsset} from '../util/util';
-import {when} from 'lit/directives/when.js';
+import {GridAppStateKeyed} from '../util/og-state';
 import {guard} from 'lit/directives/guard.js';
 import {OgPage, OgPageProvider} from './util/og-page';
-import {Asset} from '@openremote/model';
 
 export function pageMenuProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
     return {
@@ -105,8 +99,8 @@ const styling = css`
         overflow: hidden;
         max-width: 100%;
         height: 0;
-        transition: all ease-in-out 0.5s;
-        -webkit-transition: all ease-in-out 0.5s;
+        transition: all ease-in-out 0.4s;
+        -webkit-transition: all ease-in-out 0.4s;
     }
 
     .menu-background-wrapper-opened {
@@ -120,8 +114,8 @@ const styling = css`
         width: 0;
         border-radius: 0 0 0 100%;
         background: var(--og-color-primary);
-        transition: all ease-in-out 0.5s;
-        -webkit-transition: all ease-in-out 0.5s;
+        transition: all ease-in-out 0.4s;
+        -webkit-transition: all ease-in-out 0.4s;
         z-index: 10;
     }
 
@@ -138,18 +132,6 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected opened = false;
 
     @state()
-    protected showDeviceCard = true;
-
-    @state()
-    protected userAsset?: OurgridMeterAsset;
-
-    @state()
-    protected batteryAsset?: Asset;
-
-    @state()
-    protected challengeAsset?: Asset;
-
-    @state()
     protected currentPage?: string;
 
     @state()
@@ -164,22 +146,15 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     }
 
     stateChanged(state: GridAppStateKeyed): void {
-        this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
-        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
-        this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.currentPage = state.app.page;
         this.language = state.gridApp.language;
+        return super.stateChanged(state);
     }
 
     protected willUpdate(changedProps: Map<string, any>) {
         super.willUpdate(changedProps);
         if (changedProps.has('currentPage')) {
             this.toggle(false);
-            if (this.currentPage === 'setup') {
-                this.showDeviceCard = false;
-            } else {
-                this.showDeviceCard = true;
-            }
         }
     }
 
@@ -199,10 +174,14 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 this.dispatchEvent(new CustomEvent('navigate', {detail: 'account'}));
                 return;
             }
-            case 'characteristics': {
-                this.dispatchEvent(new CustomEvent('navigate', {detail: 'characteristics'}));
+            case 'devices': {
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'devices'}));
                 return;
             }
+            /*case 'characteristics': {
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'characteristics'}));
+                return;
+            }*/
             case 'language': {
                 this.dispatchEvent(new CustomEvent('language'));
                 return;
@@ -232,7 +211,8 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
         const items: OgListItem[] = [
             {icon: 'home', text: i18next.t('home'), value: 'home'},
             {icon: 'account', text: i18next.t('account'), value: 'account'},
-            {icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},
+            {icon: 'home-battery-outline', text: i18next.t('devices'), value: 'devices'},
+            /*{icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},*/
             {icon: 'web', text: i18next.t('language'), value: 'language'},
             {icon: 'help-circle-outline', text: i18next.t('intro'), value: 'intro'},
             {icon: 'book', text: i18next.t('privacyStatement'), value: 'privacy'},
@@ -241,7 +221,7 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
         return html`
             <div id="menu-wrapper">
                 <div class="menu-content-wrapper ${this.opened ? 'menu-content-wrapper-opened' : 'menu-content-wrapper-closed'}">
-                    ${guard([this.userAsset, this.currentPage, this.showDeviceCard, this.challengeAsset, this.language], () => html`
+                    ${guard([this.currentPage, this.language], () => html`
                         <div class="menu-content">
                             
                             <!-- Top container -->
@@ -254,47 +234,22 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                                         <og-mwc-list dark .values="${this.currentPage}" .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
                                     </div>
                                 </div>
+                                <div class="text-tertiary dark" style="display: flex; justify-content: center; gap: 8px;">
+                                            <span>
+                                                <or-translate value="appName"></or-translate>
+                                                v1.1.0
+                                            </span>
+                                    <span>-</span>
+                                    <or-translate value="switchCity" class="text-tertiary bold"
+                                                  style="text-decoration: underline; cursor: pointer;"
+                                                  @click="${() => {
+                                                      window.location.replace("https://ourgrid.openremote.app/cityselector/?redirect=false");
+                                                  }}"
+                                    ></or-translate>
+                                </div>
                                 <div id="bottom-graphic-container">
                                     <img id="bottom-graphic" src="images/dots-menu-white-bottom.svg"/>
                                 </div>
-                            </div>
-                            
-                            <!-- Bottom container -->
-                            <div class="menu-container">
-                                <div id="top-graphic-container">
-                                    <img id="top-graphic" src="images/dots-menu-green-top.svg"/>
-                                </div>
-                                ${when(this.showDeviceCard, () => html`
-                                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                                        <div class="menu-earnings-card">
-                                            <panel-challenge-earnings .meterAsset="${this.userAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
-                                        </div>
-                                        ${when(this.batteryAsset, () => html`
-                                            <div class="menu-asset-card">
-                                                <panel-battery-info .batteryAsset="${this.batteryAsset}" .meterAsset="${this.userAsset}" .language="${this.language}"></panel-battery-info>
-                                            </div>
-                                        `)}
-                                        <div class="menu-asset-card">
-                                            <panel-device-info .meterAsset="${this.userAsset}" .language="${this.language}"
-                                                               @remove="${() => this.onDeviceRemove()}"
-                                            ></panel-device-info>
-                                        </div>
-                                        <div></div>
-                                        <div style="display: flex; justify-content: center; gap: 8px;">
-                                            <span>
-                                                <or-translate value="appName"></or-translate>
-                                                v1.0.6
-                                            </span>
-                                            <span>-</span>
-                                            <or-translate value="switchCity" class="text-tertiary bold" 
-                                                          style="text-decoration: underline; cursor: pointer;"
-                                                          @click="${() => {
-                                                              window.location.replace("https://ourgrid.openremote.app/cityselector/?redirect=false");
-                                                          }}"
-                                            ></or-translate>
-                                        </div>
-                                    </div>
-                                `)}
                             </div>
                         </div>
                     `)}
@@ -304,14 +259,5 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 </div>
             </div>
         `;
-    }
-
-
-    // Method that is called AFTER the device of the user has been removed.
-    // In this class we handle that the Asset is removed from the local store.
-    protected onDeviceRemove() {
-        console.log('Removing device from local store...');
-        window.localStorage.removeItem('characteristics');
-        this._store.dispatch(removeUserAsset());
     }
 }

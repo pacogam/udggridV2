@@ -47,8 +47,8 @@ const styling = css`
     .mdc-fab {
         box-shadow: none;
         background: var(--og-mdc-fab-background, var(--og-color-primary));
-        width: 64px;
-        height: 64px;
+        width: var(--og-mdc-fab-size, 64px);
+        height: var(--og-mdc-fab-size, 64px);
         border-radius: var(--og-mdc-fab-border-radius, 50%) !important;
         transition: var(--og-mdc-fab-transition);
     }

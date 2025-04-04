@@ -14,6 +14,11 @@ import {pagePrivacyProvider} from "./pages/page-privacy";
 import {pageAccountPasswordProvider} from "./pages/page-account-password";
 import {pageCharacteristicsProvider} from "./pages/page-characteristics";
 import {pageConfirmPrivacyProvider} from "./pages/privacy/confirm-privacy-page";
+import {pageDevicesProvider} from "./pages/page-devices";
+import {pageAddDeviceProvider} from "./pages/add-device/add-device-select";
+import {pageAddEvProvider} from "./pages/add-device/add-ev";
+import {pageAddHeatpumpProvider} from "./pages/add-device/add-heatpump";
+import {pageAddBatteryProvider} from "./pages/add-device/add-battery";
 
 const rootReducer = combineReducers({
     app: appReducer,
@@ -33,6 +38,11 @@ export const DefaultPagesConfig: OgPageProvider<any>[] = [
     pageMenuProvider(store),
     pageAccountProvider(store),
     pageAccountPasswordProvider(store),
+    pageDevicesProvider(store),
+    pageAddDeviceProvider(store),
+    pageAddEvProvider(store),
+    pageAddHeatpumpProvider(store),
+    pageAddBatteryProvider(store),
     pageCharacteristicsProvider(store),
     pagePrivacyProvider(store),
     page1SetupProvider(store),

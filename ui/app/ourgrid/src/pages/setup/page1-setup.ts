@@ -1,21 +1,19 @@
 import {AppStateKeyed, router} from '@openremote/or-app';
 import {customElement, state} from 'lit/decorators.js';
-import {PropertyValues, TemplateResult, html} from 'lit';
+import {TemplateResult, html} from 'lit';
 import {when} from 'lit/directives/when.js';
 import { map } from 'lit/directives/map.js';
 import { until } from 'lit/directives/until.js';
 import {Store} from '@reduxjs/toolkit';
 import {InputType} from '@openremote/or-mwc-components/or-mwc-input';
 import '../../components/og-loading';
-import '../../features/og-characteristics-settings';
 import manager from '@openremote/core';
 import {isAxiosError} from '@openremote/rest';
 import {i18next} from '@openremote/or-translate';
 import {GridAppStateKeyed, setUserAsset} from '../../util/og-state';
-import {Asset, DeviceCharacteristic} from 'model';
+import {Asset} from 'model';
 import {OgOnboardingPage, OnboardPage} from '../util/og-onboarding-page';
 import {OgPageProvider} from '../util/og-page';
-import {OgCharacteristicsUpdateEvent} from '../../features/og-characteristics-settings';
 import {Task} from '@lit/task';
 import rest from "rest";
 
@@ -51,32 +49,10 @@ export class Page1Setup extends OgOnboardingPage {
     protected userAsset?: Asset;
 
     @state()
-    protected characteristics?: DeviceCharacteristic[] = this._getCharacteristicsFromLocalStorage();
-
-    @state()
     protected dongleCode?: string;
-
-    // If characteristics are set, we skip to the second page
-    currentPageIndex = this.characteristics ? 1 : 0;
 
     @state()
     protected pages: OnboardPage[] = [
-        {
-            getHeading: () => i18next.t('setup.page1-heading'),
-            noBottomGraphic: true,
-            pageContent: (): TemplateResult => {
-                return html`
-                    <div style="display: flex; flex-direction: column; gap: 32px; text-align: center; position: relative;">
-                        <og-characteristics-settings .characteristics="${this.characteristics}" @characteristics-changed="${(ev: OgCharacteristicsUpdateEvent) => {
-                            this.characteristics = ev.detail.valid ? ev.detail.characteristics : undefined;
-                            window.localStorage.setItem('characteristics', this.characteristics ? JSON.stringify(this.characteristics) : undefined);
-                        }}"></og-characteristics-settings>
-                    </div>
-                `;
-            },
-            getActionText: () => i18next.t('setup.page1-action'),
-            getActionDisabled: () => this.characteristics === undefined
-        },
         {
             getHeading: () => i18next.t('setup.page2-heading'),
             pageContent: (): TemplateResult => {
@@ -222,14 +198,6 @@ export class Page1Setup extends OgOnboardingPage {
             window.location.reload();
         }
 
-        // Upload characteristics using the fetched asset
-        if (this.characteristics) {
-            console.debug(`Uploading household characteristics...`);
-            await rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: this.characteristics}).catch((e) => {
-                console.warn(e);
-            });
-        }
-
         return true;
     }
 
@@ -247,13 +215,5 @@ export class Page1Setup extends OgOnboardingPage {
                 );
             }
         });
-    }
-
-    protected _getCharacteristicsFromLocalStorage(): DeviceCharacteristic[] | undefined {
-        try {
-            return JSON.parse(window.localStorage.getItem("characteristics")) as DeviceCharacteristic[] | undefined;
-        } catch (e) {
-            return undefined;
-        }
     }
 }

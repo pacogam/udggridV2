@@ -41,6 +41,10 @@ const styling = css`
     .mdc-chip .mdc-chip__ripple::before, .mdc-chip .mdc-chip__ripple::after {
         background-color: var(--mdc-ripple-color, rgba(0, 0, 0, 0.35));
     }
+    
+    .mdc-chip-set {
+        justify-content: end;
+    }
 `;
 
 @customElement('og-chips')
@@ -91,6 +95,7 @@ export class OgChips extends LitElement {
                         "background": this._getBackground(chip.selected, this.outlined),
                         "border": this._getBorder(chip.selected, this.outlined),
                         "cursor": chip.loading || chip.disabled ? "default" : undefined,
+                        "opacity": chip.disabled ? '0.5' : undefined,
                         "transition": "all 200ms"
                     };
                     const rippleStyles = {

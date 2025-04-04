@@ -3,6 +3,7 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introductie",
+  "devices": "Mijn apparaten",
   "houseCharacteristics": "Mijn huis",
   "privacyStatement": "Privacy",
   "continue": "Verder",
@@ -65,6 +66,43 @@
     "page3-heading": "Actueel verbruik",
     "page3-text": "Door de aangesloten dongle krijg je live inzicht in je eigen verbruik. Als het netwerk overbelast dreigt te raken zal je scherm rood kleuren."
   },
+  "deviceList": {
+    "addDevice": "Voeg apparaat toe",
+    "deleteHeatPump": "Verwijderen?",
+    "deleteHeatPumpConfirm": "Weet je het zeker dat je je warmtepomp wilt ontkoppelen?",
+    "deleteEv": "Auto verwijderen",
+    "deleteEvConfirm": "Weet je het zeker dat je je elektrische auto wilt ontkoppelen?",
+    "deleteBattery": "Batterij verwijderen",
+    "deleteBatteryConfirm": "Weet je het zeker dat je je batterij wilt ontkoppelen?"
+  },
+  "addDevice": {
+    "intro": "Voeg apparaat toe",
+    "subtitle": "Welk apparaat wil je toevoegen?",
+    "select-ev": "Elektrische auto",
+    "select-heatpump": "Warmtepomp",
+    "select-battery": "Batterij"
+  },
+  "addEv": {
+    "intro": "Jouw elektrische auto",
+    "selectBrand": "Automerk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je elektrische auto is toegevoegd!"
+  },
+  "addHeatpump": {
+    "intro": "Jouw warmtepomp",
+    "selectBrand": "Thermostaat merk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je warmtepomp is toegevoegd!"
+  },
+  "addBattery": {
+    "intro": "Jouw batterij",
+    "selectBrand": "Batterij merk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je batterij is toegevoegd!"
+  },
   "panel_tips": {
     "heading": "Tips & Acties",
     "subtitle": "Manieren om te besparen",
@@ -116,11 +154,29 @@
     "noBatteryFound": "Geen batterij gevonden",
     "unknownManufacturer": "Onbekende fabrikant",
     "version": "Versie",
-    "unknownID": "Onbekend ID",
-    "unknownVersion": "Onbekende versie",
+    "unknown": "Onbekend",
     "autoCharge": "Automatisch laden",
     "turnOnSnackbar": "Automatisch opladen staat nu aan!",
     "turnOffSnackbar": "Automatisch opladen staat nu uit."
+  },
+  "panel_heatpumpInfo": {
+    "yourHeatpump": "Jouw warmtepomp",
+    "noHeatpumpFound": "Geen warmtepomp gevonden",
+    "thermostat": "Thermostaat",
+    "unknownBrand": "Onbekend merk"
+  },
+  "panel_evInfo": {
+    "yourVehicle": "Jouw elektrische auto",
+    "noVehicleFound": "Geen elektrische auto gevonden",
+    "unknownBrand": "Onbekend merk",
+    "hasCharger": "Eigen laadpaal",
+    "noCharger": "Zonder laadpaal"
+  },
+  "panel_solarInfo": {
+    "yourSolar": "Jouw zonnepanelen",
+    "noSolarFound": "Geen zonnepanelen gevonden",
+    "unknownManufacturer": "Onbekende fabrikant",
+    "estimatedCapacity": "Voorspelde capaciteit: {{capacity}} kWp"
   },
   "panel_peakUsage": {
     "heading": "Onze wijk heeft piekbelasting!"
@@ -171,9 +227,6 @@
     "action": "Sluiten"
   },
   "setup": {
-    "page1-heading": "Mijn huis",
-    "page1-text": "Met deze informatie kunnen we gepersonalizeerde tips geven.",
-    "page1-action": "Verder",
     "page2-heading": "Installatie",
     "page2-text": "Verbind je apparaat door de gekopieerde code uit de Dongle Connect App hier te plakken:",
     "page2-inputlabel": "Plak code hier",

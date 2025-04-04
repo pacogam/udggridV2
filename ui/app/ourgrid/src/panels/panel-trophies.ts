@@ -7,6 +7,7 @@ import {animate} from '@lit-labs/motion';
 import {TrophyItem} from '../features/og-trophy-item';
 import '../components/og-expandable';
 import '../features/og-trophy-item';
+import "./panel-challenge-earnings";
 import { until } from 'lit/directives/until.js';
 import manager from '@openremote/core';
 import moment from 'moment';
@@ -134,6 +135,9 @@ export class PanelTrophies extends OgDataPanel {
         const peakPointsPerDay = this.peakPointsAsset?.attributes?.[Constants.METER_PEAK_DAY_POINTS_ATTRIBUTE]?.value || 1;
         return html`
             <div id="content-wrapper">
+                <div class="menu-earnings-card">
+                    <panel-challenge-earnings .meterAsset="${this.meterAsset}" .challengeAsset="${this.challengeAsset}"></panel-challenge-earnings>
+                </div>
                 <div class="content-container" ${animate()}>
                     ${getStatisticTemplate('images/yellow-star.svg', true, html`
                         <span class="text-heading2">${challengesJoined}</span>

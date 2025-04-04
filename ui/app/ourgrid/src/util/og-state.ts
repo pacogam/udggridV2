@@ -28,7 +28,7 @@ const gridAppSlice = createSlice({
     initialState: INITIAL_STATE,
     reducers: {
         attributeEventReceived(state: GridAppState, action: PayloadAction<AttributeEvent>) {
-            console.warn(action.payload);
+            console.debug("Received an attribute event;", action.payload);
             const assets = state.assets;
             const attrEvent = action.payload;
             const attrName = attrEvent.ref.name;

@@ -126,7 +126,7 @@ export class PanelChallengeTips extends OgDataPanel {
                         return html`
                             <div class="background-tint" style="position: relative; ${hasButton ? 'margin-bottom: 32px;' : undefined}">
                                 <div style="padding: ${hasButton ? '24px 24px 48px 24px' : '24px'};">
-                                    ${getStatisticTemplate('images/house-temperature.svg', true, html`
+                                    ${getStatisticTemplate('images/house-temperature-white.svg', true, html`
                                         <div style="display: flex; flex-direction: column;">
                                         <span class="statistic-medium" style="color: var(--og-color-danger)">
                                             ${`-${characteristics.get(WellknownCharacteristics.HEAT_PUMP)?.wattsSaved || Defaults.TIPS_HEAT_PUMP_WATT_SAVED}W`}

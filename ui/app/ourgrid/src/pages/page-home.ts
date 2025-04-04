@@ -20,6 +20,7 @@ import moment from 'moment';
 import {showChallengeMissedDialog, showLastChallengeResultDialog} from '../components/og-dialog';
 import {Defaults} from '../util/defaults';
 import rest from "rest";
+import { guard } from 'lit/directives/guard.js';
 
 export function pageHomeProvider(store: Store<GridAppStateKeyed>): OgPageProvider<AppStateKeyed> {
     return {
@@ -203,7 +204,9 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
                 <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
                 <div style="background: var(--og-background-shade)">
-                    <panel-usage-history .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .language="${this.language}"></panel-usage-history>
+                    ${guard([this.language], () => html`
+                        <panel-usage-history .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .language="${this.language}"></panel-usage-history>
+                    `)}
                 </div>
 
                 <panel-trophies .meterAsset="${this.meterAsset}" .challengeAsset="${this.challengeAsset}"></panel-trophies>

@@ -31,8 +31,8 @@ const styling = css`
 @customElement('page-account-password')
 export class PageAccountPassword extends OgPage<GridAppStateKeyed> {
 
-    animationEnterType = PageAnimationType.SWIPE_LEFT;
-    animationExitType = PageAnimationType.SWIPE_RIGHT;
+    getAnimationEnterType = () => PageAnimationType.SWIPE_LEFT;
+    getAnimationExitType = () => PageAnimationType.SWIPE_RIGHT;
 
     get name(): string {
         return 'account-password';

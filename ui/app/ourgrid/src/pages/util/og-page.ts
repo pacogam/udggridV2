@@ -13,7 +13,7 @@ export class OgPageProvider<S extends AppStateKeyed> implements PageProvider<S> 
 }
 
 export enum PageAnimationType {
-    SWIPE_RIGHT, SWIPE_LEFT, FADE
+    SWIPE_RIGHT = "SWIPE_RIGHT", SWIPE_LEFT = "SWIPE_LEFT", FADE = "FADE", SLOW_FADE = "SLOW_FADE"
 }
 
 const styling = css`
@@ -28,8 +28,8 @@ const styling = css`
 
 export abstract class OgPage<S extends AppStateKeyed> extends Page<S> {
 
-    protected readonly animationEnterType: PageAnimationType = PageAnimationType.FADE;
-    protected readonly animationExitType: PageAnimationType = PageAnimationType.FADE;
+    protected readonly getAnimationEnterType: (oldPage?: string) => PageAnimationType = () => PageAnimationType.FADE;
+    protected readonly getAnimationExitType: (newPage?: string) => PageAnimationType = () => PageAnimationType.FADE;
 
     abstract get name(): string;
 
@@ -45,11 +45,12 @@ export abstract class OgPage<S extends AppStateKeyed> extends Page<S> {
       // nothing here
     }
 
-    public async doEnterAnimation(type?: PageAnimationType): Promise<void> {
-        type = type || this.animationEnterType;
+    public async doEnterAnimation(type?: PageAnimationType, oldPage?: string): Promise<void> {
+        type = type || this.getAnimationEnterType(oldPage);
         await this.updateComplete;
         const elem = this.getAnimationElem();
         if(elem) {
+            console.debug(`Starting page enter animation '${type}' for page '${this.name}'`);
             switch (type) {
                 case PageAnimationType.SWIPE_LEFT: {
                     await doAnimation(elem, 'animate-swipeleft-enter', 300); break;
@@ -60,18 +61,23 @@ export abstract class OgPage<S extends AppStateKeyed> extends Page<S> {
                 case PageAnimationType.FADE: {
                     await doAnimation(elem, 'animate-fade-enter', 200); break;
                 }
+                case PageAnimationType.SLOW_FADE: {
+                    await doAnimation(elem, 'animate-slowfade-enter', 200); break;
+                }
                 default: {
                     await doAnimation(elem, 'animate-fade-enter', 200); break;
                 }
             }
+            console.debug(`Finished page enter animation '${type}' for page '${this.name}'`);
         }
     }
 
-    public async doExitAnimation(type?: PageAnimationType): Promise<void> {
-        type = type || this.animationExitType;
+    public async doExitAnimation(type?: PageAnimationType, newPage?: string): Promise<void> {
+        type = type || this.getAnimationExitType(newPage);
         await this.updateComplete;
         const elem = this.getAnimationElem();
         if(elem) {
+            console.debug(`Starting page exit animation '${type}' for page '${this.name}'`);
             switch (type) {
                 case PageAnimationType.SWIPE_LEFT: {
                     await doAnimation(elem, 'animate-swipeleft-exit', 300); break;
@@ -82,10 +88,14 @@ export abstract class OgPage<S extends AppStateKeyed> extends Page<S> {
                 case PageAnimationType.FADE: {
                     await doAnimation(elem, 'animate-fade-exit', 100); break;
                 }
+                case PageAnimationType.SLOW_FADE: {
+                    await doAnimation(elem, 'animate-slowfade-exit', 100); break;
+                }
                 default: {
                     await doAnimation(elem, 'animate-fade-exit', 100); break;
                 }
             }
+            console.debug(`Finished page exit animation '${type}' for page '${this.name}'`);
         }
     }
 

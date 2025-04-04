@@ -11,8 +11,18 @@ import {PageMenu, pageMenuProvider} from '../pages/page-menu';
 import {i18next} from '@openremote/or-translate';
 import {showLanguageDialog} from '../components/og-dialog';
 import {NeedsOnboardingError, NoAssetLinkedError, RequiresPrivacyConfirmationError, splashDataCheckProvider} from '../pages/splash/splash-datacheck';
-import {OgPage, OgPageProvider} from '../pages/util/og-page';
-import {attributeEventReceived, batteryAssetIdSelector, challengeAssetIdSelector, districtAssetIdSelector, GridAppStateKeyed, realmSelector, setLanguage, userAssetIdSelector} from './og-state';
+import {OgPage, OgPageProvider, PageAnimationType} from '../pages/util/og-page';
+import {
+    assetsSelector,
+    attributeEventReceived,
+    batteryAssetIdSelector,
+    challengeAssetIdSelector,
+    districtAssetIdSelector,
+    GridAppStateKeyed,
+    realmSelector,
+    setLanguage,
+    userAssetIdSelector
+} from './og-state';
 import {Asset} from '@openremote/model';
 import {OgManager} from './og-manager';
 import {Defaults} from "./defaults";
@@ -39,6 +49,13 @@ const styling = css`
     box-sizing: border-box;
     background-color: #F9F5F2;
     overflow: hidden; /*override*/
+    animation: main-content-background-fadein ease-in-out 800ms; /* fade in background from HTML page default (dark) to the light color */
+  }
+
+  /* Fade in background from default HTML page color (dark) to default App color (light) */
+  @keyframes main-content-background-fadein {
+    0% {background-color: #4F2D39;}
+    100% {background-color: #F9F5F2;}
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -137,7 +154,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
 
     protected _handleVisibilityChange(ev: Event) {
         super._handleVisibilityChange(ev);
-        if(manager.console.isMobile && document.visibilityState === 'visible') {
+        if(manager.console?.isMobile && document.visibilityState === 'visible') {
             const exclusions = ['setup'];
             if(!exclusions.includes(this._page)) {
                 window.location.reload();
@@ -149,15 +166,20 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         super.stateChanged(state);
         this._assets = state.gridApp.assets;
         this._dark = state.gridApp.dark;
-        console.warn(state);
 
-        // Once all assets are fetched (meter asset, battery asset, district asset, and challenges asset),
+        // Once all assets are fetched (meter asset, district asset, and challenges asset),
         // we subscribe to attribute changes of the specific assets
         if(!this._attributeSubscriptionId) {
-            if(userAssetIdSelector(state) && batteryAssetIdSelector(state) && districtAssetIdSelector(state) && challengeAssetIdSelector(state) && state.gridApp.assets.length >= 3) {
+            if(!this._loading && userAssetIdSelector(state) && districtAssetIdSelector(state) && challengeAssetIdSelector(state) && state.gridApp.assets.length >= 3) {
                 const assetIds = state.gridApp.assets.map(a => a.id);
-                this.subscribeAssets(manager.displayRealm, assetIds).catch(e => console.error(e));
+                this._trySubscribeAssets(assetIds, manager.displayRealm);
             }
+        }
+    }
+
+    protected _trySubscribeAssets(assetIds: string[], realm = manager.displayRealm) {
+        if(!this._attributeSubscriptionId) {
+            this.subscribeAssets(realm, assetIds).catch(e => console.error(e));
         }
     }
 
@@ -196,11 +218,20 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         return update;
     }
 
-    // On every update, check whether it should toggle app menu.
     protected willUpdate(changedProps: PropertyValues) {
+
+        // If _isMenuActive has been changed, make sure the menu component is aligned.
         if (changedProps.has('_isMenuActive')) {
             this._menu?.toggle(this._isMenuActive);
         }
+        // When loading is complete, make a WS subscription to the OurGrid assets (if possible, and not set yet)
+        if (changedProps.has('_loading') && this._loading === false) {
+            const assetIds = assetsSelector(this.getState()).map(a => a.id);
+            if(assetIds?.length > 0) {
+                this._trySubscribeAssets(assetIds, manager.displayRealm);
+            }
+        }
+
         return super.willUpdate(changedProps);
     }
 
@@ -288,7 +319,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
 
         // Exit old page
         if(currentPage && animate) {
-            await currentPage.doExitAnimation();
+            await currentPage.doExitAnimation(undefined, newPage.name);
         }
 
         this._loading = true;
@@ -300,7 +331,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
             this._setActivePage(loadingPage, true);
             this._loading = true;
             try {
-                if(animate) await loadingPage.doEnterAnimation();
+                if(animate) await loadingPage.doEnterAnimation(!currentPage ? PageAnimationType.SLOW_FADE : undefined);
                 await loadingPage.getLoadingPromise(); // wait for loading to finish
             } catch (e) {
                 if(e instanceof NoAssetLinkedError && this._page !== 'setup') {
@@ -333,7 +364,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         this._loading = false;
 
         // Enter new page
-        if(animate) await newPage.doEnterAnimation();
+        if(animate) await newPage.doEnterAnimation(undefined, currentPage?.name);
     }
 
     // Sets or appends a new page (this can be a regular page, or a splash loader)
@@ -376,7 +407,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     // where we listen to changes of attributes using websocket, to change the values live.
 
     protected subscribeAssets = async (realm: string, assetIds: string[]) => {
-        console.log(`Subscribing to ${assetIds}`);
+        console.log(`Subscribing to assets; ${assetIds}`);
 
         try {
 

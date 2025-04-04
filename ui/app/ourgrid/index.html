@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
     <title>OurGrid App</title>
     <meta name="application-name" content="OpenRemote Demo">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -54,10 +54,12 @@
         html {
             height: 100%;
             background-color: #F9F5F2;
-            --og-font-family: "WorkSans","Segoe UI", Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"
+            --og-font-family: "WorkSans","Segoe UI", Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            --og-color-secondary-dark: #4F2D39;
         }
         body {
             margin: 0 auto;
+            background: var(--og-color-secondary-dark);
             font-family: var(--og-font-family);
             line-height: 1.5;
             height: 100%;

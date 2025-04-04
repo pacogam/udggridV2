@@ -1,5 +1,5 @@
 import {TemplateResult, html, css, PropertyValues } from "lit";
-import { customElement, query, state} from "lit/decorators.js";
+import { customElement, property, query, state} from "lit/decorators.js";
 import {when} from "lit/directives/when.js";
 import {styleMap} from "lit/directives/style-map.js";
 import {Chip, OgChips} from "../components/og-chips";
@@ -10,6 +10,7 @@ import {showSnackbar} from "../components/og-snackbar";
 import {Asset} from "@openremote/model";
 import manager from "@openremote/core";
 import rest from "rest";
+import {DeviceCharacteristic} from "model";
 
 const styling = css`
     #panel-wrapper {
@@ -25,6 +26,9 @@ export class PanelBatteryInfo extends OgDataPanel {
     public transparent = false;
     public rounded = true;
 
+    @property({ type: Object })
+    public info?: DeviceCharacteristic
+
     @state()
     protected _chips: Chip[] = [{
         leadingIcon: "toggle-switch-off",
@@ -34,6 +38,11 @@ export class PanelBatteryInfo extends OgDataPanel {
             const automaticControl = !this._chips[0].selected;
             this.setAutomaticControl(automaticControl);
         }
+    }, {
+        leadingIcon: 'delete-outline',
+        text: html`<or-translate value="remove"></or-translate>`,
+        disabled: true,
+        action: () => this._onRemoveClick()
     }];
 
     @query('og-chips')
@@ -49,15 +58,22 @@ export class PanelBatteryInfo extends OgDataPanel {
         if(changedProps.has("batteryAsset") && this.batteryAsset) {
             if(this.batteryAsset.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value) {
                 this._updateAutomaticControlButtonState(this._isAutomaticControlEnabled(this.batteryAsset));
+                this._updateRemoveButtonState(!this._canRemove(this.batteryAsset, this.info))
             }
         }
+        // If the characteristic gets updated
+        if(changedProps.has("info") && this.info) {
+            this._updateRemoveButtonState(!this._canRemove(this.batteryAsset, this.info))
+        }
+
         return super.willUpdate(changedProps);
     }
 
     protected async getPanelContent(): Promise<TemplateResult> {
+        const hasBattery = this.batteryAsset || (this.info && this.info.shown)
         const iconStyles = {
             "font-size": "var(--og-font-size-statistic-large)",
-            "color": this.batteryAsset !== undefined ? "var(--og-color-success)" : "var(--og-color-danger)"
+            "color": hasBattery ? "var(--og-color-success)" : "var(--og-color-danger)"
         };
         return html`
             <div style="position: relative;">
@@ -68,40 +84,29 @@ export class PanelBatteryInfo extends OgDataPanel {
                     <div>
                         <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
                             <span class="text-heading2" style="text-align: start;">
-                                ${this.batteryAsset ? i18next.t("panel_batteryInfo.yourBattery") : i18next.t("panel_batteryInfo.noBatteryFound")}
+                                ${hasBattery ? i18next.t("panel_batteryInfo.yourBattery") : i18next.t("panel_batteryInfo.noBatteryFound")}
                             </span>
                             <div style="display: flex; flex-direction: column; gap: 2px;">
-                                ${when(this.batteryAsset, () => {
-                                    const manufacturer = this.batteryAsset.attributes["manufacturer"]?.value;
-                                    const deviceId = this.batteryAsset.attributes["deviceId"]?.value;
-                                    const version = this.batteryAsset.attributes["softwareVersion"]?.value;
+                                ${when(hasBattery, () => {
+                                    const manufacturer = this.batteryAsset?.attributes["manufacturer"]?.value || this.info?.brand;
+                                    const deviceId = this.batteryAsset?.attributes["deviceId"]?.value;
+                                    const version = this.batteryAsset?.attributes["softwareVersion"]?.value;
                                     return html`
                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="domain"></or-icon>
+                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="battery-high"></or-icon>
                                             <span class="text-tertiary" style="text-align: start;">
-                                                ${when(manufacturer, () => manufacturer, () => html`<or-translate value="panel_batteryInfo.unknownManufacturer"></or-translate>`)}
+                                                <or-translate value="${manufacturer || 'panel_batteryInfo.unknownManufacturer'}"></or-translate>
                                             </span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="identifier"></or-icon>
+                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="meter-electric-outline"></or-icon>
                                             <span class="text-tertiary" style="text-align: start;">
-                                                ${when(deviceId, () => deviceId, () => html`<or-translate value="panel_batteryInfo.unknownID"></or-translate>`)}
-                                            </span>
-                                        </div>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="download"></or-icon>
-                                            <span class="text-tertiary" style="text-align: start;">
-                                                ${when(version, () => html`
-                                                    <or-translate value="panel_batteryInfo.version"></or-translate>
-                                                    ${version}
-                                                `, () => html`
-                                                    <or-translate value="panel_batteryInfo.unknownVersion"></or-translate>
-                                                `)}
+                                                <or-translate value="panel_batteryInfo.unknown"></or-translate>
                                             </span>
                                         </div>
                                     `;
                                 }, () => html`
-                                    <or-translate value="panel_batteryInfo.noBatteryText" style="margin-bottom: 20px;"></or-translate>
+                                    <or-translate value="panel_batteryInfo.noBatteryFound" style="margin-bottom: 20px;"></or-translate>
                                 `)}
                             </div>
                             <div>
@@ -109,7 +114,7 @@ export class PanelBatteryInfo extends OgDataPanel {
                         </div>
                     </div>
                 </div>
-                ${when(this.batteryAsset, () => html`
+                ${when(hasBattery, () => html`
                     <div style="display: flex; justify-content: end; margin: 12px -12px -12px -12px;">
                         <og-chips .chips="${this._chips}" outlined choice></og-chips>
                     </div>
@@ -158,5 +163,23 @@ export class PanelBatteryInfo extends OgDataPanel {
         } else {
             return false;
         }
+    }
+
+    protected _updateRemoveButtonState(disabled: boolean): void {
+        this._chips[0].disabled = !disabled; // If battery can be removed, 'automatic charging' chip should be disabled.
+        this._chips[1].disabled = disabled;
+        this._chips = [...this._chips]; // trigger a UI update, by recreating the array. (as it also needs to trigger og-chips UI update)
+    }
+
+    protected _canRemove(batteryAsset?: Asset, info?: DeviceCharacteristic): boolean {
+        if(batteryAsset) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    protected _onRemoveClick() {
+        this.dispatchEvent(new CustomEvent('request-remove'));
     }
 }

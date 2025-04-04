@@ -3,6 +3,7 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introduction",
+  "devices": "My devices",
   "houseCharacteristics": "My House",
   "privacyStatement": "Privacy Statement",
   "continue": "Continue",
@@ -65,6 +66,43 @@
     "page3-heading": "Current usage",
     "page3-text": "The connected dongle gives you live insight into your own consumption. If the network is in danger of becoming overloaded, your screen will turn red."
   },
+  "deviceList": {
+    "addDevice": "Add Device",
+    "deleteHeatPump": "Delete heat pump",
+    "deleteHeatPumpConfirm": "Are you sure you want to remove your heat pump?",
+    "deleteEv": "Delete vehicle",
+    "deleteEvConfirm": "Are you sure you want to remove your electric vehicle?",
+    "deleteBattery": "Delete battery",
+    "deleteBatteryConfirm": "Are you sure you want to remove your battery?"
+  },
+  "addDevice": {
+    "intro": "Add Device",
+    "subtitle": "What device do you want to add?",
+    "select-ev": "Electric vehicle",
+    "select-heatpump": "Heat pump",
+    "select-battery": "Battery"
+  },
+  "addEv": {
+    "intro": "Your electric vehicle",
+    "selectBrand": "Vehicle brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your electric vehicle!"
+  },
+  "addHeatpump": {
+    "intro": "Your heat pump",
+    "selectBrand": "Thermostat brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your heat pump!"
+  },
+  "addBattery": {
+    "intro": "Your battery",
+    "selectBrand": "Battery brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your battery!"
+  },
   "panel_tips": {
     "heading": "Tips & Actions",
     "subtitle": "Ways to save energy",
@@ -116,11 +154,29 @@
     "noBatteryFound": "No battery connected",
     "unknownManufacturer": "Unknown manufacturer",
     "version": "Version",
-    "unknownID": "Unknown ID",
-    "unknownVersion": "Unknown version",
+    "unknown": "Unknown",
     "autoCharge": "Automatic control",
     "turnOnSnackbar": "Automatic control is now on!",
     "turnOffSnackbar": "Automatic control is now off!"
+  },
+  "panel_heatpumpInfo": {
+    "yourHeatpump": "Your heat pump",
+    "noHeatpumpFound": "No heat pump found",
+    "thermostat": "Thermostat",
+    "unknownBrand": "Unkown brand"
+  },
+  "panel_evInfo": {
+    "yourVehicle": "Your electric vehicle",
+    "noVehicleFound": "No electric vehicle found",
+    "unknownBrand": "Unkown brand",
+    "hasCharger": "Own charger",
+    "noCharger": "No charger"
+  },
+  "panel_solarInfo": {
+    "yourSolar": "Your solar panels",
+    "noSolarFound": "No solar panels found",
+    "unknownManufacturer": "Unknown manufacturer",
+    "estimatedCapacity": "Estimated capacity: {{capacity}} kWp"
   },
   "panel_peakUsage": {
     "heading": "Our district has a peak load!"
@@ -171,9 +227,6 @@
     "action": "Close"
   },
   "setup": {
-    "page1-heading": "My house",
-    "page1-text": "With this information, we can provide personalized tips.",
-    "page1-action": "Continue",
     "page2-heading": "Device Setup",
     "page2-text": "Setup your device by filling in the code that you copied from the Dongle Connect App here:",
     "page2-inputlabel": "Paste code here",

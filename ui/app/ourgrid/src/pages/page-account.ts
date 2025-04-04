@@ -36,8 +36,8 @@ const styling = css`
 @customElement('page-account')
 export class PageAccount extends OgPage<GridAppStateKeyed> {
 
-    animationEnterType = PageAnimationType.SWIPE_RIGHT;
-    animationExitType = PageAnimationType.SWIPE_LEFT;
+    getAnimationEnterType = () => PageAnimationType.SWIPE_RIGHT;
+    getAnimationExitType = () => PageAnimationType.SWIPE_LEFT;
 
     @state()
     protected user: User;
