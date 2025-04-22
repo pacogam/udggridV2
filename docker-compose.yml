@@ -70,6 +70,7 @@ services:
       - "80:80"
       - "443:443"
       - "8883:8883"
+      - "127.0.0.1:8404:8404" # Localhost metrics access
     volumes:
       - proxy-data:/deployment
       - deployment-data:/data
@@ -122,6 +123,8 @@ services:
 #      - /deployment.local:/deployment.local
       # 2) NFS/EFS network mount
       - efs-data:/efs
+    ports:
+      - "127.0.0.1:8405:8405" # Localhost metrics access
     environment:
       # Here are some typical environment variables you want to set
       # see openremote/profile/deploy.yml for details
@@ -134,6 +137,7 @@ services:
       OR_EMAIL_X_HEADERS:
       OR_EMAIL_FROM:
       OR_EMAIL_ADMIN:
+      OR_METRICS_ENABLED: ${OR_METRICS_ENABLED:-true}
       OR_HOSTNAME: ${OR_HOSTNAME?OR_HOSTNAME must be set}
       OR_ADDITIONAL_HOSTNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       OR_SSL_PORT: ${OR_SSL_PORT:--1}

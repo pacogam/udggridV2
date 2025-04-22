@@ -2,7 +2,6 @@ import { LitElement, TemplateResult, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {InputType} from '@openremote/or-mwc-components/or-mwc-input';
 import { when } from 'lit/directives/when.js';
-import '@openremote/or-icon';
 import './og-input';
 import {getAppStyle} from '../styles';
 import { styleMap } from 'lit/directives/style-map.js';

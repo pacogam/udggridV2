@@ -10,10 +10,11 @@ import org.openremote.model.Constants;
 import org.openremote.model.http.RequestParams;
 import org.openremote.model.reschool.UserRolesResource;
 import org.openremote.model.security.ClientRole;
-import org.openremote.model.security.Role;
-import org.openremote.model.security.User;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import static jakarta.ws.rs.core.Response.Status.*;
 
@@ -45,9 +46,9 @@ public class UserRolesResourceImpl extends ManagerWebResource implements UserRol
         }
 
         // Get state of the READ_ASSETS and RESTRICTED_USER roles
-        Role[] userRealmRoles = identityService.getIdentityProvider().getUserRealmRoles(getAuthenticatedRealmName(), getUserId());
-        boolean canReadAssets = Arrays.stream(userRealmRoles).anyMatch(r -> r.getName().equals(Constants.READ_ASSETS_ROLE) && r.isAssigned());
-        boolean isRestricted = Arrays.stream(userRealmRoles).anyMatch(r -> r.getName().equals(Constants.RESTRICTED_USER_REALM_ROLE) && r.isAssigned());
+        String[] userRealmRoles = identityService.getIdentityProvider().getUserRealmRoles(getAuthenticatedRealmName(), getUserId());
+        boolean canReadAssets = Arrays.asList(userRealmRoles).contains(Constants.READ_ASSETS_ROLE);
+        boolean isRestricted = Arrays.asList(userRealmRoles).contains(Constants.RESTRICTED_USER_REALM_ROLE);
 
         // Return status based on whether all roles are correct
         if (!canReadAssets || !isRestricted) {
@@ -75,15 +76,14 @@ public class UserRolesResourceImpl extends ManagerWebResource implements UserRol
     // Updates the roles to be correct.
     // Checks and applies RESTRICTED_USER in a realm, and applies the CORRECT_ROLES to the user.
     protected void correctRoles(String realm, String userId) {
-        Role[] userRealmRoles = identityService.getIdentityProvider().getUserRealmRoles(realm, userId);
-        for (Role r : userRealmRoles) {
-            if (r.getName().equals(Constants.RESTRICTED_USER_REALM_ROLE)) {
-                // Always make them a restricted user
-                r.setAssigned(true);
-            }
+
+        Collection<String> userRealmRoles = new ArrayList<>(List.of(identityService.getIdentityProvider().getUserRealmRoles(realm, userId)));
+        boolean isRestricted = userRealmRoles.contains(Constants.RESTRICTED_USER_REALM_ROLE);
+        if(!isRestricted) {
+            userRealmRoles.add(Constants.RESTRICTED_USER_REALM_ROLE);
+            identityService.getIdentityProvider().updateUserRealmRoles(realm, userId, userRealmRoles.toArray(new String[0]));
         }
-        String[] userRealmRoleNames = Arrays.stream(userRealmRoles).filter(Role::isAssigned).map(Role::getName).toArray(String[]::new);
-        identityService.getIdentityProvider().updateUserRealmRoles(realm, userId, userRealmRoleNames);
-        identityService.getIdentityProvider().updateUserRoles(realm, userId, Constants.KEYCLOAK_CLIENT_ID, CORRECT_ROLES);
+        // Correct client roles
+        identityService.getIdentityProvider().updateUserClientRoles(realm, userId, Constants.KEYCLOAK_CLIENT_ID, CORRECT_ROLES);
     }
 }

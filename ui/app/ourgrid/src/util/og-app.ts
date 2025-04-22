@@ -6,7 +6,6 @@ import {updateMetadata} from 'pwa-helpers/metadata';
 import {when} from 'lit/directives/when.js';
 import {guard} from 'lit/directives/guard.js';
 import {repeat} from 'lit/directives/repeat.js';
-import '../components/og-header';
 import {PageMenu, pageMenuProvider} from '../pages/page-menu';
 import {i18next} from '@openremote/or-translate';
 import {showLanguageDialog} from '../components/og-dialog';
@@ -26,6 +25,7 @@ import {
 import {Asset} from '@openremote/model';
 import {OgManager} from './og-manager';
 import {Defaults} from "./defaults";
+import '../components/og-header';
 
 const styling = css`
   :host {

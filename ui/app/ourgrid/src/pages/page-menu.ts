@@ -2,7 +2,6 @@ import {TemplateResult, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {i18next} from '@openremote/or-translate';
 import manager from '@openremote/core';
-import '@openremote/or-icon';
 import {Store} from '@reduxjs/toolkit';
 import {OgListItem} from '../components/og-mwc-list';
 import '../components/og-mwc-list';
