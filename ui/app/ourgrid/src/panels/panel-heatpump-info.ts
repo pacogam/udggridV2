@@ -90,12 +90,12 @@ export class PanelHeatpumpInfo extends OgDataPanel {
     protected async _getDetailsContentTemplate(characteristic: DeviceCharacteristic): Promise<TemplateResult> {
         const brand = characteristic.brand;
         return html`
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <or-icon style="font-size: var(--og-font-size-button-small)" icon="heat-pump"></or-icon>
-                <span class="text-tertiary" style="text-align: start;">
-                    <or-translate value='panel_heatpumpInfo.thermostat'></or-translate>
-                </span>
-            </div>
+<!--            <div style="display: flex; align-items: center; gap: 8px;">-->
+<!--                <or-icon style="font-size: var(&#45;&#45;og-font-size-button-small)" icon="heat-pump"></or-icon>-->
+<!--                <span class="text-tertiary" style="text-align: start;">-->
+<!--                    <or-translate value='panel_heatpumpInfo.thermostat'></or-translate>-->
+<!--                </span>-->
+<!--            </div>-->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <or-icon style="font-size: var(--og-font-size-button-small)" icon="thermostat"></or-icon>
                 <span class="text-tertiary" style="text-align: start;">

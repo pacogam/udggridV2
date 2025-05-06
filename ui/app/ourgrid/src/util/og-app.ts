@@ -134,6 +134,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     protected _attributeSubscriptionId: string;
     protected _timeout: NodeJS.Timeout;
     protected _assets: Asset[] = [];
+    protected _isOffline = false;
 
     static get styles() {
         return styling;
@@ -152,34 +153,33 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
         super.disconnectedCallback();
     }
 
-    protected _handleVisibilityChange(ev: Event) {
-        super._handleVisibilityChange(ev);
-        if(manager.console?.isMobile && document.visibilityState === 'visible') {
-            const exclusions = ['setup'];
-            if(!exclusions.includes(this._page)) {
-                window.location.reload();
-            }
-        }
-    }
-
     stateChanged(state: GridAppStateKeyed) {
         super.stateChanged(state);
         this._assets = state.gridApp.assets;
         this._dark = state.gridApp.dark;
 
+        // On every state update, we check if the user has changed from "offline" to "online".
+        // If so, we need to re-subscribe to the WebSocket for asset / attribute changes
+        const hasReconnected = !state.app.offline && (state.app.offline !== this._isOffline);
+        if(hasReconnected) console.debug("Reconnected to the OurGrid server!");
+
         // Once all assets are fetched (meter asset, district asset, and challenges asset),
         // we subscribe to attribute changes of the specific assets
-        if(!this._attributeSubscriptionId) {
+        if(!this._attributeSubscriptionId || hasReconnected) {
             if(!this._loading && userAssetIdSelector(state) && districtAssetIdSelector(state) && challengeAssetIdSelector(state) && state.gridApp.assets.length >= 3) {
                 const assetIds = state.gridApp.assets.map(a => a.id);
-                this._trySubscribeAssets(assetIds, manager.displayRealm);
+                this._trySubscribeAssets(assetIds, manager.displayRealm, hasReconnected);
+            } else {
+                console.warn("Could not subscribe to assets, as they haven't been fetched yet.")
             }
         }
+
+        this._isOffline = state.app.offline;
     }
 
-    protected _trySubscribeAssets(assetIds: string[], realm = manager.displayRealm) {
-        if(!this._attributeSubscriptionId) {
-            this.subscribeAssets(realm, assetIds).catch(e => console.error(e));
+    protected _trySubscribeAssets(assetIds: string[], realm = manager.displayRealm, refresh = false) {
+        if(!this._attributeSubscriptionId || refresh) {
+            this.subscribeAssets(realm, assetIds, refresh).catch(e => console.error(e));
         }
     }
 
@@ -406,7 +406,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     // The following code is based on page-map from the OpenRemote platform,
     // where we listen to changes of attributes using websocket, to change the values live.
 
-    protected subscribeAssets = async (realm: string, assetIds: string[]) => {
+    protected subscribeAssets = async (realm: string, assetIds: string[], requestCurrent = false) => {
         console.log(`Subscribing to assets; ${assetIds}`);
 
         try {
@@ -417,14 +417,20 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
                 return;
             }
 
-            const attributeSubscriptionId = await manager.events.subscribeAttributeEvents(assetIds, false, event => {
+            // Unsubscribe from any previous subscription, to force a NEW WebSocket listener (instead of listening to existing / cached ones)
+            if(this._attributeSubscriptionId) {
+                console.debug('Unsubscribing from previous attribute subscription...');
+                await manager.events.unsubscribe(this._attributeSubscriptionId);
+            }
+
+            const attributeSubscriptionId = await manager.events.subscribeAttributeEvents(assetIds, requestCurrent, event => {
                 this._store.dispatch(attributeEventReceived(event));
             });
 
             // No longer connected or realm has changed
             if (!this.isConnected || realm !== realmSelector(this.getState())) {
                 console.error('Unsubscribing from assets, since you are not connected to the realm.');
-                manager.events.unsubscribe(attributeSubscriptionId);
+                await manager.events.unsubscribe(attributeSubscriptionId);
                 return;
             }
 

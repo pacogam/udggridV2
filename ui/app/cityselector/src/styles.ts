@@ -35,13 +35,13 @@ export function getAppStyle() {
 
         /* Titles */
         --og-font-size-title: 3.0rem; /* Main title */
-        --og-font-size-heading1: 1.8rem; /* Main heading */
+        --og-font-size-heading1: 1.6rem; /* Main heading */
         --og-font-size-subheading1: 1.2rem; /* Subtitle Main heading; ... */
         --og-font-size-heading2: 1.2rem; /* Secondary heading; ... */
         --og-font-size-subheading2: 1.05rem; /* Subtitle Secondary heading; ... */
 
         /* Text */
-        --og-font-size-primary: 1.2rem; /* Main text */
+        --og-font-size-primary: 1.05rem; /* Main text */
         --og-font-size-secondary: 1.05rem; /* Secondary text; ... */
         --og-font-size-tertiary: 0.9rem; /* Tertiary text; ... */
 
@@ -72,7 +72,7 @@ export function getAppStyle() {
         --og-font-weight-subheading2: 300;
 
         /* Text */
-        --og-font-weight-primary: 400;
+        --og-font-weight-primary: 300;
         --og-font-weight-secondary: 300;
         --og-font-weight-tertiary: 300;
 

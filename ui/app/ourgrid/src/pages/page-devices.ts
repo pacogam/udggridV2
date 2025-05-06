@@ -62,11 +62,12 @@ const styling = css`
     
     .page-action {
         width: calc(100% - 32px);
-        padding: 0 32px 16px 32px;
+        padding: 0 16px;
     }
     
     .page-action > og-input {
         width: 100%;
+        padding-bottom: 16px;
     }
 `;
 

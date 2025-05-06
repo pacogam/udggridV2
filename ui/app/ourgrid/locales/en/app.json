@@ -3,15 +3,21 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introduction",
-  "devices": "My devices",
+  "devices": "Devices",
   "houseCharacteristics": "My House",
   "privacyStatement": "Privacy Statement",
+  "language": "Language",
   "continue": "Continue",
   "remove": "Remove",
   "save": "Save",
   "success": "Saved",
   "tryAgain": "Try again",
   "saved": "saved",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "areYouSure": "Are you sure?",
+  "switch": "Switch",
+  "logout": "Log out",
   "calendar": {
     "lastWeek": "[Last] dddd",
     "lastDay": "[Yesterday]",
@@ -25,7 +31,9 @@
     "email": "Email address",
     "changePassword": "Change password",
     "deleteAccount": "Delete account",
-    "deleteAccountConfirm": "This will delete your account, and all the data it contains.\n\nThis action cannot be reversed."
+    "deleteAccountConfirm": "This will delete your account, and all the data it contains.\n\nThis action cannot be reversed.",
+    "city": "City",
+    "switchCity": "Switch city"
   },
   "page-privacy": {
     "heading": "Privacy Statement",
@@ -200,7 +208,7 @@
     "perPoint": "per point"
   },
   "panel_trophies": {
-    "heading": "My Trophies",
+    "heading": "Your Trophies",
     "totalPoints": "Total amount of points",
     "challengesJoined": "Challenges",
     "pointsEarned": "points earned",
@@ -208,10 +216,11 @@
     "totalPeaksAvoided": "Peaks avoided",
     "peakPointsEarned": "points earned",
     "noPeaksFound": "No peaks found",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "peakTutorial": "Earn a peak point every day as long as your consumption during peak periods is lower than your average consumption during that day."
   },
   "panel_usageHistory": {
-    "heading": "Your consumption",
+    "heading": "Your Consumption",
     "subtitle": "with predicted load on the grid"
   },
   "panel_challengeComplete": {
@@ -265,5 +274,6 @@
     "other": "Other"
   },
   "privacy-statement": "With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighbourhood consumption; determining which challenges we send to which user, and keeping track of your earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\n\nYour anonymised energy consumption data is only shared with your city, OpenRemote, and Resourcefully. These organisations only use this data to: use the power values for preventing network congestion, further improving the application, and to ensure the application functions properly.\n\nIf you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
-  "switchCity": "Switch city"
+  "switchCity": "Switch city",
+  "switchCityConfirm": "Are you sure you want to switch cities?"
 }

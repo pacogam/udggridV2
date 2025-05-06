@@ -54,9 +54,9 @@ const styling = css`
     }
 
     .mdc-fab__icon {
-        width: 32px !important;
-        height: 32px !important;
-        font-size: 32px !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 28px !important;
     }
 
     .mdc-notched-outline__leading {

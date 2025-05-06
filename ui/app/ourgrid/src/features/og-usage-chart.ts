@@ -5,7 +5,7 @@ import manager from '@openremote/core';
 import {Asset, AssetDatapointIntervalQueryFormula, AssetDatapointLTTBQuery, Attribute, DatapointInterval, ValueDatapoint} from '@openremote/model';
 import {getAppStyle} from '../styles';
 import moment from 'moment';
-import {getStateColorByPowerValue, OgStateColor} from '../util/util';
+import {getStateColorByPowerValue, getStateColorByPowerValueRGB} from '../util/util';
 import {showSnackbar} from '../components/og-snackbar';
 import {i18next} from '@openremote/or-translate';
 import { when } from 'lit/directives/when.js';
@@ -56,12 +56,6 @@ const predictedBackgroundPlugin = {
             const now = new Date().getTime();
             const nowPx = x.getPixelForValue(now);
 
-            // Remove existing background
-            options.images.forEach((img: HTMLImageElement) => {
-                img.remove();
-            });
-            options.images = [];
-
             // Loop through each datapoint...
             options.data.forEach((coords, index) => {
                 const start = coords.x;
@@ -89,18 +83,8 @@ const predictedBackgroundPlugin = {
                     }
 
                     // Start drawing/rendering background
-                    const color = getStateColorByPowerValue(coords.y, options.threshold).toString();
-                    const img = new Image();
-                    if(color === OgStateColor.RED) {
-                        img.src = 'images/diagonal-strokes-orange.svg';
-                    } else {
-                        img.src = 'images/diagonal-strokes-green.svg';
-                    }
-                    img.onload = () => {
-                        ctx.fillStyle = (ctx.createPattern(img, 'repeat') || (color === OgStateColor.RED ? '#faa78d' : '#80d5a2'));
-                        ctx.fillRect(startPx, chartArea.top, width, chartArea.height);
-                    };
-                    options.images.push(img);
+                    ctx.fillStyle = `rgba(${getStateColorByPowerValueRGB(coords.y, options.threshold).toString()}, 0.4)`;
+                    ctx.fillRect(startPx, chartArea.top, width, chartArea.height);
                 }
             });
             ctx.restore();
@@ -322,7 +306,6 @@ export class OgUsageChart extends OrChart {
                         color: null,
                         threshold: null,
                         data: [],
-                        images: []
                     }
                 },
                 hover: null,
@@ -370,6 +353,7 @@ export class OgUsageChart extends OrChart {
             backgroundColor: color,
             label: label,
             pointRadius: 2,
+            borderWidth: 2,
             fill: false,
             data: [],
             borderDash: predicted ? [2, 4] : undefined

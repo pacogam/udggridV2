@@ -35,8 +35,8 @@ export class ConfirmPrivacyPage extends OgOnboardingPage {
             pageContent: (): TemplateResult => {
                 return html`
                     <div style="height: 100%;">
-                        <span class="text-primary">
-                            <or-translate value="privacy-statement" style="white-space: pre-line; margin-bottom: 80px;"></or-translate>
+                        <span class="text-secondary">
+                            <or-translate value="privacy-statement" style="white-space: pre-line; margin-bottom: 80px; text-align: left;"></or-translate>
                         </span>
                     </div>
                 `;

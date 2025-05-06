@@ -98,12 +98,12 @@ export class PanelBatteryInfo extends OgDataPanel {
                                                 <or-translate value="${manufacturer || 'panel_batteryInfo.unknownManufacturer'}"></or-translate>
                                             </span>
                                         </div>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <or-icon style="font-size: var(--og-font-size-button-small)" icon="meter-electric-outline"></or-icon>
-                                            <span class="text-tertiary" style="text-align: start;">
-                                                <or-translate value="panel_batteryInfo.unknown"></or-translate>
-                                            </span>
-                                        </div>
+<!--                                        <div style="display: flex; align-items: center; gap: 8px;">-->
+<!--                                            <or-icon style="font-size: var(&#45;&#45;og-font-size-button-small)" icon="meter-electric-outline"></or-icon>-->
+<!--                                            <span class="text-tertiary" style="text-align: start;">-->
+<!--                                                <or-translate value="panel_batteryInfo.unknown"></or-translate>-->
+<!--                                            </span>-->
+<!--                                        </div>-->
                                     `;
                                 }, () => html`
                                     <or-translate value="panel_batteryInfo.noBatteryFound" style="margin-bottom: 20px;"></or-translate>

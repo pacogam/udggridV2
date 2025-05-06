@@ -104,7 +104,7 @@ export class PanelUsageOverview extends OgDataPanel {
                     ${when(isInChallenge, () => this.getTimerHTML(this.meterAsset, this.challengeAsset))}
                     ${this.getStatisticHTML(meterPower, meterPowerMax, statisticColor, isInChallenge)}
                 </div>
-                <div style="aspect-ratio: ${this.aspectRatio}; overflow: hidden; border-radius: 0 0 18% 18%;">
+                <div style="aspect-ratio: ${this.aspectRatio}; overflow: hidden;">
                     <og-usage-graphic .dark="${isInChallenge}" .color="${graphicColor}" .colorAnimation="${this.staticAnimation}"></og-usage-graphic>
                 </div>
             </div>
@@ -127,7 +127,7 @@ export class PanelUsageOverview extends OgDataPanel {
             '--or-icon-fill': customColor
         };
         return html`
-            <div id="statistic-container" style="background: ${dark ? 'var(--og-color-primary-dark)' : 'var(--og-color-primary)'}">
+            <div id="statistic-container" style="background: ${dark ? 'var(--og-color-primary-dark)' : 'var(--og-color-primary)'}; ${dark ? '' : 'border:solid 8px var(--og-background-shade);'}">
                 <or-icon icon="lightning-bolt" style="${styleMap(iconStyles)}"></or-icon>
                 ${when(power, () => html`
                     <og-statistic .value="${Math.round(power)}">

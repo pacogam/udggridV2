@@ -3,15 +3,21 @@
   "home": "Home",
   "menu": "Menu",
   "intro": "Introductie",
-  "devices": "Mijn apparaten",
+  "devices": "Apparaten",
   "houseCharacteristics": "Mijn huis",
   "privacyStatement": "Privacy",
+  "language": "Taal",
   "continue": "Verder",
   "remove": "Verwijderen",
   "save": "Opslaan",
   "success": "Opgeslagen",
-  "tryAgain": "Try again",
+  "tryAgain": "Probeer opnieuw",
   "saved": "bespaard",
+  "delete": "Verwijderen",
+  "cancel": "Annuleren",
+  "areYouSure": "Weet je het zeker?",
+  "switch": "Verander",
+  "logout": "Log uit",
   "calendar": {
     "lastWeek": "[Afgelopen] dddd",
     "lastDay": "[Gisteren]",
@@ -25,7 +31,9 @@
     "email": "Email adres",
     "changePassword": "Wachtwoord wijzigen",
     "deleteAccount": "Account verwijderen",
-    "deleteAccountConfirm": "Hiermee verwijder je hele account, en alle data die eraan gekoppeld is.\n\nDit kan niet worden teruggedraaid."
+    "deleteAccountConfirm": "Hiermee verwijder je hele account, en alle data die eraan gekoppeld is.\n\nDit kan niet worden teruggedraaid.",
+    "city": "Stad",
+    "switchCity": "Verander van stad"
   },
   "page-privacy": {
     "heading": "Privacy verklaring",
@@ -208,7 +216,8 @@
     "totalPeaksAvoided": "Pieken vermeden",
     "peakPointsEarned": "punten verdiend",
     "noPeaksFound": "Geen pieken gevonden",
-    "loadMore": "Meer laden"
+    "loadMore": "Meer laden",
+    "peakTutorial": "Verdien elke dag een piekpunt zolang je verbruik in de piek periodes lager is dan je gemiddelde verbruik gedurende die dag."
   },
   "panel_usageHistory": {
     "heading": "Historisch verbruik",
@@ -265,5 +274,6 @@
     "other": "Anders"
   },
   "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote en Resourcefully. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
-  "switchCity": "Verander van stad"
+  "switchCity": "Verander van stad",
+  "switchCityConfirm": "Weet je zeker dat je van stad wil veranderen?"
 }

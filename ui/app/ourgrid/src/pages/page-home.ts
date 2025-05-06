@@ -166,7 +166,6 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
     protected showChallengeCompletedModal(meterAsset: Asset, challengeAsset: Asset) {
         showLastChallengeResultDialog(meterAsset, challengeAsset);
-        localStorage.setItem(Constants.LOCALSTORAGE_LAST_CHALLENGE_COMPLETED_KEY, new Date().getTime().toString());
     }
 
     protected async checkForChallengeMissedModal(challengeAsset?: Asset) {
@@ -203,7 +202,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
                 
                 <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
-                <div style="background: var(--og-background-shade)">
+                <div>
                     ${guard([this.language], () => html`
                         <panel-usage-history .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .language="${this.language}"></panel-usage-history>
                     `)}

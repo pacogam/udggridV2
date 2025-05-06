@@ -36,7 +36,7 @@ const styling = css`
   }
 
   .mdc-dialog__title {
-    padding: 24px 14px;
+    padding: 2px 14px 24px;
     font-size: var(--og-font-size-heading1);
     font-weight: var(--og-font-weight-heading1);
   }
@@ -134,21 +134,33 @@ export function showLastChallengeResultDialog(meterAsset: Asset, challengeAsset:
         const challenge = data[0];
         return html`
             <div class="text-primary bold" style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
-                <span style="color: var(--og-color-neutral)">${i18next.t('panel_challengeComplete.pointsEarned').replace('{{value}}', challenge.points || 0)}</span>
+                <span style="color: var(--og-color-neutral)">${i18next.t('panel_challengeComplete.pointsEarned').replace('{{value}}', challenge?.points || 0)}</span>
                 <span style="color: var(--og-color-secondary)">
-                    ${i18next.t('panel_challengeComplete.minutesJoined').replace('{{value}}', moment(challenge.endDate).diff(challenge.joinedAt, 'minutes').toString())}
+                    ${i18next.t('panel_challengeComplete.minutesJoined').replace('{{value}}', moment(challenge?.endDate).diff(challenge?.joinedAt, 'minutes').toString())}
                 </span>
             </div>
         `;
     };
-    const action = {
-        content: 'panel_challengeComplete.action'
+    const onDialogClose = (): void => {
+        console.debug("Updating local storage with timestamp of last challenge completed..");
+        localStorage.setItem(Constants.LOCALSTORAGE_LAST_CHALLENGE_COMPLETED_KEY, new Date().getTime().toString());
+    }
+    const dismissAction = {
+        actionName: 'close',
+        content: '',
+        action: onDialogClose
     } as OgDialogAction;
+    const action = {
+        actionName: 'ok',
+        content: 'panel_challengeComplete.action',
+        action: onDialogClose
+    } as OgDialogCenterAction;
+
     const dialog = (new OgDialog()
         .setHeading('panel_challengeComplete.heading')
-        .setDismissAction(null)
+        .setDismissAction(dismissAction)
         .setContent(() => html`
-            <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
                 <div class="text-primary dark">
                     <or-translate value="${'panel_challengeComplete.subtitle'}"></or-translate>
                 </div>
@@ -194,6 +206,10 @@ export class OgDialog extends OrMwcDialog {
     public setAlign(align: 'start' | 'center' | 'end'): this {
         this.align = align;
         return this;
+    }
+
+    setActions(actions: OgDialogAction[]): this {
+        return super.setActions(actions) as this;
     }
 
     public setActionBtn(action: OgDialogCenterAction): this {
@@ -252,7 +268,12 @@ export class OgDialog extends OrMwcDialog {
                                                   style="width: 100%; --or-mwc-input-color: ${this.actionBtn.bgColorCSS || 'var(--og-color-danger)'}; --or-mwc-input-text-color: ${this.actionBtn.textColorCSS || 'var(--og-color-primary)'};"
                                                   .disabled="${this.actionBtn.disabled}" .label="${this.actionBtn.content}"
                                                   @or-mwc-input-changed="${evt => {
-                                                      this.close(evt);
+                                                      if(this.actions?.includes(this.actionBtn)) {
+                                                          this._onDialogClosed(this.actionBtn.actionName); 
+                                                      } else {
+                                                          this.actionBtn.action(this);
+                                                          this.close();
+                                                      }
                                                   }}"
                                         ></og-input>
                                     </div>

@@ -6,6 +6,10 @@ export enum OgStateColor {
     GREEN = '#00AA45', RED = '#F44F1A'
 }
 
+export enum OgStateColorRGB {
+    GREEN = '0, 170, 69', RED = '244, 79, 26'
+}
+
 export enum OgMeterChallengeState {
     JOIN_CHALLENGE = 'joinChallenge', JOINED_CHALLENGE = 'joinedChallenge', ACTIVE_CHALLENGE = 'activeChallenge', NO_CHALLENGE = 'noChallenge'
 }
@@ -90,6 +94,10 @@ export function getStateColorByDistrictPowerUsage(districtAttributes: { [p: stri
 
 export function getStateColorByPowerValue(percentage: number, threshold: number) {
     return (percentage > threshold) ? OgStateColor.RED : OgStateColor.GREEN;
+}
+
+export function getStateColorByPowerValueRGB(percentage: number, threshold: number) {
+    return (percentage > threshold) ? OgStateColorRGB.RED : OgStateColorRGB.GREEN;
 }
 
 export async function doAnimation(elem: Element, cssClass: string, timeout: number): Promise<void> {

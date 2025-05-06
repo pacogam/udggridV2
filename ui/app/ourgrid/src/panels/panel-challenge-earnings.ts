@@ -31,25 +31,25 @@ export class PanelChallengeEarnings extends OgDataPanel {
         return html`
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 26px;">
                         <div style="width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;">
                             <img src="images/star.svg" style="width: 22px;" />
                         </div>
-                        <span class="text-tertiary bold"><or-translate value="panel_earnings.totalPoints" /></span>
+                        <span class="text-primary"><or-translate value="panel_earnings.totalPoints" /></span>
                     </div>
                     <span>${pointsTotal}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 26px;">
                         <or-icon icon="finance"></or-icon>
-                        <span class="text-tertiary bold"><or-translate value="panel_earnings.exchangeRate" /></span>
+                        <span class="text-primary"><or-translate value="panel_earnings.exchangeRate" /></span>
                     </div>
-                    <span>${parsedExchangeRate} <or-translate value="panel_earnings.perPoint" /></span>
+                    <span>${parsedExchangeRate}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 26px;">
                         <or-icon icon="piggy-bank-outline"></or-icon>
-                        <span class="text-tertiary bold"><or-translate value="panel_earnings.expectedEarnings" /></span>
+                        <span class="text-primary"><or-translate value="panel_earnings.expectedEarnings" /></span>
                     </div>
                     <span>${earnings}</span>
                 </div>

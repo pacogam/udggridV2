@@ -207,7 +207,7 @@ export abstract class OgPanel extends LitElement {
             'header-container--graphic': this.dotsGraphic
         };
         const textColorStyles: {} = {
-            'color': this.dark ? 'var(--og-color-primary)' : 'black'
+            'color': this.dark ? 'var(--og-color-primary)' : 'var(--og-color-primary-dark)'
         };
         const headingClasses: {} = {
             'text-title': headingStyle === 'title',

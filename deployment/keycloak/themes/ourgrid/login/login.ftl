@@ -88,6 +88,10 @@
             </div>
         </#if>
 
+        <div id="kc-wrongcity" class="fadein-animation" style="display: flex; justify-content: center; margin-top: 12px; --fadein-offset: 250ms">
+            <span>${msg("wrongCityPrefix")} <a href="https://ourgrid.openremote.app/cityselector/?redirect=false">${msg("wrongCityHere")}</a> ${msg("wrongCitySuffix")}</span>
+        </div>
+
 
         <#if realm.password && social.providers??>
             <div id="kc-social-providers">

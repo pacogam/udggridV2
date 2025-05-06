@@ -21,10 +21,10 @@ import rest from "rest";
 export function getStatisticTemplate(prefixIcon?: string, isPath = false, leftContent?: TemplateResult, rightContent?: TemplateResult, expandContent?: TemplateResult, expandable = true): TemplateResult {
     const content = html`
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="flex: 1; display: flex; align-items: center; gap: 24px;">
+            <div style="flex: 1; display: flex; align-items: center; gap: 20px;">
                 ${when(prefixIcon, () => isPath
-                        ? html`<img src="${prefixIcon}" alt="Statistic Icon" width="50" height="50"/>`
-                        : html`<or-icon .icon="${prefixIcon}" style="--internal-or-icon-width: var(--or-icon-width, 50px);" />`
+                        ? html`<img src="${prefixIcon}" alt="Statistic Icon" width="46" height="46"/>`
+                        : html`<or-icon .icon="${prefixIcon}" style="--internal-or-icon-width: var(--or-icon-width, 46px);" />`
                 )}
                 <div>
                     <div>${when(leftContent, () => leftContent)}</div>
@@ -46,7 +46,7 @@ const styling = css`
   #content-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
 `;
 
@@ -59,8 +59,8 @@ export class PanelTrophies extends OgDataPanel {
     @state()
     protected trophies: TrophyItem[] = [];
 
-    @state()
-    protected peakTrophies: TrophyItem[] = [];
+    /*@state() (CURRENTLY COMMENTED OUT, DUE TO UI DESIGN DECISION)
+    protected peakTrophies: TrophyItem[] = [];*/
 
     @state()
     protected currentHistoryDate: Date = moment().toDate();
@@ -91,13 +91,14 @@ export class PanelTrophies extends OgDataPanel {
             });
         }
 
-        if(changedProps.has('peakCurrentHistoryDate') && this.peakCurrentHistoryDate) {
+        // Do the same for peak points. (CURRENTLY COMMENTED OUT, DUE TO UI DESIGN DECISION)
+        /*if(changedProps.has('peakCurrentHistoryDate') && this.peakCurrentHistoryDate) {
             const historyDate = moment(this.peakCurrentHistoryDate).subtract(Defaults.HISTORY_FETCH_AMOUNT, (Defaults.HISTORY_FETCH_UNIT as any)).toDate();
             console.log(`Fetching peak history between ${historyDate.toDateString()} and ${this.currentHistoryDate.toDateString()}`);
             this.fetchPeaks(historyDate, this.peakCurrentHistoryDate).then(trophies => {
                 this.peakTrophies = this.peakTrophies.concat(trophies);
             });
-        }
+        }*/
 
         return super.willUpdate(changedProps);
     }
@@ -140,7 +141,7 @@ export class PanelTrophies extends OgDataPanel {
                 </div>
                 <div class="content-container" ${animate()}>
                     ${getStatisticTemplate('images/yellow-star.svg', true, html`
-                        <span class="text-heading2">${challengesJoined}</span>
+                        <span class="text-primary bold">${challengesJoined}</span>
                         <span class="text-primary"><or-translate value="panel_trophies.challengesJoined"></or-translate></span>
                     `, html`
                         <span class="text-primary">${activeChallengePoints}</span>
@@ -151,14 +152,16 @@ export class PanelTrophies extends OgDataPanel {
                 </div>
                 <div class="content-container" ${animate()}>
                     ${getStatisticTemplate('images/green-star.svg', true, html`
-                        <span class="text-heading2">${peakPoints * peakPointsPerDay}</span>
+                        <span class="text-primary bold">${peakPoints * peakPointsPerDay}</span>
                         <span class="text-primary"><or-translate value="panel_trophies.totalPeaksAvoided"></or-translate></span>
                     `, html`
                         <span class="text-primary">${peakPoints}</span>
                         <span class="text-primary"><or-translate value="panel_trophies.peakPointsEarned"></or-translate></span>
                     `, html`
-                        ${until(this.getTrophiesTemplate('peak', this.peakTrophies, this.peakPointsLoading, () => this.onLoadMorePeaksClick(), 'D MMMM YYYY'))}
-                    `, this.peakTrophies?.length > 0)}
+                        <div style="padding: 8px 16px;">
+                            <p class="text-secondary"><or-translate value="panel_trophies.peakTutorial"></or-translate></p>
+                        </div>
+                    `, true)}
                 </div>
             </div>
         `;

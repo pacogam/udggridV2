@@ -43,16 +43,16 @@ const styling = css`
     }
 
     .menu-content-wrapper-closed {
-        transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important; /*closing transition*/
-        -webkit-transition: opacity ease-in-out 0.2s, height 0s 0.2s, width 0s 0.2s !important;
+        transition: opacity ease-in-out 0.1s, height 0s 0.1s, width 0s 0.1s !important; /*closing transition*/
+        -webkit-transition: opacity ease-in-out 0.1s, height 0s 0.1s, width 0s 0.1s !important;
     }
 
     .menu-content-wrapper-opened {
         width: 100%;
         height: 100vh;
         opacity: 1;
-        transition: opacity ease-in-out 0.3s 0.3s; /*open transition*/
-        -webkit-transition: opacity ease-in-out 0.3s 0.3s;
+        transition: opacity ease-in-out 0.2s 0.2s; /*open transition*/
+        -webkit-transition: opacity ease-in-out 0.2s 0.2s;
     }
 
     .menu-content {
@@ -98,8 +98,8 @@ const styling = css`
         overflow: hidden;
         max-width: 100%;
         height: 0;
-        transition: all ease-in-out 0.4s;
-        -webkit-transition: all ease-in-out 0.4s;
+        transition: all ease-in-out 0.2s;
+        -webkit-transition: all ease-in-out 0.2s;
     }
 
     .menu-background-wrapper-opened {
@@ -113,8 +113,8 @@ const styling = css`
         width: 0;
         border-radius: 0 0 0 100%;
         background: var(--og-color-primary);
-        transition: all ease-in-out 0.4s;
-        -webkit-transition: all ease-in-out 0.4s;
+        transition: all ease-in-out 0.2s;
+        -webkit-transition: all ease-in-out 0.2s;
         z-index: 10;
     }
 
@@ -177,27 +177,19 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 this.dispatchEvent(new CustomEvent('navigate', {detail: 'devices'}));
                 return;
             }
-            /*case 'characteristics': {
-                this.dispatchEvent(new CustomEvent('navigate', {detail: 'characteristics'}));
-                return;
-            }*/
             case 'language': {
                 this.dispatchEvent(new CustomEvent('language'));
                 return;
             }
+            /*case 'characteristics': {
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'characteristics'}));
+                return;
+            }*/
             case 'intro': {
                 this.dispatchEvent(new CustomEvent('navigate', {detail: 'onboarding'}));
                 /*window.localStorage.setItem('completedOnboarding', '0');
                 router.navigate('');
                 window.location.reload();*/
-                return;
-            }
-            case 'privacy': {
-                this.dispatchEvent(new CustomEvent('navigate', {detail: 'privacy'}));
-                return;
-            }
-            case 'logout': {
-                manager.logout();
                 return;
             }
             default: {
@@ -209,13 +201,11 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected render(): TemplateResult {
         const items: OgListItem[] = [
             {icon: 'home', text: i18next.t('home'), value: 'home'},
-            {icon: 'account', text: i18next.t('account'), value: 'account'},
             {icon: 'home-battery-outline', text: i18next.t('devices'), value: 'devices'},
-            /*{icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},*/
+            {icon: 'account', text: i18next.t('account'), value: 'account'},
             {icon: 'web', text: i18next.t('language'), value: 'language'},
+            /*{icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},*/
             {icon: 'help-circle-outline', text: i18next.t('intro'), value: 'intro'},
-            {icon: 'book', text: i18next.t('privacyStatement'), value: 'privacy'},
-            {prefixImg: 'images/logout.svg', text: i18next.t('logout'), value: 'logout'}
         ];
         return html`
             <div id="menu-wrapper">
@@ -226,25 +216,9 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                             <!-- Top container -->
                             <div class="menu-container" style="background: var(--og-color-primary-dark)">
                                 <div class="menu-container" style="gap: 36px;">
-                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
-                                        <div>
-                                            <span class="text-heading dark">${i18next.t('menu')}</span>
-                                        </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; margin-top:24px;">
                                         <og-mwc-list dark .values="${this.currentPage}" .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
                                     </div>
-                                </div>
-                                <div class="text-tertiary dark" style="display: flex; justify-content: center; gap: 8px;">
-                                            <span>
-                                                <or-translate value="appName"></or-translate>
-                                                v1.1.0
-                                            </span>
-                                    <span>-</span>
-                                    <or-translate value="switchCity" class="text-tertiary bold"
-                                                  style="text-decoration: underline; cursor: pointer;"
-                                                  @click="${() => {
-                                                      window.location.replace("https://ourgrid.openremote.app/cityselector/?redirect=false");
-                                                  }}"
-                                    ></or-translate>
                                 </div>
                                 <div id="bottom-graphic-container">
                                     <img id="bottom-graphic" src="images/dots-menu-white-bottom.svg"/>

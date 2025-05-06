@@ -47,7 +47,7 @@ export class OgHeader extends LitElement {
             <div id="header-container">
                 ${when(!this.loading, () => html`
                     <div id="button-container">
-                        <og-input type="${InputType.BUTTON}" .icon="${this.menuActive ? 'close' : 'tune'}" action="${true}" style=${styleMap(buttonStyles)}
+                        <og-input type="${InputType.BUTTON}" .icon="${this.menuActive ? 'close' : 'menu'}" action="${true}" style=${styleMap(buttonStyles)}
                                       @or-mwc-input-changed="${() => { this.dispatchEvent(new CustomEvent('menu')); }}"
                         ></og-input>
                     </div>

@@ -60,6 +60,27 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
                 router.navigate('account-password');
                 return;
             }
+            case 'switch-city': {
+                showDialog(new OgDialog()
+                    .setHeading('areYouSure')
+                    .setContent(html`<or-translate value="switchCityConfirm"></or-translate>`)
+                    .setActions([
+                        {actionName: 'cancel', content: 'cancel'},
+                        {actionName: 'ok', content: 'switch', action: () => {
+                            window.location.replace("https://ourgrid.openremote.app/cityselector/?redirect=false");
+                        }}
+                    ]) as any
+                )
+                return;
+            }
+            case 'logout': {
+                manager.logout();
+                return;
+            }
+            case 'privacy': {
+                router.navigate('privacy');
+                return;
+            }
             case 'delete-account': {
                 const action = () => {
                     this.deleteAccount(this.user?.id);
@@ -71,7 +92,7 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
                 showDialog(new OgDialog()
                     .setHeading(i18next.t('page-account.deleteAccount'))
                     .setContent(html`
-                        <or-translate value="page-account.deleteAccountConfirm" style="white-space: pre-line;"></or-translate>
+                        <or-translate value="page-account.deleteAccountConfirm" style="white-space: pre-line; margin-top: -1.5rem;"></or-translate>
                     `)
                     .setDismissAction(null)
                     .setActions(dialogActions) as OgDialog
@@ -83,8 +104,13 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
     protected render(): TemplateResult {
         const items: OgListItem[] = [
             /*{icon: 'key', text: i18next.t('page-account.changePassword'), value: 'password', trailingIcon: 'chevron-right'},*/
+            {icon: 'city', text: i18next.t('page-account.switchCity'), value: 'switch-city'},
             {icon: 'delete', text: i18next.t('page-account.deleteAccount'), value: 'delete-account'}
             /*{icon: 'bell-badge', text: 'Notifications', value: 'notifications', trailingIcon: 'chevron-right'}*/
+        ];
+        const items2: OgListItem[] = [
+            {icon: 'book', text: i18next.t('privacyStatement'), value: 'privacy'},
+            {icon: 'logout', text: i18next.t('logout'), value: 'logout'}
         ];
         return html`
             <div class="page-wrapper">
@@ -101,8 +127,19 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
                             <div style="border-bottom: 1px solid #E0E0E0; margin: 0 32px;"></div>
                             <!-- Actions -->
                             <div style="padding: 16px;">
+                                <og-mwc-list .listItems="${items2}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
+                            </div>                            <!-- Divider -->
+                            <div style="border-bottom: 1px solid #E0E0E0; margin: 0 32px;"></div>
+                            <!-- Actions -->
+                            <div style="padding: 16px;">
                                 <og-mwc-list .listItems="${items}" @or-mwc-list-changed="${(ev: OrMwcListChangedEvent) => this._onMenuSelect(ev)}"></og-mwc-list>
                             </div>
+                            <div class="text-tertiary" style="display: flex; align-items:end; justify-content: center; gap: 8px;">
+                                <span>
+                                    <or-translate value="appName"></or-translate>
+                                    v1.2.0
+                                </span>
+                            <div>
                             <div style="min-height: 100px;"></div>
                         </div>
                     </div>
