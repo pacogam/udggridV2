@@ -33,12 +33,12 @@ Notifications notifications = binding.notifications
 Assets assets = binding.assets
 
 // Put the asset ID of relevant assets here:
-String parentDistrictAssetId = "uniqueId1"
-String parentMeterAssetId = "uniqueId2"
-String solarAssetId = "uniqueId3"
-String researchAsset1Id = "uniqueId4"
-String challengesAssetId = "uniqueId5"
-String peaksAssetId = "uniqueId6"
+String parentDistrictAssetId = "setId1"
+String parentMeterAssetId = "setId2"
+String solarAssetId = "setId3"
+String researchAsset1Id = "setId4"
+String challengesAssetId = "setId5"
+String peaksAssetId = "setId6"
 
 // Put the attribute names for summation here (or leave empty to include all child asset attribute names with 'Rule state'):
 String[] attributeNames = ["power", "energyImportTotal", "energyExportTotal", "energyNetTotal", "gasImportTotal", "gasFlowRate"]
@@ -323,8 +323,12 @@ rules.add()
             }
 
             // Calculate the total estimated solar capacity of active meters
-            def estimatedSolarCapacityMeters = (estimatedSolarCapacityMap.values().findAll { it != null }.sum() * 1000).round() / 1000 as Double
+            def estimatedSolarCapacitySum = estimatedSolarCapacityMap.values().findAll { it != null }.sum()
+            def estimatedSolarCapacityMeters = null
 
+            if (estimatedSolarCapacitySum != null) {
+                estimatedSolarCapacityMeters = (estimatedSolarCapacitySum * 1000).round() / 1000 as Double
+            }
             // Update meter parent - estimated solar capacity attribute
             if (estimatedSolarCapacityMeters != null) {
                 assets.dispatch(parentMeterAssetId, "estimatedSolarCapacity", estimatedSolarCapacityMeters)

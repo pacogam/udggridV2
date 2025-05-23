@@ -1,1 +1,2 @@
 org.openremote.manager.reschool.rest.ReschoolRestService
+org.openremote.manager.ourgrid.OurgridSetupService
