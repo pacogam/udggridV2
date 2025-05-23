@@ -16,7 +16,7 @@
         "add" : {
           "typesParent" : {
             "default" : {
-              "include" : [ "EarneAgent", "EarneProtocol", "OurgridChallengesAsset", "OurgridDistrictAsset", "OurgridMeterAsset", "OurgridMeterSumAsset", "OurgridPeaksAsset", "OurgridSetupAsset", "ThingsAsset", "HTTPAgent", "MQTTAgent", "GroupAsset", "ElectricityBatteryAsset" ]
+              "include" : [ "EarneAgent", "EarneProtocol", "OurgridBatteryAsset", "OurgridChallengesAsset", "OurgridDistrictAsset", "OurgridMeterAsset", "OurgridMeterSumAsset", "OurgridPeaksAsset", "OurgridSetupAsset", "ThingsAsset", "HTTPAgent", "MQTTAgent", "GroupAsset", "ElectricityBatteryAsset" ]
             }
           }
         }
@@ -26,7 +26,7 @@
       "rules" : {
         "descriptors" : {
           "all" : {
-            "includeAssets" : [ "EarneAgent", "EarneProtocol", "OurgridChallengesAsset", "OurgridDistrictAsset", "OurgridMeterAsset", "OurgridMeterSumAsset", "OurgridPeaksAsset", "OurgridSetupAsset", "ThingsAsset", "HTTPAgent", "MQTTAgent", "GroupAsset", "ElectricityBatteryAsset" ]
+            "includeAssets" : [ "EarneAgent", "EarneProtocol", "OurgridBatteryAsset", "OurgridChallengesAsset", "OurgridDistrictAsset", "OurgridMeterAsset", "OurgridMeterSumAsset", "OurgridPeaksAsset", "OurgridSetupAsset", "ThingsAsset", "HTTPAgent", "MQTTAgent", "GroupAsset", "ElectricityBatteryAsset" ]
           }
         }
       }
