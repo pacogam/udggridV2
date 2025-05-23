@@ -137,7 +137,7 @@ export class PageAccount extends OgPage<GridAppStateKeyed> {
                             <div class="text-tertiary" style="display: flex; align-items:end; justify-content: center; gap: 8px;">
                                 <span>
                                     <or-translate value="appName"></or-translate>
-                                    v1.2.0
+                                    v1.2.1
                                 </span>
                             <div>
                             <div style="min-height: 100px;"></div>
