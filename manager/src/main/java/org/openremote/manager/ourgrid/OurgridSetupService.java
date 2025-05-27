@@ -142,9 +142,13 @@ public class OurgridSetupService implements ContainerService {
         OurgridMeterSumAsset ourgridMeterSumAsset = new OurgridMeterSumAsset("OurGrid " + districtName + " Household Meters");
         ourgridMeterSumAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
 
-        // Create 1 Meter Asset
+        // Create Meter Asset
         OurgridMeterAsset ourgridMeterAsset = new OurgridMeterAsset("OurGrid " + districtName + " Meter 1");
         ourgridMeterAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridMeterSumAsset);
+
+        // Create Battery Asset
+        OurgridBatteryAsset ourgridBatteryAsset = new OurgridBatteryAsset("OurGrid " + districtName + " Battery 1");
+        ourgridBatteryAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridMeterAsset);
 
         // Create Challenges Asset
         OurgridChallengesAsset ourGridChallengesAsset = new OurgridChallengesAsset("OurGrid " + districtName + " Challenges");
@@ -238,6 +242,7 @@ public class OurgridSetupService implements ContainerService {
         assetStorageService.merge(ourgridDistrictAsset);
         assetStorageService.merge(ourgridMeterSumAsset);
         assetStorageService.merge(ourgridMeterAsset);
+        assetStorageService.merge(ourgridBatteryAsset);
         assetStorageService.merge(ourGridChallengesAsset);
         assetStorageService.merge(ourGridPeaksAsset);
         assetStorageService.merge(solarAsset);
@@ -245,11 +250,12 @@ public class OurgridSetupService implements ContainerService {
 
 
         // Setup rules
+        String realmName = ourgridSetupAsset.getRealm();
+        String rulesName1 = "OurGrid: " + districtName + " District rules";
+        String rulesName2 = "OurGrid: " + districtName + " District Batteries rules";
+
         try (InputStream inputStream = OurgridSetupService.class.getResourceAsStream("/ourgrid/rules/OurgridDistrictRules.groovy")) {
             if (inputStream != null) {
-                String realmName = ourgridSetupAsset.getRealm();
-                String rulesName = districtAssetName + " rules";
-
                 String rules = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 
                 rules = rules.replaceFirst("setId1", ourgridDistrictAsset.getId());
@@ -258,13 +264,28 @@ public class OurgridSetupService implements ContainerService {
                 rules = rules.replaceFirst("setId4", researchAsset.getId());
                 rules = rules.replaceFirst("setId5", ourGridChallengesAsset.getId());
                 rules = rules.replaceFirst("setId6", ourGridPeaksAsset.getId());
-                RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName, GROOVY, rules);
+                RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName1, GROOVY, rules);
 
                 // Merge rules into database
                 persistenceService.doReturningTransaction(entityManager -> entityManager.merge(districtRuleSet));
             }
         } catch (Exception e) {
-            LOG.warning(String.format("assetName='%s', assetId='%s'; Rule were not created for district '%s'; Exception: %s", ourgridSetupAsset.getName(), ourgridSetupAsset.getId(), districtAssetName, e));
+            LOG.warning(String.format("assetName='%s', assetId='%s'; Rule '%s' was not created for district '%s'; Exception: %s", rulesName1 , ourgridSetupAsset.getName(), ourgridSetupAsset.getId(), districtAssetName, e));
+        }
+
+        try (InputStream inputStream = OurgridSetupService.class.getResourceAsStream("/ourgrid/rules/OurgridBatteriesRules.groovy")) {
+            if (inputStream != null) {
+
+                String rules = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+
+                rules = rules.replaceFirst("setId1", ourgridMeterSumAsset.getId());
+                RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName2, GROOVY, rules);
+
+                // Merge rules into database
+                persistenceService.doReturningTransaction(entityManager -> entityManager.merge(districtRuleSet));
+            }
+        } catch (Exception e) {
+            LOG.warning(String.format("assetName='%s', assetId='%s'; Rule '%s' was not created for district '%s'; Exception: %s", rulesName2 , ourgridSetupAsset.getName(), ourgridSetupAsset.getId(), districtAssetName, e));
         }
 
         infoFieldMessage = "Created district \"" + districtAssetName + "\":\n" +
@@ -282,8 +303,9 @@ public class OurgridSetupService implements ContainerService {
                 "      - Location\n" +
                 "3) Adjust the default input variables to your specific requirements\n" +
                 "4) Connect power meters manually or with the Earn-E Agent\n" +
-                "5) Turn on challenges and peak points\n" +
-                "6) Turn on dynamic solar capacity\n" +
+                "5) Connect or remove batteries\n" +
+                "6) Turn on challenges and peak points\n" +
+                "7) Turn on dynamic solar capacity\n" +
                 "\n" +
                 "You can delete this setup asset after you have created your district";
 
