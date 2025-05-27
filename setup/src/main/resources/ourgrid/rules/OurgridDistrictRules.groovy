@@ -318,8 +318,6 @@ rules.add()
                         }
                     }
                 }
-            } else if (solarAssetLocation == null) {
-                LOG.warning("Solar irradiance calculation failed: solar asset location is missing; Set the location on the OurGrid Solar Production asset with ID: '${parentMeterAssetId}'")
             }
 
             // Calculate the total estimated solar capacity of active meters
