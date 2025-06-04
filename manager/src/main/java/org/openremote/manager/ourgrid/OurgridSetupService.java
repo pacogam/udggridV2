@@ -151,12 +151,12 @@ public class OurgridSetupService implements ContainerService {
         ourgridBatteryAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridMeterAsset);
 
         // Create Challenges Asset
-        OurgridChallengesAsset ourGridChallengesAsset = new OurgridChallengesAsset("OurGrid " + districtName + " Challenges");
-        ourGridChallengesAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
+        OurgridChallengesAsset ourgridChallengesAsset = new OurgridChallengesAsset("OurGrid " + districtName + " Challenges");
+        ourgridChallengesAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
 
         // Create Peaks Asset
-        OurgridPeaksAsset ourGridPeaksAsset = new OurgridPeaksAsset("OurGrid " + districtName + " Peaks");
-        ourGridPeaksAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
+        OurgridPeaksAsset ourgridPeaksAsset = new OurgridPeaksAsset("OurGrid " + districtName + " Peaks");
+        ourgridPeaksAsset.setId(UniqueIdentifierGenerator.generateId()).setParent(ourgridDistrictAsset);
 
         // Create Solar Asset
         ElectricityProducerSolarAsset solarAsset = new ElectricityProducerSolarAsset("OurGrid " + districtName + " Solar Production");
@@ -196,11 +196,11 @@ public class OurgridSetupService implements ContainerService {
         ourgridDistrictAsset
                 .setActivePeriod(5)
                 .setPowerImportCriticalPercentage(80)
-                .setChallengesAssetId(ourGridChallengesAsset.getId())
-                .setPeaksAssetId(ourGridPeaksAsset.getId());
+                .setChallengesAssetId(ourgridChallengesAsset.getId())
+                .setPeaksAssetId(ourgridPeaksAsset.getId());
 
         // Set default values Challenges Asset
-        ourGridChallengesAsset
+        ourgridChallengesAsset
                 .setChallengeDuration(60)
                 .setChallengeEarnPointInterval(6)
                 .setChallengeWait(15)
@@ -224,7 +224,7 @@ public class OurgridSetupService implements ContainerService {
                   }
                 ]""";
 
-        ourGridPeaksAsset
+        ourgridPeaksAsset
                 .setConnectionQualityThreshold(80.0)
                 .setPeakConsumptionThreshold(20.0)
                 .setPeakPeriods(peakPeriods)
@@ -243,8 +243,8 @@ public class OurgridSetupService implements ContainerService {
         assetStorageService.merge(ourgridMeterSumAsset);
         assetStorageService.merge(ourgridMeterAsset);
         assetStorageService.merge(ourgridBatteryAsset);
-        assetStorageService.merge(ourGridChallengesAsset);
-        assetStorageService.merge(ourGridPeaksAsset);
+        assetStorageService.merge(ourgridChallengesAsset);
+        assetStorageService.merge(ourgridPeaksAsset);
         assetStorageService.merge(solarAsset);
         assetStorageService.merge(researchAsset);
 
@@ -262,8 +262,8 @@ public class OurgridSetupService implements ContainerService {
                 rules = rules.replaceFirst("setId2", ourgridMeterSumAsset.getId());
                 rules = rules.replaceFirst("setId3", solarAsset.getId());
                 rules = rules.replaceFirst("setId4", researchAsset.getId());
-                rules = rules.replaceFirst("setId5", ourGridChallengesAsset.getId());
-                rules = rules.replaceFirst("setId6", ourGridPeaksAsset.getId());
+                rules = rules.replaceFirst("setId5", ourgridChallengesAsset.getId());
+                rules = rules.replaceFirst("setId6", ourgridPeaksAsset.getId());
                 RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName1, GROOVY, rules);
 
                 // Merge rules into database
@@ -279,6 +279,7 @@ public class OurgridSetupService implements ContainerService {
                 String rules = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 
                 rules = rules.replaceFirst("setId1", ourgridMeterSumAsset.getId());
+                rules = rules.replaceFirst("setId2", ourgridChallengesAsset.getId());
                 RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName2, GROOVY, rules);
 
                 // Merge rules into database
