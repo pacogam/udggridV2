@@ -23,9 +23,6 @@ Assets assets = binding.assets
 String meterSumAssetId = "setId1"
 String challengesAssetId = "setId2"
 
-// Set the challenge discharge power set-point minimum (kW):
-double powerSetpointDischargeMinimum = -0.8
-
 
 // Time triggers for rules
 ZoneId zone = ZoneId.of("Europe/Amsterdam")
@@ -128,6 +125,7 @@ rules.add()
                         OurgridBatteryAsset.ENERGY_CAPACITY.name,
                         OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
                         OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name,
+                        OurgridBatteryAsset.POWER_EXPORT_MAX.name,
                         OurgridBatteryAsset.POWER_SETPOINT.name
                 ] as String[]
 
@@ -140,6 +138,7 @@ rules.add()
                     def energyCapacity = it.value.get(OurgridBatteryAsset.ENERGY_CAPACITY.name) as Double
                     def energyLevelPercentage = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name) as Double
                     def energyLevelPercentageMin = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name) as Double
+                    def powerExportMax = it.value.get(OurgridBatteryAsset.POWER_EXPORT_MAX.name) as Double
                     def powerSetpoint = (it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double)
 
                     if (powerSetpoint == null || energyLevelPercentage == null || energyLevelPercentageMin == null ||
@@ -156,10 +155,6 @@ rules.add()
                         assets.dispatch(assetId, OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, true)
                     }
 
-                    if (allowDischargingButton == false) {
-                        powerSetpointDischargeMinimum = 0.0
-                    }
-
                     def challengeEnd = facts
                             .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
                             .flatMap { it.value }
@@ -167,18 +162,18 @@ rules.add()
 
                     def powerSetpointDischarge = 0.0 as Double
 
-                    if (challengeEnd != null && energyCapacity != null) {
+                    if (challengeEnd != null && energyCapacity != null && powerExportMax != null && allowDischargingButton == true) {
                         def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") as SimpleDateFormat
                         long challengeEndMillis = sdf.parse(challengeEnd).getTime()
                         long currentMillis = facts.clock.currentTimeMillis
 
                         if (currentMillis < challengeEndMillis) {
                             def challengeDurationHours = (challengeEndMillis - currentMillis) / 3600000 as Double
-                            def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100
+                            def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
                             powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
 
-                            if (powerSetpointDischarge < powerSetpointDischargeMinimum) {
-                                powerSetpointDischarge = powerSetpointDischargeMinimum
+                            if (powerSetpointDischarge < -powerExportMax) {
+                                powerSetpointDischarge = -powerExportMax
                             }
                         }
                     }

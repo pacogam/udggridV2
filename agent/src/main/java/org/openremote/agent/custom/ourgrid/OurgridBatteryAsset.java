@@ -52,6 +52,11 @@ public class OurgridBatteryAsset extends ElectricityBatteryAsset {
             new MetaItem<>(MetaItemType.RULE_STATE)
     ));
 
+    public static final AttributeDescriptor<Double> POWER_EXPORT_MAX = ElectricityBatteryAsset.POWER_EXPORT_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_EXPORT_MAX.getMeta(),
+            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+            new MetaItem<>(MetaItemType.RULE_STATE)
+    ));
+
     public static final AttributeDescriptor<Double> POWER_IMPORT_MAX = ElectricityBatteryAsset.POWER_IMPORT_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_IMPORT_MAX.getMeta(),
             new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
             new MetaItem<>(MetaItemType.RULE_STATE)
@@ -88,7 +93,6 @@ public class OurgridBatteryAsset extends ElectricityBatteryAsset {
     public static final AttributeDescriptor<Double> POWER_IMPORT_MIN = ElectricityBatteryAsset.POWER_IMPORT_MIN.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_IMPORT_MIN.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
     public static final AttributeDescriptor<Double> POWER_EXPORT_MIN = ElectricityBatteryAsset.POWER_EXPORT_MIN.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_EXPORT_MIN.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
     public static final AttributeDescriptor<Double> CARBON_IMPORT = ElectricityBatteryAsset.CARBON_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.CARBON_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> POWER_EXPORT_MAX = ElectricityBatteryAsset.POWER_EXPORT_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_EXPORT_MAX.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
     public static final AttributeDescriptor<Double> ENERGY_IMPORT_TOTAL = ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
     public static final AttributeDescriptor<Double> ENERGY_EXPORT_TOTAL = ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
     public static final AttributeDescriptor<Integer> EFFICIENCY_IMPORT = ElectricityBatteryAsset.EFFICIENCY_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.EFFICIENCY_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
