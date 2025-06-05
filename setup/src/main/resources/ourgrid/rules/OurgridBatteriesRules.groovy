@@ -11,8 +11,6 @@ import org.openremote.model.query.AssetQuery
 import org.openremote.model.rules.Assets
 
 import java.text.SimpleDateFormat
-import java.time.Clock
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.logging.Logger
@@ -31,7 +29,7 @@ double powerSetpointDischargeMinimum = -0.8
 
 // Time triggers for rules
 ZoneId zone = ZoneId.of("Europe/Amsterdam")
-LocalDateTime previousTimestampRule1 = LocalDateTime.ofInstant(Clock.system(zone).instant(), zone)
+int previousHourRule1 = -1
 long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
 
 // Action triggers for rules
@@ -42,15 +40,17 @@ rules.add()
         .priority(1)
         .name("OurGrid battery start charging rule")
         .when({ facts ->
-            def currentTimestamp = ZonedDateTime.ofInstant(facts.getClock().getNow(), zone).toLocalDateTime() as LocalDateTime
+            boolean triggerRule = false
+            int currentHour = ZonedDateTime.ofInstant(facts.getClock().getNow(), zone).toLocalDateTime().getHour()
 
             // Trigger rule at 2:00am and 1:00pm
-            if ((previousTimestampRule1.getHour() <= 1 && currentTimestamp.getHour() == 2) || (previousTimestampRule1.getHour() <= 12 && currentTimestamp.getHour() == 13)) {
-                previousTimestampRule1 = currentTimestamp
-                return true
+            if ((previousHourRule1 == 1 && currentHour == 2) || (previousHourRule1 == 12 && currentHour == 13)) {
+                triggerRule = true
             }
 
-            return false
+            previousHourRule1 = currentHour
+
+            return triggerRule
         })
         .then({ facts ->
             def attributeNames = [
