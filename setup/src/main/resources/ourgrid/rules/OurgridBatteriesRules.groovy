@@ -170,10 +170,13 @@ rules.add()
                         if (currentMillis < challengeEndMillis) {
                             def challengeDurationHours = (challengeEndMillis - currentMillis) / 3600000 as Double
                             def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
-                            powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
 
-                            if (powerSetpointDischarge < -powerExportMax) {
-                                powerSetpointDischarge = -powerExportMax
+                            if (energyCapacityUsable > 0.0) {
+                                powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
+
+                                if (powerSetpointDischarge < -powerExportMax) {
+                                    powerSetpointDischarge = -powerExportMax
+                                }
                             }
                         }
                     }
