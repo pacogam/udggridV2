@@ -2,6 +2,7 @@ package org.openremote.agent.custom.mygrid;
 
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -74,6 +75,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     protected MQTT_IOClient mqttClient;
     protected Container container;
     protected ScheduledExecutorService scheduledExecutor;
+    protected ScheduledFuture<?> syncTask;
     protected ProtocolAssetService protocolAssetService;
     protected static final AtomicReference<ResteasyClient> resteasyClient = new AtomicReference<>();
 
@@ -169,13 +171,18 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
         // We are currently using a polling mechanism to sync assets because of a MQTT issue: https://github.com/openremote/openremote/issues/1902
         // TODO: Replace this with MQTT asset event subscriptions when the issue is resolved
-        scheduledExecutor.scheduleAtFixedRate(this::syncMyGridAssets, 1, 30, TimeUnit.SECONDS);
+        syncTask = scheduledExecutor.scheduleAtFixedRate(this::syncMyGridAssets, 1, 30, TimeUnit.SECONDS);
 
         LOG.info("MyGrid protocol started");
     }
 
     @Override
     public void stop(Container container) throws Exception {
+        LOG.info("MyGrid protocol stopping");
+        if (syncTask != null) {
+            syncTask.cancel(false);
+            syncTask = null;
+        }
         mqttProtocol.stop(container);
     }
 
