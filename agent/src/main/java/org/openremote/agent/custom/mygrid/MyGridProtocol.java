@@ -163,10 +163,6 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
         this.mqttClient = this.mqttProtocol.getMQTTClient();
 
-        if (mqttClient != null) {
-           mqttClient.addConnectionStatusConsumer(this::onConnectionStatusChanged);
-        }
-
         initResteasyClient();
 
         // We are currently using a polling mechanism to sync assets because of a MQTT issue: https://github.com/openremote/openremote/issues/1902
@@ -179,10 +175,13 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     @Override
     public void stop(Container container) throws Exception {
         LOG.info("MyGrid protocol stopping");
+
+        // Cancel the sync task
         if (syncTask != null) {
             syncTask.cancel(false);
             syncTask = null;
         }
+
         mqttProtocol.stop(container);
     }
 
@@ -201,18 +200,6 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             .map(asset -> (OurgridBatteryAsset) asset)
             .collect(Collectors.toList());
     }
-
-
-
-    protected void onConnectionStatusChanged(ConnectionStatus status) {
-        LOG.info("MyGrid protocol connection status changed: " + status);
-
-        // if (status == ConnectionStatus.CONNECTED) {
-        //     tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 3, 500);
-        //     tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 3, 500);
-        // }
-    }
-
 
 
     // Provision a new OurgridBatteryAsset with the respective MQTT Agent links
