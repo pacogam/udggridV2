@@ -57,7 +57,7 @@ public class OurgridMeterSumAsset extends Asset<OurgridMeterSumAsset> {
     ).withUnits(UNITS_KILO, UNITS_WATT);
 
 
-    public static final AssetDescriptor<OurgridMeterSumAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug", "ff9300", OurgridMeterSumAsset.class);
+    public static final AssetDescriptor<OurgridMeterSumAsset> DESCRIPTOR = new AssetDescriptor<>("power-plug-outline", "ff9300", OurgridMeterSumAsset.class);
 
     protected OurgridMeterSumAsset() {
     }
