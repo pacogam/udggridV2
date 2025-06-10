@@ -155,10 +155,12 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
         const heatPumpInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.HEAT_PUMP);
         const evInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
         const batteryInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.BATTERY);
+        const homeAutomationInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.HOME_AUTOMATION);
 
         const hasElectricVehicle = evInfo && evInfo.shown;
         const hasHeatpump = heatPumpInfo && heatPumpInfo.shown;
         const hasBattery = (batteryInfo && batteryInfo.shown) || !!this.batteryAsset;
+        const hasHomeAutomation = homeAutomationInfo && homeAutomationInfo.shown;
         return html`
             <div class="page-wrapper">
                 <og-input class="page-back-icon" type=${InputType.BUTTON} action icon="chevron-left" @or-mwc-input-changed=${this._onBackClick}></og-input>
@@ -170,7 +172,7 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
                 </div>
                 <div class="page-content">
                     <div class="page-content-container">
-                        ${until(this._getDeviceSelectMenuTemplate(hasElectricVehicle, hasHeatpump, hasBattery), html`Loading...`)}
+                        ${until(this._getDeviceSelectMenuTemplate(hasElectricVehicle, hasHeatpump, hasBattery, hasHomeAutomation), html`Loading...`)}
                     </div>
                 </div>
             </div>
@@ -181,11 +183,12 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
         router.navigate('devices');
     }
 
-    protected async _getDeviceSelectMenuTemplate(hasElectricVehicle: boolean, hasHeatpump: boolean, hasBattery: boolean): Promise<TemplateResult> {
+    protected async _getDeviceSelectMenuTemplate(hasElectricVehicle: boolean, hasHeatpump: boolean, hasBattery: boolean, hasHomeAutomation: boolean): Promise<TemplateResult> {
         const items: AddDeviceMenuItem[] = [];
         if (!hasElectricVehicle) items.push({id: 'ev', svg: 'images/car-charging.svg', text: 'addDevice.select-ev'})
         if (!hasHeatpump) items.push({id: 'heatpump', svg: 'images/house-temperature.svg', text: 'addDevice.select-heatpump'})
         if (!hasBattery) items.push({id: 'battery', icon: 'battery-charging', text: 'addDevice.select-battery'})
+        if (!hasHomeAutomation) items.push({id: 'home-automation', icon: 'home-automation', text: 'addDevice.select-homeautomation'})
         return html`
             ${map(items, (item) => html`
                 <div class="add-device-menu-item" @click=${() => this._onMenuSelect(item)}>
@@ -208,6 +211,7 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
             case 'ev': router.navigate('add-ev'); return;
             case 'heatpump': router.navigate('add-heatpump'); return;
             case 'battery': router.navigate('add-battery'); return;
+            case 'home-automation': router.navigate('add-homeautomation'); return;
             default: return;
         }
     }

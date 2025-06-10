@@ -213,7 +213,8 @@ export class SplashDatacheck extends OgSplashPage {
     protected async verifyUserRoles(delay?: number): Promise<void> {
         const needsRestrictedRole = !manager.hasRealmRole("restricted_user");
         const needsReadAssetsRole = !manager.hasRole(ClientRole.READ_ASSETS);
-        if(needsRestrictedRole || needsReadAssetsRole) {
+        const needsWriteAttributesRole = !manager.hasRole(ClientRole.WRITE_ATTRIBUTES);
+        if(needsRestrictedRole || needsReadAssetsRole || needsWriteAttributesRole) {
             try {
                 await rest.api.UserRolesResource.verifyUserRoles();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }

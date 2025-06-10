@@ -34,6 +34,10 @@ export enum OgBatteryBrand {
     MYGRID = 'batteryBrands.MYGRID', LG = 'batteryBrands.LG', SONNEN_BATTERIE = 'batteryBrands.SONNEN_BATTERIE', TESLA_POWERWALL = 'batteryBrands.TESLA_POWERWALL', OTHER = 'batteryBrands.other'
 }
 
+export enum OgHomeAutomationBrand {
+    HOME_ASSISTANT = "homeAutomationBrands.HOME_ASSISTANT", OPENHAB = "homeAutomationBrands.OPENHAB"
+}
+
 export function getVehicleBrandAppUrl(brand?: OgVehicleBrand, store?: 'google' | 'apple'): string | undefined {
     if (store === 'google') {
         switch (brand) {

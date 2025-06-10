@@ -18,6 +18,8 @@
   "areYouSure": "Are you sure?",
   "switch": "Switch",
   "logout": "Log out",
+  "copy": "Copy",
+  "copySuccess": "Copied to your clipboard!",
   "calendar": {
     "lastWeek": "[Last] dddd",
     "lastDay": "[Yesterday]",
@@ -38,6 +40,9 @@
   "page-privacy": {
     "heading": "Privacy Statement",
     "accept": "Accepteer"
+  },
+  "page-homeAutomation": {
+    "heading": "Instructions"
   },
   "challenge": {
     "point": "point",
@@ -76,19 +81,22 @@
   },
   "deviceList": {
     "addDevice": "Add Device",
-    "deleteHeatPump": "Delete heat pump",
+    "deleteHeatPump": "Delete heat pump?",
     "deleteHeatPumpConfirm": "Are you sure you want to remove your heat pump?",
-    "deleteEv": "Delete vehicle",
+    "deleteEv": "Delete vehicle?",
     "deleteEvConfirm": "Are you sure you want to remove your electric vehicle?",
-    "deleteBattery": "Delete battery",
-    "deleteBatteryConfirm": "Are you sure you want to remove your battery?"
+    "deleteBattery": "Delete battery?",
+    "deleteBatteryConfirm": "Are you sure you want to remove your battery?",
+    "deleteHomeAutomation": "Are you sure?",
+    "deleteHomeAutomationConfirm": "Are you sure you want to remove your home automation?"
   },
   "addDevice": {
     "intro": "Add Device",
     "subtitle": "What device do you want to add?",
     "select-ev": "Electric vehicle",
     "select-heatpump": "Heat pump",
-    "select-battery": "Battery"
+    "select-battery": "Battery",
+    "select-homeautomation": "Home automation"
   },
   "addEv": {
     "intro": "Your electric vehicle",
@@ -110,6 +118,13 @@
     "selectBrandPlaceholder": "Select a brand",
     "addDevice": "Save device",
     "saveSuccess": "Added your battery!"
+  },
+  "addHomeAutomation": {
+    "intro": "Your home automation",
+    "selectBrand": "System",
+    "selectBrandPlaceholder": "Select system",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your home automation!"
   },
   "panel_tips": {
     "heading": "Tips & Actions",
@@ -185,6 +200,13 @@
     "noSolarFound": "No solar panels found",
     "unknownManufacturer": "Unknown manufacturer",
     "estimatedCapacity": "Estimated capacity: {{capacity}} kWp"
+  },
+  "panel_homeAutomationInfo": {
+    "yourHomeAutomation": "Your home automation",
+    "noHomeAutomationFound": "Error: could not get information from your home automation system!",
+    "unknownBrand": "Unknown system",
+    "info": "Instructions",
+    "credentials": "Credentials"
   },
   "panel_peakUsage": {
     "heading": "Our district has a peak load!"
@@ -272,6 +294,10 @@
     "SONNEN_BATTERIE": "sonnenBatterie",
     "TESLA_POWERWALL": "Tesla Powerwall",
     "other": "Other"
+  },
+  "homeAutomationBrands": {
+    "HOME_ASSISTANT": "Home Assistant",
+    "OPENHAB": "openHAB"
   },
   "privacy-statement": "With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighbourhood consumption; determining which challenges we send to which user, and keeping track of your earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\n\nYour anonymised energy consumption data is only shared with your city, OpenRemote, and Resourcefully. These organisations only use this data to: use the power values for preventing network congestion, further improving the application, and to ensure the application functions properly.\n\nIf you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
   "switchCity": "Switch city",

@@ -23,7 +23,8 @@ public class UserRolesResourceImpl extends ManagerWebResource implements UserRol
 
     // List of all roles that are applied during the correction process.
     protected static final String[] CORRECT_ROLES = new String[]{
-            ClientRole.READ_ASSETS.getValue()
+            ClientRole.READ_ASSETS.getValue(),
+            ClientRole.WRITE_ATTRIBUTES.getValue()
     };
 
     protected final AssetStorageService assetStorageService;
@@ -48,10 +49,11 @@ public class UserRolesResourceImpl extends ManagerWebResource implements UserRol
         // Get state of the READ_ASSETS and RESTRICTED_USER roles
         String[] userRealmRoles = identityService.getIdentityProvider().getUserRealmRoles(getAuthenticatedRealmName(), getUserId());
         boolean canReadAssets = Arrays.asList(userRealmRoles).contains(Constants.READ_ASSETS_ROLE);
+        boolean canWriteAttributes = Arrays.asList(userRealmRoles).contains(Constants.WRITE_ATTRIBUTES_ROLE);
         boolean isRestricted = Arrays.asList(userRealmRoles).contains(Constants.RESTRICTED_USER_REALM_ROLE);
 
         // Return status based on whether all roles are correct
-        if (!canReadAssets || !isRestricted) {
+        if (!canReadAssets || !canWriteAttributes || !isRestricted) {
             return Response.status(Response.Status.FORBIDDEN).build();
         } else {
             return Response.ok().build();

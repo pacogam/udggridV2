@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const packageJson = require('./package.json');
+const rawLoader = require('raw-loader');
 
 module.exports = (env, argv) => {
 
@@ -28,6 +29,11 @@ module.exports = (env, argv) => {
             openAnalyzer: false
         }))
     }
+
+    config.module.rules.push({
+        test: /\.md$/i,
+        use: 'raw-loader'
+    });
 
     config.plugins.push(new CopyWebpackPlugin({
         patterns: [

@@ -38,7 +38,7 @@ public class ReschoolRestService implements ContainerService {
 
         webService.addApiSingleton(new UserPeakPointsResourceImpl(timerService, identityService, assetStorageService));
 
-        webService.addApiSingleton(new UserAccountResourceImpl(timerService, identityService));
+        webService.addApiSingleton(new UserAccountResourceImpl(timerService, identityService, assetStorageService));
     }
 
     @Override

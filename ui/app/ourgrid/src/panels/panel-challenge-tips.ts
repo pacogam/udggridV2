@@ -17,8 +17,8 @@ import rest from "rest";
 @customElement('panel-challenge-tips')
 export class PanelChallengeTips extends OgDataPanel {
 
-    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "automaticControl";
-    protected ACTION_BUTTON_ATTRIBUTE_NAME = "challengeActionButton";
+    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
+    protected ACTION_BUTTON_ATTRIBUTE_NAME = "allowDischargingButton";
     protected POWER_EXPORT_MAX_ATTRIBUTE_NAME = "powerExportMax";
 
     public heading = html`<or-translate value="panel_tips.heading"></or-translate>`;

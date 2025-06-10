@@ -18,6 +18,8 @@
   "areYouSure": "Weet je het zeker?",
   "switch": "Verander",
   "logout": "Log uit",
+  "copy": "Kopieer",
+  "copySuccess": "Gekopieerd naar je klipbord!",
   "calendar": {
     "lastWeek": "[Afgelopen] dddd",
     "lastDay": "[Gisteren]",
@@ -38,6 +40,9 @@
   "page-privacy": {
     "heading": "Privacy verklaring",
     "accept": "Accepteer"
+  },
+  "page-homeAutomation": {
+    "heading": "Instructies"
   },
   "challenge": {
     "point": "punt",
@@ -78,17 +83,20 @@
     "addDevice": "Voeg apparaat toe",
     "deleteHeatPump": "Verwijderen?",
     "deleteHeatPumpConfirm": "Weet je het zeker dat je je warmtepomp wilt ontkoppelen?",
-    "deleteEv": "Auto verwijderen",
+    "deleteEv": "Auto verwijderen?",
     "deleteEvConfirm": "Weet je het zeker dat je je elektrische auto wilt ontkoppelen?",
-    "deleteBattery": "Batterij verwijderen",
-    "deleteBatteryConfirm": "Weet je het zeker dat je je batterij wilt ontkoppelen?"
+    "deleteBattery": "Batterij verwijderen?",
+    "deleteBatteryConfirm": "Weet je het zeker dat je je batterij wilt ontkoppelen?",
+    "deleteHomeAutomation": "Verwijderen?",
+    "deleteHomeAutomationConfirm": "Weet je het zeker dat je je huis automatisering wilt ontkoppelen?"
   },
   "addDevice": {
     "intro": "Voeg apparaat toe",
     "subtitle": "Welk apparaat wil je toevoegen?",
     "select-ev": "Elektrische auto",
     "select-heatpump": "Warmtepomp",
-    "select-battery": "Batterij"
+    "select-battery": "Batterij",
+    "select-homeautomation": "Huis automatisering"
   },
   "addEv": {
     "intro": "Jouw elektrische auto",
@@ -110,6 +118,13 @@
     "selectBrandPlaceholder": "Selecteer een merk",
     "addDevice": "Apparaat opslaan",
     "saveSuccess": "Je batterij is toegevoegd!"
+  },
+  "addHomeAutomation": {
+    "intro": "Jouw huis automatisering",
+    "selectBrand": "Systeem",
+    "selectBrandPlaceholder": "Selecteer systeem",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je huis automatisering is toegevoegd!"
   },
   "panel_tips": {
     "heading": "Tips & Acties",
@@ -185,6 +200,13 @@
     "noSolarFound": "Geen zonnepanelen gevonden",
     "unknownManufacturer": "Onbekende fabrikant",
     "estimatedCapacity": "Voorspelde capaciteit: {{capacity}} kWp"
+  },
+  "panel_homeAutomationInfo": {
+    "yourHomeAutomation": "Jouw huis automatisering",
+    "noHomeAutomationFound": "Kon details van je huis automatisering systeem niet vinden!",
+    "unknownBrand": "Onbekend systeem",
+    "info": "Instructies",
+    "credentials": "Inloggegevens"
   },
   "panel_peakUsage": {
     "heading": "Onze wijk heeft piekbelasting!"
@@ -272,6 +294,10 @@
     "SONNEN_BATTERIE": "sonnenBatterie",
     "TESLA_POWERWALL": "Tesla Powerwall",
     "other": "Anders"
+  },
+  "homeAutomationBrands": {
+    "HOME_ASSISTANT": "Home Assistant",
+    "OPENHAB": "openHAB"
   },
   "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote en Resourcefully. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
   "switchCity": "Verander van stad",

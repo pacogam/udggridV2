@@ -2,21 +2,18 @@ package org.openremote.manager.reschool.rest;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.openremote.agent.custom.ourgrid.OurgridBatteryAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.security.ManagerIdentityService;
 import org.openremote.manager.web.ManagerWebResource;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.UserAssetLink;
-import org.openremote.model.asset.impl.ElectricityBatteryAsset;
 import org.openremote.model.attribute.Attribute;
-import org.openremote.model.attribute.MetaItem;
 import org.openremote.model.http.RequestParams;
 import org.openremote.model.query.AssetQuery;
 import org.openremote.model.query.filter.RealmPredicate;
 import org.openremote.model.reschool.DeviceBatteryResource;
-import org.openremote.model.value.MetaItemType;
-import org.openremote.model.value.ValueType;
 
 import java.util.Collection;
 
@@ -48,22 +45,23 @@ public class DeviceBatteryResourceImpl extends ManagerWebResource implements Dev
         Asset<?> batteryAsset = getBatteryById(details.meterId);
 
         // Create automaticControl attribute if necessary
-        if(!batteryAsset.hasAttribute("automaticControl")) {
-            batteryAsset.addAttributes(new Attribute<>("automaticControl", ValueType.BOOLEAN)
-                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
-            );
+        if(!batteryAsset.hasAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON)) {
+            batteryAsset.addAttributes(new Attribute<>(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON));
         }
 
         // Also create the challengeActionButton attribute if necessary
-        if(!batteryAsset.hasAttribute("challengeActionButton")) {
-            batteryAsset.addAttributes(new Attribute<>("challengeActionButton", ValueType.BOOLEAN)
-                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
-            );
+        if(!batteryAsset.hasAttribute(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON)) {
+            batteryAsset.addAttributes(new Attribute<>(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON));
         }
 
         // Update its values
-        batteryAsset.getAttribute("automaticControl").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.automaticControl);
-        batteryAsset.getAttribute("challengeActionButton").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.automaticControl);
+        batteryAsset.getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON)
+                .orElseThrow(() -> new WebApplicationException(NOT_FOUND))
+                .setValue(details.automaticControl);
+
+        batteryAsset.getAttribute(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON)
+                .orElseThrow(() -> new WebApplicationException(NOT_FOUND))
+                .setValue(details.automaticControl);
 
         assetStorageService.merge(batteryAsset);
 
@@ -77,13 +75,13 @@ public class DeviceBatteryResourceImpl extends ManagerWebResource implements Dev
         }
 
         Asset<?> batteryAsset = getBatteryById(details.meterId);
-        if(!batteryAsset.hasAttribute("challengeActionButton")) {
-            batteryAsset.addAttributes(new Attribute<>("challengeActionButton", ValueType.BOOLEAN)
-                    .addMeta(new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ))
-            );
+        if(!batteryAsset.hasAttribute(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON)) {
+            batteryAsset.addAttributes(new Attribute<>(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON));
         }
 
-        batteryAsset.getAttribute("challengeActionButton").orElseThrow(() -> new WebApplicationException(NOT_FOUND)).setValue(details.buttonState);
+        batteryAsset.getAttribute(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON)
+                .orElseThrow(() -> new WebApplicationException(NOT_FOUND))
+                .setValue(details.buttonState);
 
         assetStorageService.merge(batteryAsset);
 
@@ -99,10 +97,9 @@ public class DeviceBatteryResourceImpl extends ManagerWebResource implements Dev
 
         // Query the battery asset, where the meterId is parent.
         // We ignore whether the user has access to the meter (access to the battery is enough).
-        // TODO: Adjust asset type
         Asset<?> batteryAsset = assetStorageService.find(new AssetQuery()
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
-                .types(ElectricityBatteryAsset.class)
+                .types(OurgridBatteryAsset.class)
                 .parents(meterId)
         );
         if (batteryAsset == null) {

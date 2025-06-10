@@ -21,7 +21,7 @@ const styling = css`
 @customElement("panel-battery-info")
 export class PanelBatteryInfo extends OgDataPanel {
 
-    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "automaticControl";
+    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
 
     public transparent = false;
     public rounded = true;

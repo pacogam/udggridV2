@@ -6,6 +6,7 @@ import manager, {Util} from '@openremote/core';
 export interface GridAppState {
     language?: string;
     user?: User;
+    serviceUser?: User;
     dark?: boolean;
     assets: Asset[];
     userAssetId?: string;
@@ -60,6 +61,12 @@ const gridAppSlice = createSlice({
                 ...state,
                 user: action.payload
             };
+        },
+        setServiceUserData(state, action: PayloadAction<User>) {
+            return {
+                ...state,
+                serviceUser: action.payload
+            }
         },
         setUserAsset(state, action: PayloadAction<Asset>) {
             return {
@@ -146,6 +153,7 @@ export const {
     setLanguage,
     setDark,
     setUserData,
+    setServiceUserData,
     setUserAsset,
     removeUserAsset,
     setBatteryAsset,

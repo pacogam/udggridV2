@@ -69,8 +69,8 @@ export class OgUsageGraphic extends LitElement {
     @property() // Sets the background color
     protected dark = false;
 
-    @property()
-    protected small = false;
+    @property({type: Boolean})
+    public small = false;
 
     @property() // Fill to full width & height
     protected fill = false;

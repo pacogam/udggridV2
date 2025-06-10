@@ -15,6 +15,7 @@ import '../panels/panel-battery-info';
 import '../panels/panel-heatpump-info';
 import '../panels/panel-ev-info';
 import '../panels/panel-solar-info';
+import '../panels/panel-home-automation';
 import { router } from "@openremote/or-app";
 import rest from "rest";
 import {OgDialog, OgDialogAction, showDialog} from "../components/og-dialog";
@@ -130,13 +131,15 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
         const heatPumpInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.HEAT_PUMP);
         const evInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
         const chargerInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.VEHICLE_CHARGER);
+        const homeAutomationInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.HOME_AUTOMATION);
         const solarCapacity = this.userAsset?.attributes?.[PageDevices.ESTIMATED_SOLAR_CAPACITY_ATTRIBUTE]?.value as number | undefined;
 
         const showBattery = !!this.userAsset && (!!this.batteryAsset || (batteryInfo && batteryInfo.shown));
         const showEv = (!!this.userAsset) && evInfo && evInfo.shown;
         const showHeatpump = (!!this.userAsset) && heatPumpInfo && heatPumpInfo.shown;
         const showSolar = (!!this.userAsset) && solarCapacity && solarCapacity > 0;
-        const removeButton = !this.userAsset || (showEv && showHeatpump && showBattery);
+        const showHomeAutomation = !!this.userAsset && homeAutomationInfo && homeAutomationInfo.shown;
+        const removeButton = !this.userAsset || (showEv && showHeatpump && showBattery && showHomeAutomation);
 
         return html`
             <div class="page-wrapper">
@@ -153,6 +156,7 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
                         ${when(showHeatpump, () => until(this._getHeatPumpTemplate(heatPumpInfo)))}
                         ${when(showBattery, () => until(this._getBatteryTemplate(batteryInfo)))}
                         ${when(showSolar, () => until(this._getSolarTemplate()))}
+                        ${when(showHomeAutomation, () => until(this._getHomeAutomationTemplate(homeAutomationInfo)))}
                     </div>
                 </div>
                 <div class="page-action">
@@ -184,6 +188,11 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
 
     protected async _getEvTemplate(info: DeviceCharacteristic, chargerInfo?: DeviceCharacteristic): Promise<TemplateResult> {
         return html`<panel-ev-info .evInfo=${info} .chargerInfo=${chargerInfo} @request-remove=${() => this._requestEvRemoval(info)}></panel-ev-info>`
+    }
+
+    protected async _getHomeAutomationTemplate(info: DeviceCharacteristic): Promise<TemplateResult> {
+        return html`<panel-homeautomation-info .homeAutomationInfo=${info} @request-info=${() => this._requestHomeAutomationInfo()}
+                                               @request-remove=${() => this._requestHomeAutomationRemoval(info)}></panel-homeautomation-info>`;
     }
 
     /**
@@ -244,14 +253,42 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
         );
     }
 
+    protected _requestHomeAutomationInfo(): void {
+        router.navigate('homeautomation');
+    }
+
+    /**
+     * Function that requests removal of their home automation integration. Prompts the user beforehand.
+     * When the user agrees, it will also remove the service user of the home automation integration.
+     */
+    protected _requestHomeAutomationRemoval(info: DeviceCharacteristic): void {
+        const dialogActions: OgDialogAction[] = [
+            {actionName: 'cancel', content: 'cancel'},
+            {actionName: 'delete', content: 'delete', action: () => this._onDeviceRemove(info)}
+        ];
+        showDialog(new OgDialog()
+            .setHeading(i18next.t('deviceList.deleteHomeAutomation'))
+            .setContent(html`<or-translate value="deviceList.deleteHomeAutomationConfirm"></or-translate>`)
+            .setDismissAction(null)
+            .setActions(dialogActions) as OgDialog
+        );
+    }
+
+    protected _onDeviceRemove(info: DeviceCharacteristic): void {
+        if(info.id === WellknownCharacteristics.HOME_AUTOMATION) {
+            rest.api.UserAccountResource.deleteServiceUserAccount(); // Attempt to delete service user of home automation
+        }
+        this._removeDevice(info);
+        this.requestUpdate();
+    }
+
     /**
      * Function that removes a device by modifying the {@link DeviceCharacteristic}.
      * Also removes the brand. Gets immediately submitted to the database using the HTTP API.
      */
-    protected _onDeviceRemove(info: DeviceCharacteristic): void {
+    protected async _removeDevice(info: DeviceCharacteristic) {
         info.shown = false;
         info.brand = undefined;
-        rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: this.characteristics});
-        this.requestUpdate();
+        await rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: this.characteristics});
     }
 }

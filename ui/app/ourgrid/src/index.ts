@@ -19,6 +19,8 @@ import {pageAddDeviceProvider} from "./pages/add-device/add-device-select";
 import {pageAddEvProvider} from "./pages/add-device/add-ev";
 import {pageAddHeatpumpProvider} from "./pages/add-device/add-heatpump";
 import {pageAddBatteryProvider} from "./pages/add-device/add-battery";
+import {pageAddHomeAutomationProvider} from "./pages/add-device/add-homeautomation";
+import {pageHomeAutomationProvider} from "./pages/page-homeautomation";
 
 const rootReducer = combineReducers({
     app: appReducer,
@@ -43,7 +45,9 @@ export const DefaultPagesConfig: OgPageProvider<any>[] = [
     pageAddEvProvider(store),
     pageAddHeatpumpProvider(store),
     pageAddBatteryProvider(store),
+    pageAddHomeAutomationProvider(store),
     pageCharacteristicsProvider(store),
+    pageHomeAutomationProvider(store),
     pagePrivacyProvider(store),
     page1SetupProvider(store),
     pageOnboardingProvider(store)
