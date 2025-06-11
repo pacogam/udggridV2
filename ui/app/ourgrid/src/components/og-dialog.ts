@@ -126,11 +126,14 @@ export function showLastChallengeResultDialog(meterAsset: Asset, challengeAsset:
         if (!challengePointAttr) {
             return html`Error`;
         }
+        let data: Challenge[] = [];
         const time = moment(challengePointAttr.timestamp).subtract(challengeDuration + challengeWait + 1, 'minutes');
-        const data = (await rest.api.DeviceChallengesResource.getHistory({
+        const promise = rest.api.DeviceChallengesResource.getHistory({
             startTimestamp: time.valueOf(),
             endTimestamp: new Date().getTime()
-        })).data as Challenge[];
+        });
+        promise.catch((ex) => console.warn(ex));
+        data = (await promise).data;
         const challenge = data[0];
         return html`
             <div class="text-primary bold" style="display: flex; flex-direction: column; gap: 6px; align-items: center;">

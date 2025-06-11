@@ -173,7 +173,7 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
             ).build();
 
         } catch (Exception e) {
-            throw new WebApplicationException(INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(e.getMessage(), INTERNAL_SERVER_ERROR);
         }
     }
 }

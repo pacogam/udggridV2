@@ -148,11 +148,14 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         const challengeWait: number = challengeAsset?.attributes?.[Constants.CHALLENGE_WAIT_ATTRIBUTE]?.value || Defaults.CHALLENGE_WAIT_MINUTES;
         const challengePointAttr: Attribute<any> | undefined = meterAsset?.attributes?.[Constants.CHALLENGE_POINT_CURRENT_ATTRIBUTE];
 
+        let data: Challenge[] = [];
         const time = moment(challengePointAttr.timestamp).subtract(challengeDuration + challengeWait + 1, 'minutes');
-        const data = (await rest.api.DeviceChallengesResource.getHistory({
+        const promise = rest.api.DeviceChallengesResource.getHistory({
             startTimestamp: time.valueOf(),
             endTimestamp: new Date().getTime()
-        })).data as Challenge[];
+        });
+        promise.catch(ex => console.warn(ex));
+        data = (await promise).data;
 
         if(data.length === 1) {
             if(lastTimestamp === null) {
