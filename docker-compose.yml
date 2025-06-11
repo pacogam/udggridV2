@@ -145,4 +145,5 @@ services:
       OR_MAP_TILES_PATH: '/efs/europe.mbtiles'
       OR_FORECAST_SOLAR_API_KEY:
       OR_FIREBASE_CONFIG_FILE: /deployment/manager/fcm.json
+      OR_KEYCLOAK_PUBLIC_URI:
     <<: *awslogs
