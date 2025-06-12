@@ -19,7 +19,7 @@ export class PanelChallengeTips extends OgDataPanel {
 
     protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
     protected ACTION_BUTTON_ATTRIBUTE_NAME = "allowDischargingButton";
-    protected POWER_EXPORT_MAX_ATTRIBUTE_NAME = "powerExportMax";
+    protected POWER_SET_POINT_ATTRIBUTE_NAME = "powerSetpoint";
 
     public heading = html`<or-translate value="panel_tips.heading"></or-translate>`;
     public subtitle = html`<or-translate value="panel_tips.subtitle"></or-translate>`;
@@ -55,7 +55,7 @@ export class PanelChallengeTips extends OgDataPanel {
                         const automaticControl: boolean = this.batteryAsset?.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false;
                         const challengeActionButton: boolean = this.batteryAsset?.attributes?.[this.ACTION_BUTTON_ATTRIBUTE_NAME]?.value || false;
                         const isManuallyActivated: boolean = automaticControl !== challengeActionButton;
-                        const powerExportMaxKW: number = this.batteryAsset?.attributes?.[this.POWER_EXPORT_MAX_ATTRIBUTE_NAME]?.value || 1;
+                        const powerSetpoint: number = this.batteryAsset?.attributes?.[this.POWER_SET_POINT_ATTRIBUTE_NAME]?.value || 0;
                         const unknownBattery = !this.batteryAsset;
                         const hasButton = !!this.batteryAsset;
                         let label: string;
@@ -72,7 +72,7 @@ export class PanelChallengeTips extends OgDataPanel {
                                     ${getStatisticTemplate('images/battery-power-charge.svg', true, html`
                                         <div style="display: flex; flex-direction: column;">
                                         <span class="statistic-medium" style="color: var(--og-color-danger)">
-                                            ${`-${Math.round(powerExportMaxKW * 1000)}W`}
+                                            ${`${Math.round(powerSetpoint * 1000)}W`}
                                         </span>
                                             <span class="text-primary">
                                                 <or-translate value="${label}"></or-translate>

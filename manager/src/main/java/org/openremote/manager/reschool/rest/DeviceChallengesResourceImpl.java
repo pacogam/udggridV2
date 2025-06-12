@@ -4,6 +4,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset;
 import org.openremote.agent.custom.ourgrid.OurgridMeterAsset;
+import org.openremote.agent.protocol.http.AbstractHTTPServerProtocol;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.datapoint.AssetDatapointService;
@@ -15,15 +16,20 @@ import org.openremote.model.query.AssetQuery;
 import org.openremote.model.query.filter.RealmPredicate;
 import org.openremote.model.reschool.Challenge;
 import org.openremote.model.reschool.DeviceChallengesResource;
+import org.openremote.model.syslog.SyslogCategory;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static jakarta.ws.rs.core.Response.Status.*;
+import static org.openremote.model.syslog.SyslogCategory.API;
 
 public class DeviceChallengesResourceImpl extends ManagerWebResource implements DeviceChallengesResource {
 
     protected final DeviceChallengesService deviceChallengesService;
     protected final AssetStorageService assetStorageService;
+
+    private static final Logger LOG = SyslogCategory.getLogger(API, AbstractHTTPServerProtocol.class);
 
     public DeviceChallengesResourceImpl(TimerService timerService, ManagerIdentityService identityService, AssetDatapointService datapointService, AssetStorageService assetStorageService) {
         super(timerService, identityService);
@@ -173,7 +179,8 @@ public class DeviceChallengesResourceImpl extends ManagerWebResource implements 
             ).build();
 
         } catch (Exception e) {
-            throw new WebApplicationException(e.getMessage(), INTERNAL_SERVER_ERROR);
+            LOG.warning("Error getting meter challenge history for " + getUserId() + ": " + e.getMessage());
+            throw new WebApplicationException(e.getMessage(), BAD_REQUEST);
         }
     }
 }

@@ -155,8 +155,8 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
                         ${when(showEv, () => until(this._getEvTemplate(evInfo, chargerInfo)))}
                         ${when(showHeatpump, () => until(this._getHeatPumpTemplate(heatPumpInfo)))}
                         ${when(showBattery, () => until(this._getBatteryTemplate(batteryInfo)))}
-                        ${when(showSolar, () => until(this._getSolarTemplate()))}
                         ${when(showHomeAutomation, () => until(this._getHomeAutomationTemplate(homeAutomationInfo)))}
+                        ${when(showSolar, () => until(this._getSolarTemplate()))}
                     </div>
                 </div>
                 <div class="page-action">
