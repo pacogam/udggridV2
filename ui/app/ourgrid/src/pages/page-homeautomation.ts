@@ -259,7 +259,7 @@ export class PageHomeAutomation extends OgPage<GridAppStateKeyed> {
 
     protected _processMarkdown(markdown: string): string {
         const replacements = {
-            '{{hostname}}': ogManager?.managerUrl || '???',
+            '{{hostname}}': ogManager?.managerUrl || window.location.hostname || '???',
             '{{realm}}': realmSelector(this.getState()) || '???',
             '{{client_id}}': this.serviceUser?.username || '???',
             '{{client_secret}}': this.serviceUser?.secret || '???',
