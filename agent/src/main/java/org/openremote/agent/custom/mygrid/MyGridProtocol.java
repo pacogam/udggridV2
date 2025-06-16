@@ -1,13 +1,12 @@
 package org.openremote.agent.custom.mygrid;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.openremote.agent.custom.ourgrid.OurgridBatteryAsset;
@@ -39,23 +38,31 @@ import static org.openremote.model.syslog.SyslogCategory.PROTOCOL;
 import static org.openremote.container.web.WebTargetBuilder.createClient;
 
 /**
- * Protocol implementation for integrating MyGrid batteries with OpenRemote/Ourgrid.
+ * Protocol implementation for integrating MyGrid batteries with
+ * OpenRemote/Ourgrid.
  * 
- * <p>This protocol provides the following functionality:</p>
+ * <p>
+ * This protocol provides the following functionality:
+ * </p>
  * 
  * <ul>
- *   <li>Establishes and manages connection to the MyGrid MQTT broker using configuration 
- *       from {@link MyGridAgent}</li>
+ * <li>Establishes and manages connection to the MyGrid MQTT broker using
+ * configuration
+ * from {@link MyGridAgent}</li>
  * 
- *   <li>Provisions {@link OurgridBatteryAsset} assets by initially querying the MyGrid OpenRemote HTTP API during startup and every minute thereafter
- *       to retrieve assets of type ModuleOneAsset linked to the restricted MyGrid service user</li>
+ * <li>Provisions {@link OurgridBatteryAsset} assets by initially querying the
+ * MyGrid OpenRemote HTTP API during startup and every minute thereafter
+ * to retrieve assets of type ModuleOneAsset linked to the restricted MyGrid
+ * service user</li>
  * 
- *   <li>Subscribes to asset events via MQTT to provision the assets if they don't exist yet locally</li>
+ * <li>Subscribes to asset events via MQTT to provision the assets if they don't
+ * exist yet locally</li>
  * 
- *   <li>Subscribes to attribute events via MQTT to forward the attribute events to the internal message broker</li>
+ * <li>Subscribes to attribute events via MQTT to forward the attribute events
+ * to the internal message broker</li>
  * 
- *   <li>Automatically configures {@link MQTTAgentLink}s for each provisioned 
- *       {@link OurgridBatteryAsset} for publishing specific attributes</li>
+ * <li>Automatically configures {@link MQTTAgentLink}s for each provisioned
+ * {@link OurgridBatteryAsset} for publishing specific attributes</li>
  * </ul>
  * 
  * @see MyGridAgent
@@ -70,14 +77,11 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
     // Attribute events to process locally when received from the MyGrid MQTT broker
     private static final String[] SYNCED_ATTRIBUTES = {
-        "power",
-        "energyLevel",
-        "powerSetpoint",
-        "energyLevelPercentage",
+            "power",
+            "energyLevel",
+            "powerSetpoint",
+            "energyLevelPercentage",
     };
-
-    // Periodic sync task delay in milliseconds (1 minute)
-    private static final int PERIODIC_SYNC_TASK_INTERVAL = 60000;
 
     protected MyGridAgent agent;
     protected MyGridMQTTProtocol mqttProtocol;
@@ -87,8 +91,15 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     protected ProtocolAssetService protocolAssetService;
     protected static final AtomicReference<ResteasyClient> resteasyClient = new AtomicReference<>();
 
-    // Periodic sync task handle
-    protected ScheduledFuture<?> periodicSyncTask;
+    // Timestamp of the last executed sync
+    protected long lastSyncTimestamp = 0;
+
+    // Interval used to prevent constant syncs when the client gets disconnected and
+    // re-connected due to connection issues
+    protected static final long MIN_INTERVAL_BETWEEN_SYNCS = 5000; // 5 seconds
+
+    // Subscribed topics
+    protected final Set<String> subscribedTopics = ConcurrentHashMap.newKeySet();
 
     public MyGridProtocol(MyGridAgent agent) {
         this.agent = agent;
@@ -168,21 +179,34 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     protected void onConnectionStatusChanged(ConnectionStatus status) {
         LOG.info("MyGrid protocol connection status changed: " + status);
 
-        // (Re)Subscribe to asset and attribute events when the connection is established to the MyGrid MQTT broker
+        // (Re)Subscribe to asset and attribute events when the MQTT connection is
+        // established
         if (status == ConnectionStatus.CONNECTED) {
             LOG.info("MyGrid protocol connection established, subscribing to asset and attribute events");
 
-            // Asset events wildcard topic (example: mygrid/serviceuser/asset/#)
-            tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 3, 500);
+            // Subscribe to asset and attribute events with an active retry mechanism
+            tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 10, 5000);
+            tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 10, 5000);
 
-            // Attribute events wildcard topic (example: mygrid/serviceuser/attribute/+/#)
-            tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 3, 500);
+            // Syncing the assets from MyGrid (ModuleOneAsset) if the last sync was more
+            // than MIN_INTERVAL_BETWEEN_SYNCS ago
+            // This is to prevent constant syncs when the client gets disconnected and
+            // re-connected.
+            // Note: The client gets disconnected when UserAssetLinks change, thats why we
+            // resync on reconnect.
+            if (System.currentTimeMillis() - lastSyncTimestamp > MIN_INTERVAL_BETWEEN_SYNCS) {
+                syncMyGridAssets();
+                lastSyncTimestamp = System.currentTimeMillis();
+            }
+
         } else {
             LOG.info("MyGrid protocol connection lost, unsubscribing from asset and attribute events");
-            mqttCleanupMessageConsumers();
+            if (mqttClient != null) {
+                mqttClient.removeAllMessageConsumers();
+                subscribedTopics.clear();
+            }
         }
     }
-
 
     @Override
     public void start(Container container) throws Exception {
@@ -196,16 +220,10 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
         if (mqttClient != null) {
             mqttClient.addConnectionStatusConsumer(this::onConnectionStatusChanged);
-         }
+        }
 
         // Initialize the RESTEasy client for HTTP requests
         initResteasyClient();
-
-        // Provision the assets from MyGrid (ModuleOneAsset)'s
-        syncMyGridAssets();
-
-        // Start the periodic sync task (attempts to sync the assets every minute)
-        periodicSyncTask = scheduledExecutor.scheduleAtFixedRate(this::syncMyGridAssets, PERIODIC_SYNC_TASK_INTERVAL, PERIODIC_SYNC_TASK_INTERVAL, TimeUnit.MILLISECONDS);
 
         LOG.info("MyGrid protocol started");
     }
@@ -215,7 +233,10 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         LOG.info("MyGrid protocol stopping");
 
         // Cleanup the MQTT client subscriptions
-        mqttCleanupMessageConsumers();
+        if (mqttClient != null) {
+            mqttClient.removeAllMessageConsumers();
+            subscribedTopics.clear();
+        }
 
         // Remove status consumer from the MQTT client
         if (mqttClient != null) {
@@ -223,21 +244,9 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             mqttClient.removeAllConnectionStatusConsumers();
         }
 
-        // Cancel the periodic sync task
-        if (periodicSyncTask != null) {
-            LOG.info("Cancelling periodic asset sync task");
-            periodicSyncTask.cancel(false);
-        }
-
         mqttProtocol.stop(container);
 
         LOG.info("MyGrid protocol stopped");
-    }
-
-    protected void mqttCleanupMessageConsumers() {
-        if (mqttClient != null) {
-            mqttClient.removeAllMessageConsumers();
-        }
     }
 
     protected static void initResteasyClient() {
@@ -251,11 +260,10 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     // Get all OurgridBatteryAssets from the local OpenRemote instance
     protected List<OurgridBatteryAsset> getBatteryAssets() {
         return protocolAssetService.findAssets(new AssetQuery().types(OurgridBatteryAsset.class))
-            .stream()
-            .map(OurgridBatteryAsset.class::cast)
-            .toList();
+                .stream()
+                .map(OurgridBatteryAsset.class::cast)
+                .toList();
     }
-
 
     // Provision a new OurgridBatteryAsset with the respective MQTT Agent links
     protected Optional<OurgridBatteryAsset> provisionBatteryAsset(Asset<?> asset) {
@@ -275,17 +283,19 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
         // Update attributes with any existing values from the given asset
         Arrays.stream(SYNCED_ATTRIBUTES)
-            .filter(attributeName -> batteryAsset.hasAttribute(attributeName) && asset.hasAttribute(attributeName))
-            .forEach(attributeName -> asset.getAttribute(attributeName).flatMap(Attribute::getValue).ifPresent(value -> batteryAsset.getAttribute(attributeName).ifPresent(attribute -> attribute.setValue(value))));
+                .filter(attributeName -> batteryAsset.hasAttribute(attributeName) && asset.hasAttribute(attributeName))
+                .forEach(attributeName -> asset.getAttribute(attributeName).flatMap(Attribute::getValue)
+                        .ifPresent(value -> batteryAsset.getAttribute(attributeName)
+                                .ifPresent(attribute -> attribute.setValue(value))));
 
         // Add the MQTT publish agent link for the power setpoint attribute
         var powerSetpointAttribute = batteryAsset.getAttribute(OurgridBatteryAsset.POWER_SETPOINT);
         if (powerSetpointAttribute.isPresent()) {
-            var powerSetpointAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(), OurgridBatteryAsset.POWER_SETPOINT.getName());
+            var powerSetpointAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
+                    OurgridBatteryAsset.POWER_SETPOINT.getName());
             powerSetpointAttribute.get().addOrReplaceMeta(
-                new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
-                .setPublishTopic(powerSetpointAttributePublishTopic))
-            );
+                    new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
+                            .setPublishTopic(powerSetpointAttributePublishTopic)));
         }
 
         // Merge the OurgridBatteryAsset into the local OpenRemote instance
@@ -299,21 +309,24 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         return Optional.of(batteryAsset);
     }
 
-    // Construct the initial topic prefix based on the agent's config (example: mygrid/serviceuser)
+    // Construct the initial topic prefix based on the agent's config (example:
+    // mygrid/serviceuser)
     protected String getTopicPrefix() {
-        String realm = this.getAgent().getMyGridRealm().orElseThrow(() -> 
-            new IllegalArgumentException("MyGrid realm was not configured"));
-        String clientId = this.getAgent().getClientId().orElseThrow(() -> 
-            new IllegalArgumentException("Client ID was not configured"));
+        String realm = this.getAgent().getMyGridRealm()
+                .orElseThrow(() -> new IllegalArgumentException("MyGrid realm was not configured"));
+        String clientId = this.getAgent().getClientId()
+                .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
         return realm + "/" + clientId;
     }
 
-    // Return the wildcard topic for asset events (example: mygrid/serviceuser/asset/#)
+    // Return the wildcard topic for asset events (example:
+    // mygrid/serviceuser/asset/#)
     protected String getAssetEventsTopic() {
         return getTopicPrefix() + "/asset/#";
     }
 
-    // Return the wildcard topic for attribute events (example: mygrid/serviceuser/attribute/+/#)
+    // Return the wildcard topic for attribute events (example:
+    // mygrid/serviceuser/attribute/+/#)
     protected String getAttributeEventsTopic() {
         return getTopicPrefix() + "/attribute/+/#";
     }
@@ -323,38 +336,42 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         return getTopicPrefix() + "/writeattributevalue/" + attributeName + "/" + assetId;
     }
 
-    // Simple record for the auth token
-    record OAuthToken(String token, long expiresAtMillis) {}
-
-    // Sync the relevant assets (ModuleOneAsset) from MyGrid to the local OpenRemote instance
+    // Sync the relevant assets (ModuleOneAsset) from MyGrid to the local OpenRemote
+    // instance
     protected void syncMyGridAssets() {
-        LOG.info("Syncing battery assets from MyGrid");
+        LOG.info("Syncing battery assets (ModuleOneAsset) from MyGrid");
 
-        String myGridRealm = this.agent.getMyGridRealm().orElseThrow(() -> new IllegalArgumentException("Agent mygrid realm was not configured"));
-        String url = "https://" + this.agent.getHost().orElseThrow(() -> new IllegalArgumentException("Agent host was not configured"));
+        String myGridRealm = this.agent.getMyGridRealm()
+                .orElseThrow(() -> new IllegalArgumentException("Agent mygrid realm was not configured"));
+        String url = "https://"
+                + this.agent.getHost().orElseThrow(() -> new IllegalArgumentException("Agent host was not configured"));
 
         // Get the token before querying the assets
         Map<String, String> oAuthResponse = getMyGridOAuthToken(url, myGridRealm);
 
         if (oAuthResponse.isEmpty()) {
-            LOG.severe("Failed to get auth token response");
+            LOG.severe("Failed to get auth token response while syncing battery assets (ModuleOneAsset) from MyGrid");
             return;
         }
 
         String accessToken = oAuthResponse.get("access_token");
-        long expiresAtMillis = System.currentTimeMillis() + Long.parseLong(oAuthResponse.get("expires_in")) * 1000;
-        OAuthToken oAuthToken = new OAuthToken(accessToken, expiresAtMillis);
-    
+
+        if (accessToken == null) {
+            LOG.severe(
+                    "Failed to get access token from OAuth response while syncing battery assets (ModuleOneAsset) from MyGrid");
+            return;
+        }
+
         // Query the assets
-        List<Asset<?>> mygridAssets = getMyGridAssets(url, myGridRealm, oAuthToken.token());
+        List<Asset<?>> mygridAssets = getMyGridAssets(url, myGridRealm, accessToken);
 
         // Provision each asset
         mygridAssets.forEach(asset -> {
-           Optional<OurgridBatteryAsset> batteryAsset = provisionBatteryAsset(asset);
-           batteryAsset.ifPresent(ourgridBatteryAsset -> LOG.info("Battery asset created: " + ourgridBatteryAsset.getId()));
+            Optional<OurgridBatteryAsset> batteryAsset = provisionBatteryAsset(asset);
+            batteryAsset.ifPresent(
+                    ourgridBatteryAsset -> LOG.info("Battery asset created: " + ourgridBatteryAsset.getId()));
         });
     }
-
 
     // Query the MyGrid OpenRemote API for the assets with the ModuleOneAsset type
     protected List<Asset<?>> getMyGridAssets(String url, String realm, String accessToken) {
@@ -371,9 +388,10 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
                 .header("Authorization", "Bearer " + accessToken)
                 .build("POST", Entity.json(assetQuery))
                 .invoke()) {
-            
+
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return response.readEntity(new jakarta.ws.rs.core.GenericType<>() {});
+                return response.readEntity(new jakarta.ws.rs.core.GenericType<>() {
+                });
             }
             return Collections.emptyList();
         } catch (Exception e) {
@@ -382,11 +400,12 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         }
     }
 
-
     // Get the OAuth token from the MyGrid Keycloak instance
     protected Map<String, String> getMyGridOAuthToken(String url, String realm) {
-        UsernamePassword usernamePassword = this.agent.getUsernamePassword().orElseThrow(() -> new IllegalArgumentException("Client secret was not configured"));
-        String serviceUser = this.agent.getClientId().orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
+        UsernamePassword usernamePassword = this.agent.getUsernamePassword()
+                .orElseThrow(() -> new IllegalArgumentException("Client secret was not configured"));
+        String serviceUser = this.agent.getClientId()
+                .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
         String serviceUserSecret = usernamePassword.getPassword();
 
         Map<String, String> data = new HashMap<>();
@@ -397,15 +416,16 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         ResteasyClient client = resteasyClient.get();
         jakarta.ws.rs.core.MultivaluedHashMap<String, String> formData = new jakarta.ws.rs.core.MultivaluedHashMap<>();
         data.forEach(formData::add);
-        
+
         try (Response response = client.target(url + "/auth/realms/" + realm + "/protocol/openid-connect/token")
                 .request()
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build("POST", Entity.form(formData))
                 .invoke()) {
-            
+
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return response.readEntity(new jakarta.ws.rs.core.GenericType<Map<String, String>>() {});
+                return response.readEntity(new jakarta.ws.rs.core.GenericType<Map<String, String>>() {
+                });
             }
             return Collections.emptyMap();
         } catch (Exception e) {
@@ -414,33 +434,45 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         }
     }
 
-        // Retry mechanism for subscribing to a MQTT topic with a delay between retries and a max number of retries
-        protected void tryAddMQTTMessageConsumer(String topic, Consumer<MQTTMessage<String>> consumer, int maxRetries, long delayMs) {
-            if (maxRetries <= 0) {
-                LOG.warning("Max retries reached for subscribing to " + topic);
-                return;
-            }
-    
-            scheduledExecutor.schedule(() -> {
-                try {
-                    boolean subscribed = mqttClient.addMessageConsumer(topic, consumer);
-                    if (!subscribed) {
-                        LOG.warning("Failed to subscribe to " + topic);
-                        tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
-                    }
-                    LOG.info("Subscribed to " + topic);
-                } catch (Exception e) {
-                    tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
-                }
-            }, delayMs, TimeUnit.MILLISECONDS);
+    /*
+     * Retry mechanism for subscribing to a MQTT topic with a delay between retries
+     * and a max number of retries.
+     * Prevents double subscriptions to the same topic.
+     */
+    protected void tryAddMQTTMessageConsumer(String topic, Consumer<MQTTMessage<String>> consumer, int maxRetries,
+            long delayMs) {
+
+        if (maxRetries <= 0) {
+            LOG.warning("Max retries reached for subscribing to " + topic);
+            return;
         }
 
+        scheduledExecutor.schedule(() -> {
+            try {
+                if (subscribedTopics.contains(topic)) {
+                    LOG.info("Already subscribed to " + topic);
+                    return;
+                }
 
+                boolean subscribed = mqttClient.addMessageConsumer(topic, consumer);
+                if (!subscribed) {
+                    LOG.warning("Failed to subscribe to " + topic);
+                    tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
+                } else {
+                    subscribedTopics.add(topic);
+                    LOG.info("Successfully subscribed to " + topic);
+                    LOG.info("Subscribed topics: " + subscribedTopics);
+                }
+            } catch (Exception e) {
+                LOG.warning("Error subscribing to " + topic + ": " + e.getMessage());
+                tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
+            }
+        }, delayMs, TimeUnit.MILLISECONDS);
+    }
 
     /*
      * Asset Event Consumer
      * Process the asset events from the MyGrid MQTT broker
-     * CREATE, UPDATE: provision the battery asset if it doesn't exist yet
      * DELETE: delete the battery asset
      */
     protected void onMyGridAssetEvent(MQTTMessage<String> msg) {
@@ -451,12 +483,8 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
                 return; // Don't process unrelated asset types.
             }
 
-            // Handle the asset event based on the cause
+            // Handle battery asset event for removal
             switch (assetEvent.getCause()) {
-                case CREATE, UPDATE:
-                    Optional<OurgridBatteryAsset> batteryAsset = provisionBatteryAsset(assetEvent.getAsset());
-                    batteryAsset.ifPresent(ourgridBatteryAsset -> LOG.fine("Battery asset created: " + ourgridBatteryAsset.getId()));
-                    break;
                 case DELETE:
                     protocolAssetService.deleteAssets(assetEvent.getAsset().getId());
                     break;
@@ -466,12 +494,12 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         }
     }
 
-
     /*
      * Attribute Event Consumer
      * Process the attribute events from the MyGrid MQTT broker
      * Forward the attribute event to the internal message broker for processing
-     * TODO: Add backpressure mechanism / processing queue if performance becomes an issue
+     * TODO: Add backpressure mechanism / processing queue if performance becomes an
+     * issue
      */
     protected void onMyGridAttributeEvent(MQTTMessage<String> msg) {
         SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
@@ -481,15 +509,16 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
             // Process the attribute event if SYNCED_ATTRIBUTES contains the attribute name
             if (Arrays.asList(SYNCED_ATTRIBUTES).contains(attributeEvent.getName())) {
-                LOG.info("Processing external attribute event: " + attributeEvent.getName() + " for asset " + attributeEvent.getId() + " with new value " + attributeEvent.getValue());
-                
+                LOG.info("Processing external attribute event: " + attributeEvent.getName() + " for asset "
+                        + attributeEvent.getId() + " with new value " + attributeEvent.getValue());
+
                 // Ensure the attribute event is updated to the agent's realm
                 attributeEvent.setRealm(this.agent.getRealm());
 
                 // Process the attribute event
                 protocolAssetService.sendAttributeEvent(attributeEvent);
             }
-           
+
         }
     }
 
