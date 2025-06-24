@@ -167,6 +167,10 @@ public class OurgridSetupService implements ContainerService {
                         .addOrReplaceMeta(
                                 new MetaItem<>(MetaItemType.RULE_STATE)
                         ),
+                new Attribute<>("powerExportMax", ValueType.POSITIVE_NUMBER)
+                        .addOrReplaceMeta(
+                                new MetaItem<>(MetaItemType.RULE_STATE)
+                        ),
                 new Attribute<>("powerForecast", ValueType.NUMBER)
                         .addOrReplaceMeta(
                                 new MetaItem<>(MetaItemType.HAS_PREDICTED_DATA_POINTS),

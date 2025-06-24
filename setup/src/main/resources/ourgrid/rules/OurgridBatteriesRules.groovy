@@ -32,6 +32,9 @@ long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis
 // Action triggers for rules
 String challengeGeneralStatusPreviousRule2 = ""
 String challengeGeneralStatusPreviousRule3 = ""
+String challengeGeneralStatusPreviousRule4 = ""
+
+def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") as SimpleDateFormat
 
 rules.add()
         .priority(1)
@@ -118,6 +121,14 @@ rules.add()
             def activeChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.activeChallenge.toString() as String
 
             if (challengeGeneralStatus == activeChallenge) {
+                def challengeEnd = facts
+                        .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
+                        .flatMap { it.value }
+                        .orElse(null) as String
+
+                long challengeEndMillis = sdf.parse(challengeEnd).getTime()
+                long currentMillis = facts.clock.currentTimeMillis
+
                 // Power set-point logic during challenge
                 def attributeNames = [
                         OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
@@ -155,28 +166,18 @@ rules.add()
                         assets.dispatch(assetId, OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, true)
                     }
 
-                    def challengeEnd = facts
-                            .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
-                            .flatMap { it.value }
-                            .orElse(null) as String
-
                     def powerSetpointDischarge = 0.0 as Double
 
-                    if (challengeEnd != null && energyCapacity != null && powerExportMax != null && allowDischargingButton == true) {
-                        def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") as SimpleDateFormat
-                        long challengeEndMillis = sdf.parse(challengeEnd).getTime()
-                        long currentMillis = facts.clock.currentTimeMillis
+                    if (challengeEnd != null && energyCapacity != null && energyLevelPercentage != null && energyLevelPercentageMin != null && powerExportMax != null &&
+                            allowDischargingButton == true && currentMillis < challengeEndMillis) {
+                        def challengeDurationHours = (challengeEndMillis - currentMillis) / 3600000 as Double
+                        def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
 
-                        if (currentMillis < challengeEndMillis) {
-                            def challengeDurationHours = (challengeEndMillis - currentMillis) / 3600000 as Double
-                            def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
+                        if (energyCapacityUsable > 0.0) {
+                            powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
 
-                            if (energyCapacityUsable > 0.0) {
-                                powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
-
-                                if (powerSetpointDischarge < -powerExportMax) {
-                                    powerSetpointDischarge = -powerExportMax
-                                }
+                            if (powerSetpointDischarge < -powerExportMax) {
+                                powerSetpointDischarge = -powerExportMax
                             }
                         }
                     }
@@ -258,6 +259,57 @@ rules.add()
             }
         })
 
+rules.add()
+        .priority(4)
+        .name("OurGrid battery join challenge automatically rule")
+        .when({ facts ->
+            boolean triggerRule = false
+
+            // Check if challenges asset ID is valid
+            def challengesAsset = facts.matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name)) as Optional<AttributeInfo>
+
+            if (challengesAsset.isEmpty()) {
+                return false
+            }
+
+            def challengeGeneralStatus = challengesAsset.get().value.orElse(null).toString() as String
+            def joinedChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.joinedChallenge.toString() as String
+            def noChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.noChallenge.toString() as String
+
+            if (challengeGeneralStatus == joinedChallenge && (challengeGeneralStatusPreviousRule4 == noChallenge || challengeGeneralStatusPreviousRule4 == "null")) {
+                triggerRule = true
+            }
+
+            challengeGeneralStatusPreviousRule4 = challengeGeneralStatus
+
+            return triggerRule
+        })
+        .then({ facts ->
+            def joinedChallenge = OurgridMeterAsset.ChallengeStatusValueType.joinedChallenge.toString() as String
+
+            def attributeNamesMeterAsset = [
+                    OurgridMeterAsset.CHALLENGE_STATUS.name
+            ] as String[]
+
+            def metersAttributes = getChildrenAttributes(meterSumAssetId, attributeNamesMeterAsset, OurgridMeterAsset, facts) as Map<String, Map<String, Object>>
+
+            // Get household meter asset ID's
+            def meterAssetIds = assets.getResults(new AssetQuery().parents(meterSumAssetId).types(OurgridMeterAsset)).map { it.id }.toList() as String[]
+
+            // Join challenge if meter has a battery with allowed automatic control
+            facts.matchAssetState(new AssetQuery().parents(meterAssetIds).types(OurgridBatteryAsset).attributeNames(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name))
+                    .each {
+                        if (it.value.orElse(false) == true) {
+                            def meterAssetId = it.parentId as String
+                            def meterChallengeStatus = metersAttributes[meterAssetId]?.get(OurgridMeterAsset.CHALLENGE_STATUS.name)?.toString() as String
+
+                            if (meterChallengeStatus != joinedChallenge) {
+                                assets.dispatch(meterAssetId, OurgridMeterAsset.CHALLENGE_STATUS.name, OurgridMeterAsset.ChallengeStatusValueType.joinedChallenge)
+                            }
+                        }
+                    }
+        })
+
 
 private Map<String, Map<String, Object>> getBatteriesAttributes(String meterSumAssetId, String[] attributeNames, RulesFacts facts) {
     // Check if parent asset ID is valid
@@ -287,4 +339,35 @@ private Map<String, Map<String, Object>> getBatteriesAttributes(String meterSumA
     }
 
     return batteriesAttributes
+}
+
+private Map<String, Map<String, Object>> getChildrenAttributes(String parentAssetId, String[] attributeNames, Class<Asset> assetType, RulesFacts facts) {
+    // Check if parent asset ID is valid
+    def parentAsset = assets.getResults(new AssetQuery().ids(parentAssetId)).findFirst() as Optional<Asset>
+
+    if (parentAsset.isEmpty()) {
+        LOG.warning("No parent asset found with ID: '" + parentAsset + "'; Check asset ID")
+        return
+    }
+
+    def attributesList = facts
+            .matchAssetState(new AssetQuery().parents(parentAssetId).types(assetType).attributeNames(attributeNames))
+            .toList() as List<AttributeInfo>
+
+    // Group attributes per asset ID
+    def attributes = [:].withDefault { [:].withDefault { null } } as Map<String, Map<String, Object>>
+
+    attributesList.each { attributeInfo ->
+        def id = attributeInfo.id as String
+        def attributeName = attributeInfo.name as String
+        def value = attributeInfo.value.orElse(null)
+
+        attributes[id][attributeName] = value
+    }
+
+    if (attributes.isEmpty()) {
+        LOG.warning("No attributes found for children of parent asset with ID: '" + parentAsset + "'; Check children assets and if the rule state configuration is added to the attributes")
+    }
+
+    return attributes
 }

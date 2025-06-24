@@ -239,6 +239,7 @@ rules.add()
                         netPowerMetersWatt = (sum as Double).round()
                         assets.dispatch(parentMeterAssetId, attributeName, netPowerMetersWatt)
                     } else {
+                        sum = ((sum as Double) * 1000).round() / 1000
                         assets.dispatch(parentMeterAssetId, attributeName, sum)
                     }
                 }
