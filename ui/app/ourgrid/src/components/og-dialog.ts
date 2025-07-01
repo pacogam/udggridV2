@@ -134,12 +134,14 @@ export function showLastChallengeResultDialog(meterAsset: Asset, challengeAsset:
         });
         promise.catch((ex) => console.warn(ex));
         data = (await promise).data;
-        const challenge = data[0];
+        const challenge = data?.[0];
+        const diffBetweenJoinAndEnd = moment(challenge?.endDate).diff(challenge?.joinedAt, 'minutes', true);
+        const joinedMinutes = Math.ceil(diffBetweenJoinAndEnd);
         return html`
             <div class="text-primary bold" style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
                 <span style="color: var(--og-color-neutral)">${i18next.t('panel_challengeComplete.pointsEarned').replace('{{value}}', challenge?.points || 0)}</span>
                 <span style="color: var(--og-color-secondary)">
-                    ${i18next.t('panel_challengeComplete.minutesJoined').replace('{{value}}', moment(challenge?.endDate).diff(challenge?.joinedAt, 'minutes').toString())}
+                    ${i18next.t('panel_challengeComplete.minutesJoined').replace('{{value}}', joinedMinutes.toString())}
                 </span>
             </div>
         `;

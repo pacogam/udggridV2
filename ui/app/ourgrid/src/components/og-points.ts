@@ -95,7 +95,7 @@ export class OgPoints extends LitElement {
                 </div>
                 ${when(this.label, () => html`
                     <span class="text-primary" style="color: var(--og-color-neutral)">
-                        ${Math.min(Math.round(this.progress / this.max * 100), 100)}<or-translate value="challenge.percentOfPointsEarned"></or-translate>
+                        ${Math.min(Math.round(this.progress / this.max * 100), 100)} or ${Math.max(Math.min(Math.round(this.progress / this.max * 100), 100), 0)}<or-translate value="challenge.percentOfPointsEarned"></or-translate>
                     </span>
                 `)}
             </div>
