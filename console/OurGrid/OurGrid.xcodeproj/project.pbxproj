@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F604C2CEC113E9629E004EA /* Pods_OurGrid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 538F136169B742A127CEB7BB /* Pods_OurGrid.framework */; };
-		4C69D99A2B838BF6004631C5 /* ORLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C69D9992B838BF6004631C5 /* ORLib.framework */; };
 		4C69D99E2B838E62004631C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4C69D9782B838B13004631C5 /* Assets.xcassets */; };
 		4C69D99F2B8394A6004631C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C69D96F2B838B12004631C5 /* AppDelegate.swift */; };
 		4C69D9A02B8394A8004631C5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C69D9712B838B12004631C5 /* SceneDelegate.swift */; };
@@ -16,23 +14,14 @@
 		4C69D9A22B8394AF004631C5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4C69D9752B838B12004631C5 /* Main.storyboard */; };
 		4C69D9A32B8394B3004631C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4C69D97A2B838B13004631C5 /* LaunchScreen.storyboard */; };
 		4C69D9A42B8394BA004631C5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4C69D95F2B836618004631C5 /* GoogleService-Info.plist */; };
+		911AA5682E254C7800886F60 /* ORLib in Frameworks */ = {isa = PBXBuildFile; productRef = 911AA5672E254C7800886F60 /* ORLib */; };
+		911AA56B2E254C8B00886F60 /* DropDown in Frameworks */ = {isa = PBXBuildFile; productRef = 911AA56A2E254C8B00886F60 /* DropDown */; };
+		911AA56E2E254CA000886F60 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 911AA56D2E254CA000886F60 /* IQKeyboardManagerSwift */; };
+		911AA5712E254D2100886F60 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 911AA5702E254D2100886F60 /* FirebaseCrashlytics */; };
+		911AA5732E254D2100886F60 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 911AA5722E254D2100886F60 /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		4C69D99C2B838BF6004631C5 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		4444BFDF94EB423874ECAA06 /* Pods-OurGrid.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGrid.release.xcconfig"; path = "Target Support Files/Pods-OurGrid/Pods-OurGrid.release.xcconfig"; sourceTree = "<group>"; };
 		4C69D95F2B836618004631C5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4C69D9642B838286004631C5 /* ORLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ORLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C69D96F2B838B12004631C5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -45,8 +34,6 @@
 		4C69D9852B838B6F004631C5 /* OurGrid.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OurGrid.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C69D9992B838BF6004631C5 /* ORLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ORLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C69D99D2B838D24004631C5 /* OurGrid.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OurGrid.entitlements; sourceTree = "<group>"; };
-		538F136169B742A127CEB7BB /* Pods_OurGrid.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OurGrid.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E7A455404EC8277B89BE423E /* Pods-OurGrid.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OurGrid.debug.xcconfig"; path = "Target Support Files/Pods-OurGrid/Pods-OurGrid.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,8 +41,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C69D99A2B838BF6004631C5 /* ORLib.framework in Frameworks */,
-				3F604C2CEC113E9629E004EA /* Pods_OurGrid.framework in Frameworks */,
+				911AA56E2E254CA000886F60 /* IQKeyboardManagerSwift in Frameworks */,
+				911AA5682E254C7800886F60 /* ORLib in Frameworks */,
+				911AA5732E254D2100886F60 /* FirebaseMessaging in Frameworks */,
+				911AA56B2E254C8B00886F60 /* DropDown in Frameworks */,
+				911AA5712E254D2100886F60 /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +57,6 @@
 			children = (
 				4C69D96E2B838B12004631C5 /* OurGrid */,
 				4C69D91E2B83544D004631C5 /* Products */,
-				6E7FE0746ADBD14A4BF00B8F /* Pods */,
 				7EA2FA8D842A9054238299D7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -96,21 +85,11 @@
 			path = OurGrid;
 			sourceTree = "<group>";
 		};
-		6E7FE0746ADBD14A4BF00B8F /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				E7A455404EC8277B89BE423E /* Pods-OurGrid.debug.xcconfig */,
-				4444BFDF94EB423874ECAA06 /* Pods-OurGrid.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		7EA2FA8D842A9054238299D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				4C69D9992B838BF6004631C5 /* ORLib.framework */,
 				4C69D9642B838286004631C5 /* ORLib.framework */,
-				538F136169B742A127CEB7BB /* Pods_OurGrid.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -122,12 +101,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4C69D9962B838B70004631C5 /* Build configuration list for PBXNativeTarget "OurGrid" */;
 			buildPhases = (
-				8A4C90C7E27BB897B98A1219 /* [CP] Check Pods Manifest.lock */,
 				4C69D9812B838B6F004631C5 /* Sources */,
 				4C69D9822B838B6F004631C5 /* Frameworks */,
 				4C69D9832B838B6F004631C5 /* Resources */,
-				4C69D99C2B838BF6004631C5 /* Embed Frameworks */,
-				87C1CF44EA37C57FA1E8FC40 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -162,6 +138,12 @@
 				Base,
 			);
 			mainGroup = 4C69D9142B83544D004631C5;
+			packageReferences = (
+				911AA5662E254C7800886F60 /* XCRemoteSwiftPackageReference "console-ios-lib" */,
+				911AA5692E254C8B00886F60 /* XCRemoteSwiftPackageReference "DropDown" */,
+				911AA56C2E254CA000886F60 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				911AA56F2E254D2100886F60 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 4C69D91E2B83544D004631C5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -184,48 +166,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		87C1CF44EA37C57FA1E8FC40 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-OurGrid/Pods-OurGrid-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-OurGrid/Pods-OurGrid-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OurGrid/Pods-OurGrid-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8A4C90C7E27BB897B98A1219 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-OurGrid-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4C69D9812B838B6F004631C5 /* Sources */ = {
@@ -376,7 +316,6 @@
 		};
 		4C69D9972B838B70004631C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E7A455404EC8277B89BE423E /* Pods-OurGrid.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -412,7 +351,6 @@
 		};
 		4C69D9982B838B70004631C5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4444BFDF94EB423874ECAA06 /* Pods-OurGrid.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -469,6 +407,69 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		911AA5662E254C7800886F60 /* XCRemoteSwiftPackageReference "console-ios-lib" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/openremote/console-ios-lib.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
+		911AA5692E254C8B00886F60 /* XCRemoteSwiftPackageReference "DropDown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AssistoLab/DropDown.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		911AA56C2E254CA000886F60 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.1;
+			};
+		};
+		911AA56F2E254D2100886F60 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		911AA5672E254C7800886F60 /* ORLib */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 911AA5662E254C7800886F60 /* XCRemoteSwiftPackageReference "console-ios-lib" */;
+			productName = ORLib;
+		};
+		911AA56A2E254C8B00886F60 /* DropDown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 911AA5692E254C8B00886F60 /* XCRemoteSwiftPackageReference "DropDown" */;
+			productName = DropDown;
+		};
+		911AA56D2E254CA000886F60 /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 911AA56C2E254CA000886F60 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
+		};
+		911AA5702E254D2100886F60 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 911AA56F2E254D2100886F60 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		911AA5722E254D2100886F60 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 911AA56F2E254D2100886F60 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4C69D9152B83544D004631C5 /* Project object */;
 }
