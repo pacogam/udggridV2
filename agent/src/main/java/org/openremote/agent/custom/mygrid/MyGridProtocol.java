@@ -454,15 +454,10 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
                     return;
                 }
 
-                boolean subscribed = mqttClient.addMessageConsumer(topic, consumer);
-                if (!subscribed) {
-                    LOG.warning("Failed to subscribe to " + topic);
-                    tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
-                } else {
-                    subscribedTopics.add(topic);
-                    LOG.info("Successfully subscribed to " + topic);
-                    LOG.info("Subscribed topics: " + subscribedTopics);
-                }
+                mqttClient.addMessageConsumer(topic, consumer);
+                subscribedTopics.add(topic);
+                LOG.info("Successfully subscribed to " + topic);
+                LOG.info("Subscribed topics: " + subscribedTopics);
             } catch (Exception e) {
                 LOG.warning("Error subscribing to " + topic + ": " + e.getMessage());
                 tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
