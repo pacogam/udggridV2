@@ -2520,13 +2520,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/model@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@openremote/model@npm:1.8.0"
-  checksum: 10/ed0e534ee87daee2e348b97c33f25a0fd7e140c7672236232f37979b10b34d739907f2f229b4fb41412882f5c20e48b964a412babbc9a077842badfb4d8e0535
-  languageName: node
-  linkType: hard
-
 "@openremote/or-app@npm:1.7.0, @openremote/or-app@npm:~1.7.0":
   version: 1.7.0
   resolution: "@openremote/or-app@npm:1.7.0"
@@ -2899,7 +2892,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/rest@npm:1.7.0":
+"@openremote/rest@npm:1.7.0, @openremote/rest@npm:~1.7.0":
   version: 1.7.0
   resolution: "@openremote/rest@npm:1.7.0"
   dependencies:
@@ -2907,17 +2900,6 @@ __metadata:
     axios: "npm:0.24.0"
     qs: "npm:^6.8.0"
   checksum: 10/32d7a29e3bf0fba36a7bee1fe7464f0561509d6c8c5dfe27f75264a98a3dad19c7b9d1f065bf1f551cd268ef9313f942759458caa21bc98b5bbec5df32d82da7
-  languageName: node
-  linkType: hard
-
-"@openremote/rest@npm:~1.8.0":
-  version: 1.8.0
-  resolution: "@openremote/rest@npm:1.8.0"
-  dependencies:
-    "@openremote/model": "npm:1.8.0"
-    axios: "npm:0.24.0"
-    qs: "npm:^6.8.0"
-  checksum: 10/43cfe86212cfed658dac425481255f868f8315900f0cb01d9dc84bc3c7d5b703ea26ad5498baaf416cd8b3f1ddd096042131724ee5c1c60c7c7ac7836ec325db
   languageName: node
   linkType: hard
 
@@ -8705,7 +8687,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rest@workspace:ui/component/rest"
   dependencies:
-    "@openremote/rest": "npm:~1.8.0"
+    "@openremote/rest": "npm:~1.7.0"
     "@openremote/util": "npm:~1.7.0"
     "@types/qs": "npm:^6.9.7"
     axios: "npm:0.24.0"
