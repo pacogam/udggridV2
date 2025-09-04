@@ -23,7 +23,7 @@ import io.netty.buffer.ByteBuf;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.keycloak.KeycloakSecurityContext;
 import org.openremote.manager.mqtt.MQTTHandler;
-import org.openremote.manager.mqtt.Topic;
+import org.openremote.model.protocol.mqtt.Topic;
 import org.openremote.model.syslog.SyslogCategory;
 
 import java.nio.charset.StandardCharsets;
