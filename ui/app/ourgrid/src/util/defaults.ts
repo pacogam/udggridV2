@@ -20,7 +20,7 @@ export class Defaults {
 
     // Tips related
     static TIPS_HEAT_PUMP_WATT_SAVED: number = 3000;
-    static TIPS_VEHICLE_CHARGER_WATT_SAVED: number = 5000;
+    static TIPS_VEHICLE_CHARGER_WATT_SAVED: number = 7000;
 
     // Animation related
     static PEAK_NOTIFICATION_JOINED_TIMEOUT_MS = 3000;

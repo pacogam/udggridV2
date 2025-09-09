@@ -26,6 +26,11 @@
         "name": "Weert",
         "ourGridUrl": "https://staging.ourgrid.openremote.app/ourgrid",
         "realm": "amsterdam"
+      },
+      {
+        "name": "Eersel",
+        "ourGridUrl": "https://staging.denhaag.openremote.app/ourgrid",
+        "realm": "gems"
       }
     ]
   }
