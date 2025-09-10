@@ -7,69 +7,128 @@ import org.openremote.model.rules.Assets
 
 import java.util.logging.Logger
 
-Logger LOG = binding.LOG
-RulesBuilder rules = binding.rules
 Assets assets = binding.assets
+RulesBuilder rules = binding.rules
+Logger LOG = binding.LOG
 
-// Put the ["asset name", "attribute name" ,"input asset ID" and "output asset ID"] here:
+// -------------------------input------------------------- //
+
+// Set the ["inputAssetName", "inputAttributeName", "inputAssetId", "outputAssetName", "outputAttributeName", "outputAssetId"] here:
 def attributes = [
-        ["AssetName1", "attributeName1", "inputAssetId1", "outputAssetId1"],
-        ["AssetName2", "attributeName2", "inputAssetId2", "outputAssetId2"],
-        ["AssetName3", "attributeName3", "inputAssetId3", "outputAssetId3"]
+        ["inputAssetName1", "inputAttributeName1", "inputAssetId1", "outputAssetName1", "outputAttributeName1", "outputAssetId1"],
+        ["inputAssetName2", "inputAttributeName2", "inputAssetId2", "outputAssetName2", "outputAttributeName2", "outputAssetId2"],
+        ["inputAssetName3", "inputAttributeName3", "inputAssetId3", "outputAssetName3", "outputAttributeName3", "outputAssetId3"]
 ]
 
-def attributeNames = attributes.collect { it[1] }.unique() as String[]
-def inputAssetIds = attributes.collect { it[2] } as String[]
-def inputOutputAssetIdsMap = attributes.collectEntries { [(it[2]), it[3]] } as HashMap<String, String>
+// ------------------------------------------------------- //
+
+// Collect all unique asset ID's and attribute names
+def inputAttributeNames = attributes.collect { it[1] }.unique() as String[]
+def inputAssetIds = attributes.collect { it[2] }.unique() as String[]
+
+// Find the minimum number of required asset queries
+def assetQueryOptimisedBy = "assetIds"
+
+if (inputAssetIds.size() > inputAttributeNames.size()) {
+    assetQueryOptimisedBy = "attributeNames"
+}
+
+// Map all asset queries
+def assetQueryMap = attributes.inject([:]) { map, row ->
+    def inputAttributeName = row[1]
+    def inputAssetId = row[2]
+
+    if (assetQueryOptimisedBy == "assetIds") {
+        map[inputAssetId] = (map[inputAssetId] ?: []) + inputAttributeName
+    } else if (assetQueryOptimisedBy == "attributeNames") {
+        map[inputAttributeName] = (map[inputAttributeName] ?: []) + inputAssetId
+    }
+    return map
+} as Map<String, List<Map<String, String>>>
+
+// Map input to output keys
+def inputOutputMap = attributes.inject([:]) { map, row ->
+    def inputAttributeName = row[1]
+    def inputAssetId = row[2]
+    def inputKey = inputAssetId + inputAttributeName
+    def outputAttribute = [assetId: row[5], attributeName: row[4]]
+
+    map[inputKey] = (map[inputKey] ?: []) + [outputAttribute]
+    return map
+}
 
 rules.add()
         .name("Link attributes rule")
         .when({ facts ->
+            def attributeChanges = []
 
-            // Find attribute changes
-            List<AttributeInfo> changes = facts
-                    .matchAssetState(
-                            new AssetQuery()
-                                    .ids(inputAssetIds)
-                                    .attributeNames(attributeNames)
-                    )
-                    .filter { attributeInfo ->
-                        boolean timestampChanged = false
+            // Find attribute changes for each asset query
+            assetQueryMap.each {
+                def inputKey = it.key as String
+                def inputValues = it.value as String[]
 
-                        // Get previous attribute state from facts
-                        Optional<AttributeInfo> previous = facts.matchFirst(attributeInfo.id + attributeInfo.name)
+                // Create asset query
+                def assetQuery = new AssetQuery()
 
-                        // Check if attribute timestamp has been updated (attribute value can be the same)
-                        if (attributeInfo.timestamp > previous.map { it.timestamp }.orElse(0)) {
-                            timestampChanged = true
+                if (assetQueryOptimisedBy == "assetIds") {
+                    assetQuery = assetQuery.ids(inputKey).attributeNames(inputValues)
+                } else if (assetQueryOptimisedBy == "attributeNames") {
+                    assetQuery = assetQuery.ids(inputValues).attributeNames(inputKey)
+                }
+
+                // Find attribute changes
+                List<AttributeInfo> changes = facts
+                        .matchAssetState(assetQuery)
+                        .filter { attributeInfo ->
+                            boolean timestampChanged = false
+
+                            // Get previous attribute state from facts
+                            Optional<AttributeInfo> attributeInfoPrevious = facts.matchFirst(attributeInfo.id + attributeInfo.name)
+
+                            // Check if attribute timestamp has been updated (attribute value can be the same)
+                            if (attributeInfo.timestamp > attributeInfoPrevious.map { it.timestamp }.orElse(0)) {
+                                timestampChanged = true
+                            }
+                            return timestampChanged
                         }
-                        return timestampChanged
-                    }
-                    .toList()
+                        .toList()
 
-            // Bind attribute info for the then trigger
-            if (!changes.isEmpty()) {
-                facts.bind("changes", changes)
+                attributeChanges.addAll(changes)
             }
 
-            // Trigger rule if there are changes to process
-            return !changes.isEmpty()
+            // Bind attribute info for the then trigger
+            if (!attributeChanges.isEmpty()) {
+                facts.bind("attributeChanges", attributeChanges)
+            }
+
+            // Trigger rule if there are attribute changes to process
+            return !attributeChanges.isEmpty()
         })
         .then({ facts ->
-            def changes = facts.bound("changes") as List<AttributeInfo>
+            def attributeChanges = facts.bound("attributeChanges") as List<AttributeInfo>
 
             // Create fact for each attribute change
-            if (changes != null) {
-                changes.forEach { attributeInfo -> facts.put(attributeInfo.id + attributeInfo.name, attributeInfo as Object) }
+            if (attributeChanges != null) {
+                attributeChanges.forEach { attributeInfo -> facts.put(attributeInfo.id + attributeInfo.name, attributeInfo as Object) }
             }
 
             // Update linked output attributes
-            changes.forEach {
-                String outputAssetId = inputOutputAssetIdsMap[it.id]
-                String attributeName = it.name
-                String value = it.value.orElse(null)
+            attributeChanges.forEach { attributeInfo ->
+                def inputKey = attributeInfo.id + attributeInfo.name
+                def outputKeys = inputOutputMap[inputKey] as List<Map<String, String>>
 
-                // Update attribute
-                assets.dispatch(outputAssetId, attributeName, value)
+                if (outputKeys == null) {
+                    return
+                }
+
+                String value = attributeInfo.value.orElse(null)
+
+                outputKeys.each { outputKey ->
+                    def outputAssetId = outputKey.get("assetId")
+                    def outputAttributeName = outputKey.get("attributeName")
+
+                    // Update attribute
+                    assets.dispatch(outputAssetId, outputAttributeName, value)
+                }
             }
         })
