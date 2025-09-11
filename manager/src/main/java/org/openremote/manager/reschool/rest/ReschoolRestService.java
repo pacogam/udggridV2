@@ -1,6 +1,7 @@
 package org.openremote.manager.reschool.rest;
 
 import org.openremote.container.timer.TimerService;
+import org.openremote.manager.asset.AssetProcessingService;
 import org.openremote.manager.asset.AssetStorageService;
 import org.openremote.manager.datapoint.AssetDatapointService;
 import org.openremote.manager.security.ManagerIdentityService;
@@ -13,6 +14,7 @@ public class ReschoolRestService implements ContainerService {
     protected ManagerIdentityService identityService;
     protected AssetDatapointService datapointService;
     protected AssetStorageService assetStorageService;
+    protected AssetProcessingService assetProcessingService;
 
     @Override
     public void init(Container container) throws Exception {
@@ -21,12 +23,13 @@ public class ReschoolRestService implements ContainerService {
         identityService = container.getService(ManagerIdentityService.class);
         datapointService = container.getService(AssetDatapointService.class);
         assetStorageService = container.getService(AssetStorageService.class);
+        assetProcessingService = container.getService(AssetProcessingService.class);
 
         webService.addApiSingleton(new DeviceChallengesResourceImpl(timerService, identityService, datapointService, assetStorageService));
 
         webService.addApiSingleton(new DeviceResourceImpl(timerService, identityService, assetStorageService));
 
-        webService.addApiSingleton(new DeviceBatteryResourceImpl(timerService, identityService, assetStorageService));
+        webService.addApiSingleton(new DeviceBatteryResourceImpl(timerService, identityService, assetStorageService, assetProcessingService));
 
         webService.addApiSingleton(new UserChallengesResourceImpl(timerService, identityService, assetStorageService));
 

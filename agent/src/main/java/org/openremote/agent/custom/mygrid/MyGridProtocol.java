@@ -75,13 +75,19 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
     private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, MyGridProtocol.class);
 
-    // Attribute events to process locally when received from the MyGrid MQTT broker
-    private static final String[] SYNCED_ATTRIBUTES = {
+    // Attribute names to process locally when received from the MyGrid MQTT broker
+    private static final String[] SUBSCRIBED_ATTRIBUTES = {
             "power",
             "energyLevel",
             "powerSetpoint",
             "energyLevelPercentage",
     };
+
+    private static final Map<String, String> OURGRID_TO_MYGRID_MAPPING = new HashMap<>();
+
+    static {
+        OURGRID_TO_MYGRID_MAPPING.put("allowAutomaticControlButton", "externalControl");
+    }
 
     protected MyGridAgent agent;
     protected MyGridMQTTProtocol mqttProtocol;
@@ -168,6 +174,8 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
     @Override
     public void processLinkedAttributeWrite(AttributeEvent event) {
+        LOG.info("MyGrid protocol processing linked attribute write: " + event.getName() + " for asset "
+                + event.getId());
         mqttProtocol.processLinkedAttributeWrite(event);
     }
 
@@ -266,29 +274,58 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     }
 
     // Provision a new OurgridBatteryAsset with the respective MQTT Agent links
-    protected Optional<OurgridBatteryAsset> provisionBatteryAsset(Asset<?> asset) {
+    protected void provisionBatteryAsset(Asset<?> asset) {
         if (asset.getId() == null) {
             LOG.warning("Cannot build asset due to missing ID value");
-            return Optional.empty();
+            return;
         }
 
-        // Skip if asset is already provisioned!
-        if (getBatteryAssets().stream().anyMatch(a -> a.getId().equals(asset.getId()))) {
-            return Optional.empty();
+        // Update the existing asset with new agent links if it exists
+        var existingAsset = getBatteryAssets().stream().filter(a -> a.getId().equals(asset.getId())).findFirst()
+                .orElse(null);
+        if (existingAsset != null) {
+            LOG.info("Updating agent links for existing battery asset: " + existingAsset.getId());
+
+            // Add or replace the agent links
+            addOrReplaceAgentLinks(existingAsset);
+
+            try {
+                protocolAssetService.mergeAsset(existingAsset);
+                LOG.info("Successfully updated agent links for existing battery asset: " + existingAsset.getId());
+            } catch (Exception e) {
+                LOG.warning("Failed to merge battery asset with new agent links: " + existingAsset.getId());
+            }
+            return;
         }
 
         OurgridBatteryAsset batteryAsset = new OurgridBatteryAsset(asset.getId());
         batteryAsset.setId(asset.getId());
         batteryAsset.setParentId(this.agent.getId());
 
-        // Update attributes with any existing values from the given asset
-        Arrays.stream(SYNCED_ATTRIBUTES)
+        // Update any existing attributes with the new values from the MyGrid asset
+        Arrays.stream(SUBSCRIBED_ATTRIBUTES)
                 .filter(attributeName -> batteryAsset.hasAttribute(attributeName) && asset.hasAttribute(attributeName))
                 .forEach(attributeName -> asset.getAttribute(attributeName).flatMap(Attribute::getValue)
                         .ifPresent(value -> batteryAsset.getAttribute(attributeName)
                                 .ifPresent(attribute -> attribute.setValue(value))));
 
-        // Add the MQTT publish agent link for the power setpoint attribute
+        // Add or replace the agent links
+        addOrReplaceAgentLinks(batteryAsset);
+
+        // Merge the OurgridBatteryAsset into the local OpenRemote instance
+        try {
+            LOG.info("Provisioning new battery asset: " + batteryAsset.getId());
+            protocolAssetService.mergeAsset(batteryAsset);
+            LOG.info("Successfully provisioned new battery asset: " + batteryAsset.getId());
+        } catch (Exception e) {
+            LOG.warning("Failed to merge battery asset: " + batteryAsset.getId());
+        }
+    }
+
+    // Add or replace the agent links for the given asset
+    protected void addOrReplaceAgentLinks(OurgridBatteryAsset batteryAsset) {
+
+        // power setpoint
         var powerSetpointAttribute = batteryAsset.getAttribute(OurgridBatteryAsset.POWER_SETPOINT);
         if (powerSetpointAttribute.isPresent()) {
             var powerSetpointAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
@@ -298,15 +335,21 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
                             .setPublishTopic(powerSetpointAttributePublishTopic)));
         }
 
-        // Merge the OurgridBatteryAsset into the local OpenRemote instance
-        try {
-            protocolAssetService.mergeAsset(batteryAsset);
-        } catch (Exception e) {
-            LOG.warning("Failed to merge asset: " + batteryAsset.getId());
-            return Optional.empty();
+        // allowAutomaticControlButton
+        var allowAutomaticControlButtonAttribute = batteryAsset
+                .getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON);
+        if (allowAutomaticControlButtonAttribute.isPresent()) {
+            // Get the equivalent MyGrid attribute name for the publish topic
+            var mygridAttributeName = OURGRID_TO_MYGRID_MAPPING
+                    .get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName());
+            var allowAutomaticControlButtonAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
+                    mygridAttributeName);
+            allowAutomaticControlButtonAttribute.get().addOrReplaceMeta(
+                    new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
+                            .setPublishTopic(allowAutomaticControlButtonAttributePublishTopic).setUpdateOnWrite(true)));
+
         }
 
-        return Optional.of(batteryAsset);
     }
 
     // Construct the initial topic prefix based on the agent's config (example:
@@ -366,11 +409,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         List<Asset<?>> mygridAssets = getMyGridAssets(url, myGridRealm, accessToken);
 
         // Provision each asset
-        mygridAssets.forEach(asset -> {
-            Optional<OurgridBatteryAsset> batteryAsset = provisionBatteryAsset(asset);
-            batteryAsset.ifPresent(
-                    ourgridBatteryAsset -> LOG.info("Battery asset created: " + ourgridBatteryAsset.getId()));
-        });
+        mygridAssets.forEach(this::provisionBatteryAsset);
     }
 
     // Query the MyGrid OpenRemote API for the assets with the ModuleOneAsset type
@@ -493,26 +532,21 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
      * Attribute Event Consumer
      * Process the attribute events from the MyGrid MQTT broker
      * Forward the attribute event to the internal message broker for processing
-     * TODO: Add backpressure mechanism / processing queue if performance becomes an
-     * issue
+     * after mapping the attribute name to the equivalent Ourgrid attribute name
      */
     protected void onMyGridAttributeEvent(MQTTMessage<String> msg) {
         SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
 
         // Forward the attribute event to the internal message broker
-        if (event instanceof AttributeEvent attributeEvent) {
+        if (event instanceof AttributeEvent attributeEvent
+                && Arrays.asList(SUBSCRIBED_ATTRIBUTES).contains(attributeEvent.getName())) {
 
-            // Process the attribute event if SYNCED_ATTRIBUTES contains the attribute name
-            if (Arrays.asList(SYNCED_ATTRIBUTES).contains(attributeEvent.getName())) {
-                LOG.info("Processing external attribute event: " + attributeEvent.getName() + " for asset "
-                        + attributeEvent.getId() + " with new value " + attributeEvent.getValue());
+            LOG.info("Processing external attribute event: " + attributeEvent.getName() + " for asset "
+                    + attributeEvent.getId() + " with new value " + attributeEvent.getValue());
 
-                // Ensure the attribute event is updated to the agent's realm
-                attributeEvent.setRealm(this.agent.getRealm());
-
-                // Process the attribute event
-                protocolAssetService.sendAttributeEvent(attributeEvent);
-            }
+            // Ensure the attribute event is updated to the agent's realm
+            attributeEvent.setRealm(this.agent.getRealm());
+            protocolAssetService.sendAttributeEvent(attributeEvent);
 
         }
     }
