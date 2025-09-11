@@ -131,6 +131,9 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
     protected batteryAsset?: Asset;
 
     @state()
+    protected vehicleAsset?: Asset;
+
+    @state()
     protected characteristics?: DeviceCharacteristic[];
 
     get name(): any {
@@ -140,7 +143,9 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
     stateChanged(state: GridAppStateKeyed): void {
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
         this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
-        const characteristics = JSON.parse(this.userAsset?.attributes?.[AddDeviceSelect.HOUSEHOLD_CHARACTERISTICS_ATTRIBUTE]?.value) as DeviceCharacteristic[] | undefined;
+        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
+        const val = this.userAsset?.attributes?.[AddDeviceSelect.HOUSEHOLD_CHARACTERISTICS_ATTRIBUTE]?.value;
+        const characteristics = val ? JSON.parse(val) as DeviceCharacteristic[] : undefined;
         if (characteristics && JSON.stringify(characteristics) !== JSON.stringify(this.characteristics)) {
             this.characteristics = characteristics;
         }
@@ -157,7 +162,7 @@ export class AddDeviceSelect extends OgPage<GridAppStateKeyed> {
         const batteryInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.BATTERY);
         const homeAutomationInfo = this.characteristics?.find(c => c.id === WellknownCharacteristics.HOME_AUTOMATION);
 
-        const hasElectricVehicle = evInfo && evInfo.shown;
+        const hasElectricVehicle = (evInfo && evInfo.shown) || !!this.vehicleAsset;
         const hasHeatpump = heatPumpInfo && heatPumpInfo.shown;
         const hasBattery = (batteryInfo && batteryInfo.shown) || !!this.batteryAsset;
         const hasHomeAutomation = homeAutomationInfo && homeAutomationInfo.shown;

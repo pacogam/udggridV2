@@ -133,7 +133,8 @@ export class PageAddHeatpump extends OgPage<GridAppStateKeyed> {
 
     stateChanged(state: GridAppStateKeyed): void {
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
-        const characteristics = JSON.parse(this.userAsset?.attributes?.[PageAddHeatpump.HOUSEHOLD_CHARACTERISTICS_ATTRIBUTE]?.value) as DeviceCharacteristic[] | undefined;
+        const val = this.userAsset?.attributes?.[PageAddHeatpump.HOUSEHOLD_CHARACTERISTICS_ATTRIBUTE]?.value;
+        const characteristics = val ? JSON.parse(val) as DeviceCharacteristic[] : undefined;
         if (characteristics && JSON.stringify(characteristics) !== JSON.stringify(this.characteristics)) {
             this.characteristics = characteristics;
         }

@@ -1,6 +1,6 @@
 import {css, html, LitElement, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import {OgBatteryBrand, OgHeatPumpBrand, OgVehicleBrand} from '../util/util';
+import {OgBatteryBrand, OgHeatPumpBrand, OgVehicleBrand, OgVehicleChargerBrand} from '../util/util';
 import {OgInputButtonGroupOption, OgSpecialInputType} from '../components/og-input';
 import {i18next} from '@openremote/or-translate';
 import {DeviceCharacteristic, WellknownCharacteristics} from 'model';
@@ -174,7 +174,7 @@ export class OgCharacteristicsSettings extends LitElement {
                         <div class="characteristic-item">
                             <og-input .type="${InputType.SELECT}" ?disabled="${this.electricCarState === 0}" style="width: 100%;"
                                       label="${this.electricCarState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_electricVehicleBrand')}"
-                                      .options="${[OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.OTHER]}" .value="${this.electricCarBrand}"
+                                      .options="${[OgVehicleBrand.AUDI, OgVehicleBrand.HYUNDAI, OgVehicleBrand.KIA, OgVehicleBrand.OPEL, OgVehicleBrand.PEUGEOT, OgVehicleBrand.RENAULT, OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.VOLVO, OgVehicleBrand.OTHER]}" .value="${this.electricCarBrand}"
                                       @or-mwc-input-changed="${ev => this.onElectricCarBrandUpdate(ev)}"
                             ></og-input>
                         </div>

@@ -4,7 +4,7 @@ import {Asset, ClientRole, User} from "@openremote/model";
 import {isAxiosError} from "@openremote/rest";
 import {i18next} from "@openremote/or-translate";
 import manager from "@openremote/core";
-import {GridAppStateKeyed, setBatteryAsset, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData} from "../../util/og-state";
+import {GridAppStateKeyed, setBatteryAsset, setChallengeAsset, setDistrictAsset, setPeakPointsAsset, setUserAsset, setUserData, setVehicleAsset} from "../../util/og-state";
 import {InputType} from "@openremote/or-mwc-components/or-mwc-input";
 import {Store} from "@reduxjs/toolkit";
 import {OgPageProvider} from "../util/og-page";
@@ -46,6 +46,7 @@ export class SplashDatacheck extends OgSplashPage {
     protected user?: User;
     protected userAsset?: Asset;
     protected batteryAsset?: Asset;
+    protected vehicleAsset?: Asset;
     protected districtAsset?: Asset;
     protected challengeAsset?: Asset;
     protected peakPointsAsset?: Asset;
@@ -78,6 +79,7 @@ export class SplashDatacheck extends OgSplashPage {
         this.user = state.gridApp.user;
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
         this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
+        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.page = state.app.page;
@@ -138,6 +140,7 @@ export class SplashDatacheck extends OgSplashPage {
             await this.verifyUserRoles();
             const meterAsset = await this.checkUserAsset(user.id);
             await this.checkBatteryAsset(meterAsset.id);
+            await this.checkVehicleAsset(user.id);
             await this.checkDistrictLink();
             const districtAsset = await this.checkDistrictAsset(user.id);
             const challengeAssetId = await this.checkChallengeAssetId(districtAsset);
@@ -272,7 +275,8 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.userAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 types: ["OurgridMeterAsset"],
-                userIds: [userId]
+                userIds: [userId],
+                limit: 1
             })).data;
             if(assets === undefined || assets.length === 0) {
                 throw new NoAssetLinkedError(i18next.t("error.userAssetFailed"));
@@ -292,9 +296,7 @@ export class SplashDatacheck extends OgSplashPage {
 
 
     /* ---------------------------------------- */
-    // CHECK 4:     Fetch and check the linked asset of a user
-    //              Which is the energy meter at the household, that is required
-    //              for showing any data on the app.
+    // CHECK 4:     Fetch and check the linked battery asset of a user
 
     protected async checkBatteryAsset(meterId: string): Promise<Asset> {
         try {
@@ -321,6 +323,37 @@ export class SplashDatacheck extends OgSplashPage {
             return asset;
         } else {
             return this.batteryAsset;
+        }
+    }
+
+    /* ---------------------------------------- */
+    // CHECK 4:     Fetch and check the linked vehicle asset of a user
+
+    protected async checkVehicleAsset(userId: string): Promise<Asset> {
+        try {
+            return await this.fetchVehicleAsset(userId);
+        } catch (e) {
+            return;
+        }
+    }
+
+    protected async fetchVehicleAsset(userId: string, delay?: number): Promise<Asset> {
+        if(!this.vehicleAsset) {
+            const assets = (await rest.api.AssetResource.queryAssets({ userIds: [userId], types: ["OurgridVehicleAsset"], limit: 1 })).data;
+            if(!assets || assets.length === 0) {
+                return null;
+            }
+
+            // Add additional delay if necessary
+            if(delay !== undefined) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            // cache the asset and its ID.
+            this._store.dispatch(setVehicleAsset(assets[0]));
+
+            return assets[0];
+        } else {
+            return this.vehicleAsset;
         }
     }
 
@@ -385,7 +418,8 @@ export class SplashDatacheck extends OgSplashPage {
         if(!this.districtAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 types: ["OurgridDistrictAsset"],
-                userIds: [userId]
+                userIds: [userId],
+                limit: 1
             })).data;
             if(assets === undefined || assets.length === 0) {
                 throw new NoDistrictAssetError(i18next.t("error.districtAssetDataFailed"));
@@ -485,7 +519,8 @@ export class SplashDatacheck extends OgSplashPage {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [challengeId],
                 types: ["OurgridChallengesAsset"],
-                userIds: [userId]
+                userIds: [userId],
+                limit: 1
             })).data;
             if(assets === undefined || assets.length === 0) {
                 throw new NoChallengeAssetError(i18next.t("error.challengeAssetDataFailed"));
@@ -571,7 +606,8 @@ export class SplashDatacheck extends OgSplashPage {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [peakPointsId],
                 types: ["OurgridPeaksAsset"],
-                userIds: [userId]
+                userIds: [userId],
+                limit: 1
             })).data;
             if(assets === undefined || assets.length === 0) {
                 throw new NoPeakPointsAssetError(i18next.t("error.peakPointsAssetDataFailed"));

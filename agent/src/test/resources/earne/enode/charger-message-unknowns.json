@@ -1,0 +1,209 @@
+{
+  "createdAt": "2020-04-07T17:04:26Z",
+  "version": "2024-10-01",
+  "user": {
+    "id": "string",
+    "role": "admin",
+    "metadata": {
+      "region": "EU",
+      "preferences": [
+        "email",
+        "sms"
+      ],
+      "extraNested": {
+        "flag": true,
+        "numbers": [
+          1,
+          2,
+          3.14159
+        ],
+        "innerArray": [
+          {
+            "key": "value"
+          }
+        ]
+      }
+    },
+    "lastLogin": null,
+    "aliases": [
+      "tester",
+      "qa-user"
+    ]
+  },
+  "event": "user:charger:updated",
+  "source": "unit-test",
+  "debug": {
+    "traceId": "abc123",
+    "steps": [
+      1,
+      2,
+      3
+    ],
+    "flags": {
+      "retry": false,
+      "urgent": true
+    }
+  },
+  "charger": {
+    "information": {
+      "brand": "Zaptec",
+      "model": "Pro",
+      "serialNumber": "1234567890",
+      "year": null,
+      "color": "white",
+      "warrantyYears": 3,
+      "extra": {
+        "notes": "extended info",
+        "tags": [
+          "new",
+          "urgent"
+        ]
+      }
+    },
+    "location": {
+      "id": "2211e263-d6d4-d6d4-d6d4-dbdd77ec82b6",
+      "lastUpdated": "2023-03-21T16:39:20.000Z",
+      "coordinates": {
+        "lat": 51.4416,
+        "lon": 5.4697,
+        "altitude": null,
+        "history": [
+          {
+            "time": "2023-01-01T00:00:00Z",
+            "lat": 51.4,
+            "lon": 5.4
+          }
+        ]
+      }
+    },
+    "id": "2211e263-0362-4235-83f4-887bdf3ee414",
+    "userId": "d381faac-5283-44a1-9eb1-36cab2ace670",
+    "vendor": "ZAPTEC",
+    "lastSeen": "2023-03-21T21:08:27.596Z",
+    "isReachable": true,
+    "status": "active",
+    "chargeState": {
+      "isPluggedIn": true,
+      "isCharging": true,
+      "chargeRate": 6.939,
+      "lastUpdated": "2023-03-21T16:39:20.000Z",
+      "maxCurrent": 16,
+      "powerDeliveryState": "PLUGGED_IN:CHARGING",
+      "temperature": 35.2,
+      "history": [
+        {
+          "time": "2023-03-20T12:00:00Z",
+          "chargeRate": 5.5
+        },
+        {
+          "time": "2023-03-21T12:00:00Z",
+          "chargeRate": 6.0
+        }
+      ],
+      "warnings": [
+        "overheat",
+        null,
+        123
+      ]
+    },
+    "capabilities": {
+      "information": {
+        "isCapable": true,
+        "interventionIds": [],
+        "notes": "verified",
+        "extraCapability": {
+          "enabled": true,
+          "limits": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      "chargeState": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "startCharging": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "stopCharging": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "setMaxCurrent": {
+        "isCapable": false,
+        "interventionIds": [
+          "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+        ]
+      },
+      "scheduleCharging": {
+        "isCapable": true,
+        "interventionIds": [],
+        "maxSessions": 3,
+        "extraSchedule": [
+          {
+            "day": "Monday",
+            "start": "08:00",
+            "end": "12:00"
+          },
+          {
+            "day": "Tuesday",
+            "start": "14:00",
+            "end": "18:00"
+          }
+        ]
+      }
+    },
+    "scopes": [
+      "charger:control:charging",
+      "charger:read:data",
+      "charger:admin:override",
+      "extraScope:experimental"
+    ],
+    "extraInfo": {
+      "notes": "this is extra",
+      "misc": [
+        null,
+        true,
+        42,
+        {
+          "nested": "value"
+        }
+      ]
+    }
+  },
+  "updatedFields": [
+    "lastSeen",
+    "chargeState.isPluggedIn",
+    "chargeState.isCharging",
+    "chargeState.lastUpdated",
+    "charger.status",
+    "charger.chargeState.history",
+    "user.metadata.extraNested.numbers"
+  ],
+  "experimentalField": {
+    "randomArray": [
+      1,
+      "two",
+      null,
+      true,
+      {
+        "deep": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "deeplyNested": {
+      "a": {
+        "b": {
+          "c": {
+            "d": "value"
+          }
+        }
+      }
+    }
+  }
+}

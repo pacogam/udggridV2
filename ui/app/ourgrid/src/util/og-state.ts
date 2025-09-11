@@ -11,6 +11,7 @@ export interface GridAppState {
     assets: Asset[];
     userAssetId?: string;
     batteryAssetId?: string;
+    vehicleAssetId?: string;
     districtAssetId?: string;
     challengeAssetId?: string;
     peakPointsAssetId?: string;
@@ -78,7 +79,7 @@ const gridAppSlice = createSlice({
         removeUserAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.batteryAssetId),
+                assets: state.assets.filter(a => a.id !== state.userAssetId),
                 userAssetId: null
             };
         },
@@ -92,8 +93,22 @@ const gridAppSlice = createSlice({
         removeBatteryAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.batteryAssetId),
+                assets: state.assets.filter(a => a.id !== state.batteryAssetId),
                 batteryAssetId: null
+            };
+        },
+        setVehicleAsset(state, action: PayloadAction<Asset>) {
+            return {
+                ...state,
+                assets: [...state.assets, action.payload],
+                vehicleAssetId: action.payload.id
+            };
+        },
+        removeVehicleAsset(state) {
+            return {
+                ...state,
+                assets: state.assets.filter(a => a.id !== state.vehicleAssetId),
+                vehicleAssetId: null
             };
         },
         setDistrictAsset(state, action: PayloadAction<Asset>) {
@@ -106,7 +121,7 @@ const gridAppSlice = createSlice({
         removeDistrictAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.districtAssetId),
+                assets: state.assets.filter(a => a.id !== state.districtAssetId),
                 districtAssetId: null
             };
         },
@@ -120,7 +135,7 @@ const gridAppSlice = createSlice({
         removeChallengeAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.challengeAssetId),
+                assets: state.assets.filter(a => a.id !== state.challengeAssetId),
                 challengeAssetId: null
             }
         },
@@ -134,7 +149,7 @@ const gridAppSlice = createSlice({
         removePeakPointsAsset(state) {
             return {
                 ...state,
-                assets: state.assets.filter(a => a.id === state.peakPointsAssetId),
+                assets: state.assets.filter(a => a.id !== state.peakPointsAssetId),
                 peakPointsAssetId: null
             }
         },
@@ -158,6 +173,8 @@ export const {
     removeUserAsset,
     setBatteryAsset,
     removeBatteryAsset,
+    setVehicleAsset,
+    removeVehicleAsset,
     setDistrictAsset,
     removeDistrictAsset,
     setChallengeAsset,

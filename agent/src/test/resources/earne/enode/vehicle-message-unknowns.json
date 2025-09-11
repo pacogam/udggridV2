@@ -1,0 +1,212 @@
+{
+  "createdAt": "2025-08-05T15:29:55.298Z",
+  "version": "2024-10-01",
+  "event": "user:vehicle:updated",
+  "source": "unit-test",
+  "debug": {
+    "traceId": "veh123xyz",
+    "steps": [
+      1,
+      2,
+      3
+    ],
+    "flags": {
+      "urgent": true,
+      "retry": false
+    }
+  },
+  "user": {
+    "id": "pilotdo001",
+    "role": "driver",
+    "metadata": {
+      "region": "EU",
+      "preferences": [
+        "email",
+        "push"
+      ],
+      "extraNested": {
+        "flag": true,
+        "numbers": [
+          1,
+          2,
+          3.1415
+        ],
+        "innerArray": [
+          {
+            "key": "value"
+          }
+        ]
+      }
+    },
+    "lastLogin": null,
+    "aliases": [
+      "tesla-pilot",
+      "qa-driver"
+    ]
+  },
+  "vehicle": {
+    "id": "5043a3ea-7aec-440b-96fc-622e2d6b2485",
+    "userId": "pilotdo001",
+    "vendor": "TESLA",
+    "isReachable": true,
+    "status": "active",
+    "lastSeen": "2025-08-05T15:29:55.225Z",
+    "information": {
+      "displayName": null,
+      "brand": "Tesla",
+      "model": "Model Y",
+      "year": 2023,
+      "color": "midnight silver",
+      "warrantyYears": 4,
+      "extra": {
+        "notes": "extended info",
+        "tags": [
+          "test",
+          "experimental"
+        ]
+      }
+    },
+    "chargeState": {
+      "chargeRate": null,
+      "chargeTimeRemaining": null,
+      "isFullyCharged": false,
+      "isPluggedIn": false,
+      "isCharging": false,
+      "batteryLevel": 65,
+      "range": 333,
+      "batteryCapacity": 70.79,
+      "chargeLimit": 80,
+      "lastUpdated": "2025-08-05T15:29:55.226Z",
+      "powerDeliveryState": "UNPLUGGED",
+      "maxCurrent": 16,
+      "history": [
+        {
+          "time": "2025-08-04T12:00:00Z",
+          "batteryLevel": 50
+        },
+        {
+          "time": "2025-08-05T08:00:00Z",
+          "batteryLevel": 60
+        }
+      ],
+      "warnings": [
+        "lowBattery",
+        null,
+        42
+      ]
+    },
+    "smartChargingPolicy": {
+      "deadline": null,
+      "isEnabled": false,
+      "minimumChargeLimit": 0,
+      "extraPolicy": {
+        "peakHours": [
+          "18:00-21:00"
+        ],
+        "priority": "low"
+      }
+    },
+    "odometer": {
+      "distance": 29838,
+      "lastUpdated": "2025-08-05T07:41:46.957Z",
+      "tripHistory": [
+        {
+          "tripId": "t1",
+          "distance": 120
+        },
+        {
+          "tripId": "t2",
+          "distance": 85
+        }
+      ]
+    },
+    "capabilities": {
+      "information": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "chargeState": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "location": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "odometer": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "setMaxCurrent": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "startCharging": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "stopCharging": {
+        "interventionIds": [],
+        "isCapable": true
+      },
+      "smartCharging": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "extraCapability": {
+        "isCapable": true,
+        "interventionIds": [],
+        "notes": "experimental feature"
+      }
+    },
+    "scopes": [
+      "vehicle:control:charging",
+      "vehicle:read:data",
+      "vehicle:read:location",
+      "vehicle:admin:override"
+    ],
+    "extraInfo": {
+      "notes": "extra data for testing",
+      "misc": [
+        null,
+        true,
+        42,
+        {
+          "nested": "value"
+        }
+      ]
+    }
+  },
+  "updatedFields": [
+    "lastSeen",
+    "chargeState.range",
+    "chargeState.lastUpdated",
+    "vehicle.status",
+    "chargeState.history",
+    "user.metadata.extraNested.numbers"
+  ],
+  "experimentalField": {
+    "randomArray": [
+      1,
+      "two",
+      null,
+      true,
+      {
+        "deep": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "deeplyNested": {
+      "a": {
+        "b": {
+          "c": {
+            "d": "value"
+          }
+        }
+      }
+    }
+  }
+}

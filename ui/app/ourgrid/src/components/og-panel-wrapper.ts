@@ -79,6 +79,9 @@ export class OgPanelWrapper extends LitElement {
     public batteryAsset: Asset;
 
     @property({type: Object})
+    public vehicleAsset: Asset;
+
+    @property({type: Object})
     public challengeAsset: Asset;
 
     @property({type: Object})
@@ -133,10 +136,10 @@ export class OgPanelWrapper extends LitElement {
         }
 
         // If meter-, battery-, or challenge data has changed, we also set the respective variables for data panels.
-        if(changedProps.has('meterAsset') || changedProps.has('batteryAsset') || changedProps.has('challengeAsset')) {
+        if(changedProps.has('meterAsset') || changedProps.has('batteryAsset') || changedProps.has('vehicleAsset') || changedProps.has('challengeAsset')) {
             this.loadedPanels.forEach(panel => {
                 if(panel instanceof OgDataPanel) {
-                    panel.setUser(this.user).setMeterAsset(this.meterAsset).setBatteryAsset(this.batteryAsset).setChallengeAsset(this.challengeAsset).setDistrictAsset(this.districtAsset).setPeakPointsAsset(this.peakPointsAsset);
+                    panel.setUser(this.user).setMeterAsset(this.meterAsset).setBatteryAsset(this.batteryAsset).setVehicleAsset(this.vehicleAsset).setChallengeAsset(this.challengeAsset).setDistrictAsset(this.districtAsset).setPeakPointsAsset(this.peakPointsAsset);
                 }
             });
         }
@@ -171,6 +174,7 @@ export class OgPanelWrapper extends LitElement {
                         .setUser(this.user)
                         .setMeterAsset(this.meterAsset)
                         .setBatteryAsset(this.batteryAsset)
+                        .setVehicleAsset(this.vehicleAsset)
                         .setChallengeAsset(this.challengeAsset)
                         .setDistrictAsset(this.districtAsset)
                         .setPeakPointsAsset(this.peakPointsAsset);

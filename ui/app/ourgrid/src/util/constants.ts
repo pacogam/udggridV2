@@ -22,4 +22,7 @@ export class Constants {
 
     // URL parameters related
     static CHALLENGE_NOTIFICATION_PARAMS_NAME: string = 'challengeNotification'
+
+    // EARN-E / ENODE related
+    static AUTHORIZE_EV_URL: string = "https://earne.welvaart-it.com/public/ourgrid/linkuser/ev/{meterId}/ourgridXmEmF76TSf0j4dsymsDeKDukB9f393hCpP1Cz4v7YpH2pdYjDwrf6ePg7"
 }

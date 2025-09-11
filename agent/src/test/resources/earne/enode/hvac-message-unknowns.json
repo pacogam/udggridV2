@@ -1,0 +1,212 @@
+{
+  "createdAt": "2020-04-07T17:04:26Z",
+  "version": "2024-10-01",
+  "user": {
+    "id": "string",
+    "role": "admin",
+    "metadata": {
+      "region": "EU",
+      "preferences": [
+        "email",
+        "sms"
+      ],
+      "extraNested": {
+        "flag": true,
+        "numbers": [
+          1,
+          2,
+          3.14159
+        ],
+        "innerArray": [
+          {
+            "key": "value"
+          }
+        ]
+      }
+    },
+    "lastLogin": null,
+    "aliases": [
+      "hvac-tester",
+      "qa-user"
+    ]
+  },
+  "event": "user:hvac:updated",
+  "source": "unit-test",
+  "debug": {
+    "traceId": "xyz789",
+    "steps": [
+      1,
+      2,
+      3
+    ],
+    "flags": {
+      "retry": false,
+      "urgent": true
+    }
+  },
+  "hvac": {
+    "id": "8f39fa8d-8f10-4984-a319-741dc23848c0",
+    "userId": "17d9f847-8a1c-4158-adaa-4911a7acd5f9",
+    "vendor": "ADAX",
+    "lastSeen": "2020-04-07T17:04:26.000Z",
+    "isReachable": true,
+    "status": "active",
+    "consumptionRate": 1.8,
+    "information": {
+      "brand": "ADAX",
+      "model": "Neo Wi-Fi Skirting",
+      "displayName": "Bedroom Panel Heater",
+      "groupName": "Bedroom",
+      "category": "HEATING",
+      "color": "white",
+      "warrantyYears": 2,
+      "extra": {
+        "notes": "extended info",
+        "tags": [
+          "test",
+          "experimental"
+        ]
+      }
+    },
+    "location": {
+      "id": "8d90101b-3f2f-462a-bbb4-1ed320d33bbe",
+      "coordinates": {
+        "lat": 51.4416,
+        "lon": 5.4697,
+        "altitude": null,
+        "history": [
+          {
+            "time": "2020-01-01T00:00:00Z",
+            "lat": 51.44,
+            "lon": 5.46
+          }
+        ]
+      }
+    },
+    "capabilities": {
+      "capableModes": [
+        "HEAT",
+        "COOL",
+        "OFF",
+        "AUTO"
+      ],
+      "coolSetpointRange": {
+        "min": 15,
+        "max": 25,
+        "extra": [
+          14,
+          26,
+          null
+        ]
+      },
+      "heatSetpointRange": {
+        "min": 15,
+        "max": 25
+      },
+      "setpointDifferenceRange": {
+        "min": 15,
+        "max": 25
+      },
+      "setFollowSchedule": {
+        "isCapable": true,
+        "interventionIds": [],
+        "notes": "can follow weekly schedule"
+      },
+      "setPermanentHold": {
+        "isCapable": true,
+        "interventionIds": [],
+        "notes": "holds current settings indefinitely"
+      },
+      "advancedModes": [
+        {
+          "mode": "eco",
+          "enabled": true
+        },
+        {
+          "mode": "boost",
+          "enabled": false
+        }
+      ]
+    },
+    "thermostatState": {
+      "mode": "HEAT",
+      "heatSetpoint": 22,
+      "coolSetpoint": 24,
+      "holdType": "PERMANENT",
+      "lastUpdated": "2020-04-07T17:04:26.000Z",
+      "schedule": [
+        {
+          "day": "Monday",
+          "start": "06:00",
+          "end": "09:00"
+        },
+        {
+          "day": "Monday",
+          "start": "17:00",
+          "end": "22:00"
+        }
+      ]
+    },
+    "temperatureState": {
+      "currentTemperature": 20.8,
+      "isActive": true,
+      "lastUpdated": "2020-04-07T17:03:26.000Z",
+      "sensorHistory": [
+        20.5,
+        20.7,
+        20.8,
+        null,
+        "error"
+      ]
+    },
+    "scopes": [
+      "hvac:control:mode",
+      "hvac:read:data",
+      "hvac:admin:override"
+    ],
+    "extraInfo": {
+      "notes": "extra data for testing",
+      "misc": [
+        null,
+        true,
+        42,
+        {
+          "nested": "value"
+        }
+      ]
+    }
+  },
+  "updatedFields": [
+    "lastSeen",
+    "thermostatState.mode",
+    "thermostatState.holdType",
+    "thermostatState.lastUpdated",
+    "hvac.status",
+    "hvac.thermostatState.schedule",
+    "user.metadata.extraNested.numbers"
+  ],
+  "experimentalField": {
+    "randomArray": [
+      1,
+      "two",
+      null,
+      true,
+      {
+        "deep": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "deeplyNested": {
+      "a": {
+        "b": {
+          "c": {
+            "d": "value"
+          }
+        }
+      }
+    }
+  }
+}

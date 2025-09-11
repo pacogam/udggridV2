@@ -2,7 +2,7 @@ import {TemplateResult, html} from "lit";
 import {customElement, query} from "lit/decorators.js";
 import {OgDataPanel} from "../components/og-data-panel";
 import {getStatisticTemplate} from "./panel-trophies";
-import {DeviceCharacteristic, WellknownCharacteristics} from "model";
+import {Asset, DeviceCharacteristic, WellknownCharacteristics} from "model";
 import manager from "@openremote/core";
 import {when} from "lit/directives/when.js";
 import {InputType, OrInputChangedEvent} from "@openremote/or-mwc-components/or-mwc-input";
@@ -17,9 +17,12 @@ import rest from "rest";
 @customElement('panel-challenge-tips')
 export class PanelChallengeTips extends OgDataPanel {
 
-    protected AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
-    protected ACTION_BUTTON_ATTRIBUTE_NAME = "allowDischargingButton";
+    protected BATTERY_AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
+    protected BATTERY_ACTION_BUTTON_ATTRIBUTE_NAME = "allowDischargingButton";
     protected POWER_SET_POINT_ATTRIBUTE_NAME = "powerSetpoint";
+    protected EV_AUTOMATIC_CONTROL_ATTRIBUTE_NAME = "allowAutomaticControlButton";
+    protected EV_ACTION_BUTTON_ATTRIBUTE_NAME = "allowStopChargingButton";
+    protected EV_POWER_ATTRIBUTE_NAME = "power";
 
     public heading = html`<or-translate value="panel_tips.heading"></or-translate>`;
     public subtitle = html`<or-translate value="panel_tips.subtitle"></or-translate>`;
@@ -43,17 +46,17 @@ export class PanelChallengeTips extends OgDataPanel {
 
     protected async getPanelContent(): Promise<TemplateResult> {
         const characteristics = await this.getHouseholdCharacteristics();
-        const check = (key): boolean => {
+        const check = (key: string, allowNull = true): boolean => {
             const characteristic = characteristics.get(key);
-            return !characteristic || (characteristic.shown && !characteristic.active);
+            return (!characteristic && allowNull) || (characteristic?.shown && !characteristic?.active);
         };
         return html`
             <div style="padding: 24px 0;">
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     
-                    ${when(check(WellknownCharacteristics.BATTERY), () => {
-                        const automaticControl: boolean = this.batteryAsset?.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false;
-                        const challengeActionButton: boolean = this.batteryAsset?.attributes?.[this.ACTION_BUTTON_ATTRIBUTE_NAME]?.value || false;
+                    ${when(check(WellknownCharacteristics.BATTERY, false), () => {
+                        const automaticControl: boolean = this.batteryAsset?.attributes?.[this.BATTERY_AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false;
+                        const challengeActionButton: boolean = this.batteryAsset?.attributes?.[this.BATTERY_ACTION_BUTTON_ATTRIBUTE_NAME]?.value || false;
                         const isManuallyActivated: boolean = automaticControl !== challengeActionButton;
                         const powerSetpoint: number = this.batteryAsset?.attributes?.[this.POWER_SET_POINT_ATTRIBUTE_NAME]?.value || 0;
                         const unknownBattery = !this.batteryAsset;
@@ -71,12 +74,8 @@ export class PanelChallengeTips extends OgDataPanel {
                                 <div style="padding: ${hasButton ? '24px 24px 48px 24px' : '24px'};">
                                     ${getStatisticTemplate('images/battery-power-charge.svg', true, html`
                                         <div style="display: flex; flex-direction: column;">
-                                        <span class="statistic-medium" style="color: var(--og-color-danger)">
-                                            ${`${Math.round(powerSetpoint * 1000)}W`}
-                                        </span>
-                                            <span class="text-primary">
-                                                <or-translate value="${label}"></or-translate>
-                                            </span>
+                                        <span class="statistic-medium" style="color: var(--og-color-danger)">${`${Math.round(powerSetpoint * 1000)}W`}</span>
+                                        <or-translate class="text-primary" value="${label}"></or-translate>
                                         </div>
                                     `)}
                                 </div>
@@ -89,31 +88,46 @@ export class PanelChallengeTips extends OgDataPanel {
                         `;
                     })}
 
-                    ${when(check(WellknownCharacteristics.VEHICLE_CHARGER), () => {
+                    ${when(check(WellknownCharacteristics.ELECTRIC_VEHICLE, false) || this.vehicleAsset, () => {
+                        const automaticControl: boolean = this.vehicleAsset?.attributes?.[this.EV_AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false;
                         const chargerCharacteristic: DeviceCharacteristic | undefined = characteristics.get(WellknownCharacteristics.VEHICLE_CHARGER);
                         const vehicleCharacteristic: DeviceCharacteristic | undefined = characteristics.get(WellknownCharacteristics.ELECTRIC_VEHICLE);
-                        const brandUrl = this._getBrandAppUrl(vehicleCharacteristic);
-                        const hasButton = chargerCharacteristic && vehicleCharacteristic && brandUrl !== undefined;
+                        const brand = vehicleCharacteristic?.brand || `vehicleBrands.${this.vehicleAsset?.attributes?.["manufacturer"]?.value?.toUpperCase()}`;
+                        const brandUrl = this._getBrandAppUrl(vehicleCharacteristic, this.vehicleAsset);
+                        const hasButton = ((chargerCharacteristic && vehicleCharacteristic) || this.vehicleAsset) && brandUrl !== undefined;
+                        const wattsSaved = this.vehicleAsset?.attributes?.[this.EV_POWER_ATTRIBUTE_NAME]?.value ?? chargerCharacteristic?.wattsSaved ?? Defaults.TIPS_VEHICLE_CHARGER_WATT_SAVED;
+                        let label: string;
+                        if(automaticControl) {
+                            label = "panel_tips.text2-automatic";
+                        } else {
+                            label = "panel_tips.text2-manual";
+                        }
                         return html`
                             <div class="background-tint" style="position: relative; ${hasButton ? 'margin-bottom: 32px;' : undefined}">
                                 <div style="padding: ${hasButton ? '24px 24px 48px 24px' : '24px'};">
                                     ${getStatisticTemplate('images/car-charging.svg', true, html`
                                         <div style="display: flex; flex-direction: column;">
-                                            <span class="statistic-medium" style="color: var(--og-color-danger)">
-                                                ${`-${chargerCharacteristic?.wattsSaved || Defaults.TIPS_VEHICLE_CHARGER_WATT_SAVED}W`}
-                                            </span>
-                                            <span class="text-primary"><or-translate value="panel_tips.text2"></or-translate></span>
+                                            <span class="statistic-medium" style="color: ${automaticControl ? 'var(--og-color-success)' : 'var(--og-color-danger)'}">${`-${wattsSaved}W`}</span>
+                                            <or-translate class="text-primary" value=${label}></or-translate>
                                         </div>
                                     `)}
                                 </div>
                                 ${when(hasButton, () => html`
                                     <div style="position: absolute; display: block; bottom: -24px; width: calc(100% - 48px); left: 24px;">
-                                        <a href="${brandUrl}" target="_blank">
-                                            <og-input .type="${InputType.BUTTON}" .label="${`goToVehicleBrandApp_${vehicleCharacteristic.brand}`}" fullWidth raised rounded comfortable
-                                                      style="width: 100%; --or-mwc-input-color: var(--og-color-neutral); --or-mwc-input-text-color: var(--og-color-primary-dark)"
-                                            ></og-input>
-                                        </a>
-                                    </div>
+                                        ${when(automaticControl,
+                                                () => html`
+                                                    <og-input id="ev-btn" .type="${InputType.BUTTON}" label="panel_tips.action2-automatic" fullWidth raised rounded comfortable readonly
+                                                              style="width: 100%; --or-mwc-input-color: var(--og-color-success); --or-mwc-input-text-color: var(--og-color-primary)"
+                                                    ></og-input>
+                                                `,
+                                                () => html`
+                                                    <a href="${brandUrl}" target="_blank">
+                                                        <og-input .type="${InputType.BUTTON}" .label="${`goToVehicleBrandApp_${brand}`}" fullWidth raised rounded comfortable
+                                                                  style="width: 100%; --or-mwc-input-color: var(--og-color-neutral); --or-mwc-input-text-color: var(--og-color-primary-dark)"
+                                                        ></og-input>
+                                                    </a>
+                                                `
+                                        )}
                                 `)}
                             </div>
                         `;
@@ -179,11 +193,11 @@ export class PanelChallengeTips extends OgDataPanel {
         `;
     }
 
-    protected _onAutomaticControlClick(_ev: OrInputChangedEvent, newValue?: boolean) {
+    protected _onBatteryAutomaticControlClick(_ev: OrInputChangedEvent, newValue?: boolean) {
         if(!newValue) {
-            newValue = !(this.batteryAsset?.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false);
+            newValue = !(this.batteryAsset?.attributes?.[this.BATTERY_AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value || false);
         }
-        this._setActionButtonAttribute(newValue);
+        this._setBatteryActionButtonAttribute(newValue);
     }
 
     /**
@@ -213,7 +227,7 @@ export class PanelChallengeTips extends OgDataPanel {
             <og-input id="battery-btn" .type="${InputType.BUTTON}" fullWidth raised rounded comfortable
                       .label="${label}" .readonly="${readonly}"
                       style="${styleMap(styles)}"
-                      @or-mwc-input-changed="${(ev: OrInputChangedEvent) => this._onAutomaticControlClick(ev)}"
+                      @or-mwc-input-changed="${(ev: OrInputChangedEvent) => this._onBatteryAutomaticControlClick(ev)}"
             ></og-input>
         `;
     }
@@ -221,12 +235,20 @@ export class PanelChallengeTips extends OgDataPanel {
     /**
      * Internal function that returns the brand URL, based on the console device.
      */
-    protected _getBrandAppUrl(characteristic: DeviceCharacteristic): string | undefined {
+    protected _getBrandAppUrl(characteristic?: DeviceCharacteristic, asset?: Asset): string | undefined {
         const store: 'google' | 'apple' | undefined = manager.console.isMobile ? (manager.console.shellAndroid ? 'google' : (manager.console.shellApple ? 'apple' : undefined)) : 'google';
         switch (characteristic?.id) {
             case WellknownCharacteristics.ELECTRIC_VEHICLE: return getVehicleBrandAppUrl(characteristic.brand as OgVehicleBrand | undefined, store);
             case WellknownCharacteristics.HEAT_PUMP: return getHeatPumpBrandAppUrl(characteristic.brand as OgHeatPumpBrand | undefined, store);
-            default: return;
+            default: break;
+        }
+        switch (asset?.type) {
+            case "OurgridVehicleAsset": {
+                const manufacturer = asset?.attributes?.["manufacturer"]?.value as string;
+                if(manufacturer) return getVehicleBrandAppUrl(`vehicleBrands.${manufacturer.toUpperCase()}` as OgVehicleBrand | undefined, store);
+                break;
+            }
+            default: break;
         }
     }
 
@@ -235,7 +257,7 @@ export class PanelChallengeTips extends OgDataPanel {
      * It uses the custom endpoint in {@link DeviceBatteryResource}, where all "user access checks" are performed.
      * Shows a snackbar afterward, and will update the button state automatically.
      */
-    protected _setActionButtonAttribute(newState: boolean): void {
+    protected _setBatteryActionButtonAttribute(newState: boolean): void {
         if (this.meterAsset) {
 
             rest.api.DeviceBatteryResource.actionButton({meterId: this.meterAsset.id, buttonState: newState}).then(() => {
@@ -249,7 +271,7 @@ export class PanelChallengeTips extends OgDataPanel {
             });
         } else {
             showSnackbar(undefined, i18next.t("errorOccurred"));
-            console.warn("Could not toggle automatic control; assets are not cached correctly.");
+            console.warn("Could not toggle automatic control of battery; assets are not cached correctly.");
         }
     }
 }

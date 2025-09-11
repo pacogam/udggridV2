@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-05-30T14:33:17Z",
+  "swVersion": 228,
+  "deviceId": "11111111-aaaa-2222-bbbb-33333333",
+  "geo": {
+    "Latitude": "0.0",
+    "Longitude": "0.0"
+  },
+  "model": "XMX5LGBBLA1231231231",
+  "wifiRSSI": -74,
+  "energy_delivered_tariff1": 2345.678901,
+  "energy_delivered_tariff2": 1234.567890,
+  "energy_returned_tariff1": 7500.111111,
+  "energy_returned_tariff2": 14123.55555,
+  "gas_delivered": 1010.10101,
+  "power_delivered": 0,
+  "power_returned": 3.434343434,
+  "voltage_l1": 245,
+  "voltage_l2": 247,
+  "voltage_l3": 248,
+  "current_l1": 4,
+  "current_l2": 4,
+  "current_l3": 4
+}

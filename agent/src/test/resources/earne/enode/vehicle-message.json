@@ -1,0 +1,88 @@
+{
+    "createdAt": "2025-08-05T15:29:55.298Z",
+    "version": "2024-10-01",
+    "event": "user:vehicle:updated",
+    "user": {
+        "id": "pilotdo001"
+    },
+    "vehicle": {
+        "id": "5043a3ea-7aec-440b-96fc-622e2d6b2485",
+        "userId": "pilotdo001",
+        "vendor": "TESLA",
+        "isReachable": true,
+        "lastSeen": "2025-08-05T15:29:55.225Z",
+        "information": {
+            "displayName": null,
+            "brand": "Tesla",
+            "model": "Model Y",
+            "year": 2023
+        },
+        "chargeState": {
+            "chargeRate": null,
+            "chargeTimeRemaining": null,
+            "isFullyCharged": false,
+            "isPluggedIn": false,
+            "isCharging": false,
+            "batteryLevel": 65,
+            "range": 333,
+            "batteryCapacity": 70.79,
+            "chargeLimit": 80,
+            "lastUpdated": "2025-08-05T15:29:55.226Z",
+            "powerDeliveryState": "UNPLUGGED",
+            "maxCurrent": 16
+        },
+        "smartChargingPolicy": {
+            "deadline": null,
+            "isEnabled": false,
+            "minimumChargeLimit": 0
+        },
+        "odometer": {
+            "distance": 29838,
+            "lastUpdated": "2025-08-05T07:41:46.957Z"
+        },
+        "capabilities": {
+            "information": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "chargeState": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "location": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "odometer": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "setMaxCurrent": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "startCharging": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "stopCharging": {
+                "interventionIds": [],
+                "isCapable": true
+            },
+            "smartCharging": {
+                "isCapable": true,
+                "interventionIds": []
+            }
+        },
+        "scopes": [
+            "vehicle:control:charging",
+            "vehicle:read:data",
+            "vehicle:read:location"
+        ]
+    },
+    "updatedFields": [
+        "lastSeen",
+        "chargeState.range",
+        "chargeState.lastUpdated"
+    ]
+}

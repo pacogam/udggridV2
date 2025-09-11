@@ -269,18 +269,24 @@ rules.add()
             def challengesAsset = facts.matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name)) as Optional<AttributeInfo>
 
             if (challengesAsset.isEmpty()) {
+                LOG.warning("No Challenges asset found with ID: '" + challengesAssetId + "'; Check asset ID and if the rule state configuration is added to the attribute")
                 return false
             }
 
             def challengeGeneralStatus = challengesAsset.get().value.orElse(null).toString() as String
             def joinedChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.joinedChallenge.toString() as String
-            def noChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.noChallenge.toString() as String
 
-            if (challengeGeneralStatus == joinedChallenge && (challengeGeneralStatusPreviousRule4 == noChallenge || challengeGeneralStatusPreviousRule4 == "null")) {
-                triggerRule = true
+            if (challengeGeneralStatus == joinedChallenge && challengeGeneralStatusPreviousRule4 != joinedChallenge) {
+                def joinChallenge = OurgridMeterAsset.ChallengeStatusValueType.joinChallenge.toString() as String
+                def metersReadyToJoin = assets.getResults(new AssetQuery().parents(meterSumAssetId).types(OurgridMeterAsset).attributeValue(OurgridMeterAsset.CHALLENGE_STATUS.name, joinChallenge)).any()
+                // Trigger rule after district rules have updated meter challenge status to joinChallenge
+                if (metersReadyToJoin) {
+                    challengeGeneralStatusPreviousRule4 = joinedChallenge
+                    triggerRule = true
+                }
+            } else {
+                challengeGeneralStatusPreviousRule4 = challengeGeneralStatus
             }
-
-            challengeGeneralStatusPreviousRule4 = challengeGeneralStatus
 
             return triggerRule
         })
@@ -299,12 +305,11 @@ rules.add()
             // Join challenge if meter has a battery with allowed automatic control
             facts.matchAssetState(new AssetQuery().parents(meterAssetIds).types(OurgridBatteryAsset).attributeNames(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name))
                     .each {
-                        if (it.value.orElse(false) == true) {
+                        if (it.value.orElse(false)) {
                             def meterAssetId = it.parentId as String
                             def meterChallengeStatus = metersAttributes[meterAssetId]?.get(OurgridMeterAsset.CHALLENGE_STATUS.name)?.toString() as String
-
                             if (meterChallengeStatus != joinedChallenge) {
-                                assets.dispatch(meterAssetId, OurgridMeterAsset.CHALLENGE_STATUS.name, OurgridMeterAsset.ChallengeStatusValueType.joinedChallenge)
+                                assets.dispatch(meterAssetId, OurgridMeterAsset.CHALLENGE_STATUS.name, joinedChallenge)
                             }
                         }
                     }

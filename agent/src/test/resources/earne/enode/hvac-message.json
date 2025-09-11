@@ -1,0 +1,75 @@
+{
+  "createdAt": "2020-04-07T17:04:26Z",
+  "version": "2024-10-01",
+  "user": {
+    "id": "string"
+  },
+  "event": "user:hvac:updated",
+  "hvac": {
+    "id": "8f39fa8d-8f10-4984-a319-741dc23848c0",
+    "userId": "17d9f847-8a1c-4158-adaa-4911a7acd5f9",
+    "vendor": "ADAX",
+    "lastSeen": "2020-04-07T17:04:26.000Z",
+    "isReachable": true,
+    "consumptionRate": 1.8,
+    "information": {
+      "brand": "ADAX",
+      "model": "Neo Wi-Fi Skirting",
+      "displayName": "Bedroom Panel Heater",
+      "groupName": "Bedroom",
+      "category": "HEATING"
+    },
+    "location": {
+      "id": "8d90101b-3f2f-462a-bbb4-1ed320d33bbe"
+    },
+    "capabilities": {
+      "capableModes": [
+        "HEAT",
+        "COOL",
+        "OFF"
+      ],
+      "coolSetpointRange": {
+        "min": 15,
+        "max": 25
+      },
+      "heatSetpointRange": {
+        "min": 15,
+        "max": 25
+      },
+      "setpointDifferenceRange": {
+        "min": 15,
+        "max": 25
+      },
+      "setFollowSchedule": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "setPermanentHold": {
+        "isCapable": true,
+        "interventionIds": []
+      }
+    },
+    "thermostatState": {
+      "mode": "HEAT",
+      "heatSetpoint": 22,
+      "coolSetpoint": 24,
+      "holdType": "PERMANENT",
+      "lastUpdated": "2020-04-07T17:04:26.000Z"
+    },
+    "temperatureState": {
+      "currentTemperature": 20.8,
+      "isActive": true,
+      "lastUpdated": "2020-04-07T17:03:26.000Z"
+    },
+    "scopes": [
+      "hvac:control:mode",
+      "hvac:read:data"
+    ]
+  },
+  "updatedFields": [
+    "lastSeen",
+    "thermostatState.mode",
+    "thermostatState.holdType",
+    "thermostatState.lastUpdated"
+  ]
+}

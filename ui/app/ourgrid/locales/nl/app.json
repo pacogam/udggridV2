@@ -14,6 +14,7 @@
   "tryAgain": "Probeer opnieuw",
   "saved": "bespaard",
   "delete": "Verwijderen",
+  "connect": "Verbinden",
   "cancel": "Annuleren",
   "areYouSure": "Weet je het zeker?",
   "switch": "Verander",
@@ -100,10 +101,14 @@
   },
   "addEv": {
     "intro": "Jouw elektrische auto",
+    "question_automaticChargeControl": "Wil je automatisch meedoen aan uitdagingen, en het auto laden uitstellen?",
     "selectBrand": "Automerk",
     "selectBrandPlaceholder": "Selecteer een merk",
     "addDevice": "Apparaat opslaan",
-    "saveSuccess": "Je elektrische auto is toegevoegd!"
+    "connectDevice": "Verbind uw apparaat",
+    "goBack": "Terug",
+    "saveSuccess": "Je elektrische auto is toegevoegd!",
+    "error_needCharger": "Je kunt alleen je auto toevoegen als je thuis een laadpaal hebt."
   },
   "addHeatpump": {
     "intro": "Jouw warmtepomp",
@@ -130,7 +135,9 @@
     "heading": "Tips & Acties",
     "subtitle": "Manieren om te besparen",
     "text1": "Even niet koken",
-    "text2": "Auto laden uitstellen",
+    "text2-manual": "Auto laden uitstellen",
+    "text2-automatic": "Auto laden uitstellen",
+    "action2-automatic": "Auto laden uitgesteld.",
     "text3": "Een wasje draaien",
     "text4": "Verwarming omlaag",
     "text5": "Even geen water koken",
@@ -151,7 +158,7 @@
     "HEAT_PUMP": "Warmte pomp",
     "question_solarPanels": "Ik heb zonnepanelen.",
     "question_electricVehicle": "Ik heb een elektrische auto.",
-    "question_vehicleCharger": "Ik heb een laadpaal.",
+    "question_vehicleCharger": "Heb je een laadpaal thuis?",
     "question_battery": "Ik heb een batterij.",
     "question_heatPump": "Ik heb een warmtepomp.",
     "select_electricVehicleBrand": "Kies het automerk",
@@ -178,9 +185,9 @@
     "unknownManufacturer": "Onbekende fabrikant",
     "version": "Versie",
     "unknown": "Onbekend",
-    "autoCharge": "Automatisch laden",
-    "turnOnSnackbar": "Automatisch opladen staat nu aan!",
-    "turnOffSnackbar": "Automatisch opladen staat nu uit."
+    "autoCharge": "Automatische sturing",
+    "turnOnSnackbar": "Automatische sturing staat nu aan!",
+    "turnOffSnackbar": "Automatische sturing staat nu uit."
   },
   "panel_heatpumpInfo": {
     "yourHeatpump": "Jouw warmtepomp",
@@ -192,8 +199,13 @@
     "yourVehicle": "Jouw elektrische auto",
     "noVehicleFound": "Geen elektrische auto gevonden",
     "unknownBrand": "Onbekend merk",
+    "unknownModel": "Onbekend model",
+    "autoCharge": "Automatische sturing",
+    "autoChargeConfirm": "Om automatisch het laden van je auto uit te stellen, moet je je auto verbinden met OurGrid.",
     "hasCharger": "Eigen laadpaal",
-    "noCharger": "Zonder laadpaal"
+    "noCharger": "Zonder laadpaal",
+    "turnOnSnackbar": "Automatische sturing staat nu aan!",
+    "turnOffSnackbar": "Automatische sturing staat nu uit."
   },
   "panel_solarInfo": {
     "yourSolar": "Jouw zonnepanelen",
@@ -264,13 +276,29 @@
     "page2-action": "Klaar"
   },
   "vehicleBrands": {
+    "AUDI": "Audi",
+    "HYUNDAI": "Hyundai",
+    "KIA": "Kia",
+    "OPEL": "Opel",
+    "PEUGEOT": "Peugeot",
+    "RENAULT": "Renault",
     "TESLA": "Tesla",
+    "VOLKSWAGEN": "Volkswagen",
     "VOLKSWAGEN_ID": "Volkswagen ID",
+    "VOLVO": "Volvo",
     "other": "Anders"
   },
   "goToVehicleBrandApp_vehicleBrands": {
+    "AUDI": "Ga naar je myAudi app",
+    "HYUNDAI": "Ga naar je Hyundai Bluelink app",
+    "KIA": "Ga naar je Kia App",
+    "OPEL": "Ga naar je myOpel app",
+    "PEUGEOT": "Ga naar je MYPEUGEOT APP",
+    "RENAULT": "Ga naar je My Renault app",
     "TESLA": "Ga naar je Tesla app",
-    "VOLKSWAGEN_ID": "Ga naar je Volkswagen app"
+    "VOLKSWAGEN": "Ga naar je Volkswagen app",
+    "VOLKSWAGEN_ID": "Ga naar je Volkswagen app",
+    "VOLVO": "Ga naar je Volvo Cars app"
   },
   "vehicleChargerBrands": {
     "TESLA": "Tesla",

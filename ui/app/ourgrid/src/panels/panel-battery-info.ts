@@ -56,7 +56,7 @@ export class PanelBatteryInfo extends OgDataPanel {
 
         // If the battery asset gets updated, correct the "automaticControl" button state
         if(changedProps.has("batteryAsset") && this.batteryAsset) {
-            if(this.batteryAsset.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value) {
+            if(this.batteryAsset.attributes?.[this.AUTOMATIC_CONTROL_ATTRIBUTE_NAME]?.value !== undefined) {
                 this._updateAutomaticControlButtonState(this._isAutomaticControlEnabled(this.batteryAsset));
                 this._updateRemoveButtonState(!this._canRemove(this.batteryAsset, this.info))
             }

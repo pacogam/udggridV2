@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.openremote.model.Constants.*;
 
 @Entity
-public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
+public class OurgridMeterAsset extends Asset<OurgridMeterAsset> implements OurgridDeviceAsset {
 
     public static final AttributeDescriptor<Double> CONNECTION_QUALITY = new AttributeDescriptor<>("connectionQuality", ValueType.POSITIVE_NUMBER,
             new MetaItem<>(MetaItemType.LABEL, "   Connection quality (previous day)"),
@@ -321,6 +321,7 @@ public class OurgridMeterAsset extends Asset<OurgridMeterAsset> {
         return this;
     }
 
+    @Override
     public OurgridMeterAsset setDeviceId(String value) {
         getAttributes().getOrCreate(DEVICE_ID).setValue(value);
         return this;

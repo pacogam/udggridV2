@@ -93,6 +93,9 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
     protected batteryAsset?: Asset;
 
     @state()
+    protected vehicleAsset?: Asset;
+
+    @state()
     protected challengeAsset?: Asset;
 
     @state()
@@ -108,6 +111,7 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
     stateChanged(state: GridAppStateKeyed): void {
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
         this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
+        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.language = state.gridApp.language;
 
@@ -135,7 +139,7 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
         const solarCapacity = this.userAsset?.attributes?.[PageDevices.ESTIMATED_SOLAR_CAPACITY_ATTRIBUTE]?.value as number | undefined;
 
         const showBattery = !!this.userAsset && (!!this.batteryAsset || (batteryInfo && batteryInfo.shown));
-        const showEv = (!!this.userAsset) && evInfo && evInfo.shown;
+        const showEv = (!!this.userAsset) && (!!this.vehicleAsset || (evInfo && evInfo.shown));
         const showHeatpump = (!!this.userAsset) && heatPumpInfo && heatPumpInfo.shown;
         const showSolar = (!!this.userAsset) && solarCapacity && solarCapacity > 0;
         const showHomeAutomation = !!this.userAsset && homeAutomationInfo && homeAutomationInfo.shown;
@@ -152,7 +156,7 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
                 <div class="page-content">
                     <div class="page-content-container">
                         ${when(true, () => until(this._getMeterTemplate()))}
-                        ${when(showEv, () => until(this._getEvTemplate(evInfo, chargerInfo)))}
+                        ${when(showEv, () => until(this._getEvTemplate(this.userAsset, this.vehicleAsset, evInfo, chargerInfo)))}
                         ${when(showHeatpump, () => until(this._getHeatPumpTemplate(heatPumpInfo)))}
                         ${when(showBattery, () => until(this._getBatteryTemplate(batteryInfo)))}
                         ${when(showHomeAutomation, () => until(this._getHomeAutomationTemplate(homeAutomationInfo)))}
@@ -175,7 +179,8 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
     }
 
     protected async _getBatteryTemplate(info?: DeviceCharacteristic, batteryAsset = this.batteryAsset, meterAsset = this.userAsset, language = this.language): Promise<TemplateResult> {
-        return html`<panel-battery-info .info=${info} .batteryAsset=${batteryAsset} .meterAsset=${meterAsset} .language=${language} @request-remove=${() => this._requestBatteryRemoval(info)}></panel-battery-info>`
+        return html`<panel-battery-info .info=${info} .batteryAsset=${batteryAsset} .meterAsset=${meterAsset} .language=${language}
+                                        @request-remove=${() => this._requestBatteryRemoval(info)}></panel-battery-info>`
     }
 
     protected async _getMeterTemplate(meterAsset = this.userAsset, language = this.language): Promise<TemplateResult> {
@@ -186,8 +191,9 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
         return html`<panel-heatpump-info .info=${info} @request-remove=${() => this._requestHeatPumpRemoval(info)}></panel-heatpump-info>`
     }
 
-    protected async _getEvTemplate(info: DeviceCharacteristic, chargerInfo?: DeviceCharacteristic): Promise<TemplateResult> {
-        return html`<panel-ev-info .evInfo=${info} .chargerInfo=${chargerInfo} @request-remove=${() => this._requestEvRemoval(info)}></panel-ev-info>`
+    protected async _getEvTemplate(meterAsset = this.userAsset, vehicleAsset = this.vehicleAsset, info: DeviceCharacteristic, chargerInfo?: DeviceCharacteristic): Promise<TemplateResult> {
+        return html`<panel-ev-info .meterAsset=${meterAsset} .vehicleAsset=${vehicleAsset} .evInfo=${info} .chargerInfo=${chargerInfo}
+                                   @request-remove=${() => this._requestEvRemoval(info)}></panel-ev-info>`
     }
 
     protected async _getHomeAutomationTemplate(info: DeviceCharacteristic): Promise<TemplateResult> {
@@ -275,6 +281,10 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
     }
 
     protected _onDeviceRemove(info: DeviceCharacteristic): void {
+        if(!info) {
+            console.error('Could not remove device: No information provided');
+            return;
+        }
         if(info.id === WellknownCharacteristics.HOME_AUTOMATION) {
             rest.api.UserAccountResource.deleteServiceUserAccount(); // Attempt to delete service user of home automation
         }

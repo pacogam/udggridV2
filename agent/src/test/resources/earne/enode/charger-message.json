@@ -1,0 +1,67 @@
+{
+  "createdAt": "2020-04-07T17:04:26Z",
+  "version": "2024-10-01",
+  "user": {
+    "id": "string"
+  },
+  "event": "user:charger:updated",
+  "charger": {
+    "information": {
+      "brand": "Zaptec",
+      "model": "Pro",
+      "serialNumber": "1234567890",
+      "year": null
+    },
+    "location": {
+      "id": "2211e263-d6d4-d6d4-d6d4-dbdd77ec82b6",
+      "lastUpdated": "2023-03-21T16:39:20.000Z"
+    },
+    "id": "2211e263-0362-4235-83f4-887bdf3ee414",
+    "userId": "d381faac-5283-44a1-9eb1-36cab2ace670",
+    "vendor": "ZAPTEC",
+    "lastSeen": "2023-03-21T21:08:27.596Z",
+    "isReachable": true,
+    "chargeState": {
+      "isPluggedIn": true,
+      "isCharging": true,
+      "chargeRate": 6.939,
+      "lastUpdated": "2023-03-21T16:39:20.000Z",
+      "maxCurrent": 16,
+      "powerDeliveryState": "PLUGGED_IN:CHARGING"
+    },
+    "capabilities": {
+      "information": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "chargeState": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "startCharging": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "stopCharging": {
+        "isCapable": true,
+        "interventionIds": []
+      },
+      "setMaxCurrent": {
+        "isCapable": false,
+        "interventionIds": [
+          "4eaeb363-296d-4ccc-a973-7805e6f400bd"
+        ]
+      }
+    },
+    "scopes": [
+      "charger:control:charging",
+      "charger:read:data"
+    ]
+  },
+  "updatedFields": [
+    "lastSeen",
+    "chargeState.isPluggedIn",
+    "chargeState.isCharging",
+    "chargeState.lastUpdated"
+  ]
+}

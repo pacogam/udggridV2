@@ -5,10 +5,11 @@ import org.openremote.model.asset.AssetDescriptor;
 import org.openremote.model.asset.impl.ElectricityBatteryAsset;
 import org.openremote.model.attribute.AttributeExecuteStatus;
 import org.openremote.model.attribute.MetaItem;
-import org.openremote.model.attribute.MetaMap;
 import org.openremote.model.value.AttributeDescriptor;
 import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueType;
+
+import static org.openremote.agent.custom.ourgrid.OurgridAssetUtil.withAddedMeta;
 
 @Entity
 public class OurgridBatteryAsset extends ElectricityBatteryAsset {
@@ -110,9 +111,6 @@ public class OurgridBatteryAsset extends ElectricityBatteryAsset {
         super(name);
     }
 
-    public static MetaMap withAddedMeta(MetaMap map, MetaItem<?>... items) {
-        MetaMap newMap = new MetaMap(map);
-        newMap.addAll(items);
-        return newMap;
-    }
+
 }
+

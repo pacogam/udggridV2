@@ -3,12 +3,14 @@ import {GridAppStateKeyed} from "../../util/og-state";
 import {InputType, OrInputChangedEvent, OrMwcInput} from "@openremote/or-mwc-components/or-mwc-input";
 import {Store} from '@reduxjs/toolkit';
 import { customElement, query, state } from "lit/decorators.js";
+import { when } from "lit/directives/when.js";
 import {css, html, TemplateResult } from "lit";
 import {GraphicType} from "../../features/og-usage-graphic";
 import {i18next} from "@openremote/or-translate";
 import { router } from "@openremote/or-app";
 import { until } from "lit/directives/until.js";
 import {OgVehicleBrand, OurgridMeterAsset} from "../../util/util";
+import {Constants} from "../../util/constants";
 import {OgInputButtonGroupOption, OgSpecialInputType} from "../../components/og-input";
 import {DeviceCharacteristic, WellknownCharacteristics} from "model";
 import rest from "rest";
@@ -59,6 +61,7 @@ const styling = css`
     }
 
     .page-content-container {
+        height: 100%;
         display: flex;
         flex-direction: column;
         gap: 48px;
@@ -122,6 +125,9 @@ export class PageAddEv extends OgPage<GridAppStateKeyed> {
     protected _hasCharger?: boolean;
 
     @state()
+    protected _automaticControl?: boolean;
+
+    @state()
     protected userAsset?: OurgridMeterAsset;
 
     @state()
@@ -156,10 +162,17 @@ export class PageAddEv extends OgPage<GridAppStateKeyed> {
                 <div class="page-content">
                     ${until(this._getEvFormTemplate(), html`Loading...`)}
                 </div>
-                <og-input class="page-action" .type=${InputType.BUTTON} raised rounded fullWidth label="addEv.addDevice"
-                          ?disabled=${!this._isValid()}
-                          @or-mwc-input-changed=${this._onEvAddClick}
-                ></og-input>
+                
+                <!-- If error, show "back" button, otherwise show "connect device" or "add device" based on automaticControl is true/false -->
+                ${when(!this._isError(), () => html`
+                    <og-input class="page-action" .type=${InputType.BUTTON} raised rounded fullWidth label=${this._automaticControl ? 'addEv.connectDevice' : 'addEv.addDevice'}
+                              ?disabled=${!this._isValid()} @or-mwc-input-changed=${this._onEvAddClick}
+                    ></og-input>
+                `, () => html`
+                    <og-input class="page-action" .type=${InputType.BUTTON} raised rounded fullWidth label="addEv.goBack"
+                              @or-mwc-input-changed=${this._onBackClick}
+                    ></og-input>
+                `)}
             </div>
         `;
     }
@@ -170,73 +183,158 @@ export class PageAddEv extends OgPage<GridAppStateKeyed> {
     ];
 
     protected async _getEvFormTemplate(): Promise<TemplateResult> {
+        const chargerGroupValue = this._hasCharger === true ? 1 : this._hasCharger === false ? 0 : undefined;
+        const automaticControlGroupValue = this._automaticControl === true ? 1 : this._automaticControl === false ? 0 : undefined;
         return html`
             <div class="page-content-container">
-                <div class="ev-option-item vertical">
-                    <or-translate class="text-secondary bold" value="addEv.selectBrand"></or-translate>
-                    <og-input type=${InputType.SELECT} label=${i18next.t('addEv.selectBrandPlaceholder')} style="width: 100%;"
-                              .options=${[OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.OTHER]}
-                              .value=${this._selectedBrand}
-                              @or-mwc-input-changed=${this._onBrandSelect}
-                    ></og-input>
-                </div>
+                
+                <!-- Initial question if user has a car charger -->
                 <div class="ev-option-item horizontal">
-                    <span class="text-secondary bold"><or-translate value="panel_characteristics.question_vehicleCharger"/></span>
-                    <og-input .type=${OgSpecialInputType.BUTTON_GROUP} value="" .options="${this._toggleOptions}" .value=${this._hasCharger}
+                    <or-translate class="text-secondary bold" value="panel_characteristics.question_vehicleCharger"></or-translate>
+                    <og-input .type=${OgSpecialInputType.BUTTON_GROUP} value="" .options="${this._toggleOptions}" .value=${chargerGroupValue}
                               @or-mwc-input-changed=${this._onChargerToggle}
                     ></og-input>
                 </div>
+                
+                ${when(this._hasCharger, () => html`
+                    <!-- When charger is YES, show control to enable/disable automatic control -->
+                    <div class="ev-option-item horizontal">
+                        <or-translate class="text-secondary bold" value="addEv.question_automaticChargeControl"></or-translate>
+                        <og-input .type=${OgSpecialInputType.BUTTON_GROUP} value="" .options="${this._toggleOptions}" .value=${automaticControlGroupValue}
+                                  @or-mwc-input-changed=${this._onAutomaticControlToggle}
+                        ></og-input>
+                    </div>
+                    
+                    ${when(this._automaticControl === false, () => html`
+                        <!-- Without automatic control: select brand -->
+                        <div class="ev-option-item vertical">
+                            <or-translate class="text-secondary bold" value="addEv.selectBrand"></or-translate>
+                            <og-input type=${InputType.SELECT} label=${i18next.t('addEv.selectBrandPlaceholder')} style="width: 100%;"
+                                      .options=${[OgVehicleBrand.AUDI, OgVehicleBrand.HYUNDAI, OgVehicleBrand.KIA, OgVehicleBrand.OPEL, OgVehicleBrand.PEUGEOT, OgVehicleBrand.RENAULT, OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.VOLVO, OgVehicleBrand.OTHER]}
+                                      .value=${this._selectedBrand}
+                                      @or-mwc-input-changed=${this._onBrandSelect}
+                            ></og-input>
+                        </div>
+                    `)}
+                `, () => when(this._hasCharger === false,
+                        () => html`
+                            <!-- No charger? Show error that you need a charger -->
+                            <div style="flex: 1; display: flex; text-align: center; justify-content: center; padding: 25% 0;">
+                                <or-translate class="text-subheading" value="addEv.error_needCharger"></or-translate>
+                            </div>
+                        `)
+                )}
             </div>
-        `
+        `;
     }
 
+    /**
+     * Returns a boolean whether to display an "error" text (with button) or not.
+     * @protected
+     */
+    protected _isError() {
+        return this._hasCharger === false;
+    }
+
+    /**
+     * Returns a boolean whether the form is valid or not, which normally corresponds with the 'button disabled' state.
+     * If the user has a charger, we check if they use 'automatic control' or if they have selected a car brand.
+     * When any of the requirements are NOT met, the form is invalid.
+     * @protected
+     */
     protected _isValid() {
-        return this._selectedBrand && this._hasCharger !== undefined
+        return this._hasCharger && (this._automaticControl || this._selectedBrand);
     }
 
+    /**
+     * Event callback for toggling the "Do you have a car charger" button.
+     * @param ev - The respective `or-mwc-input` event
+     * @protected
+     */
+    protected _onChargerToggle(ev: OrInputChangedEvent) {
+        this._hasCharger = ev.detail.value === 1;
+    }
+
+    /**
+     * Event callback for toggling the "Do you want to enable automatic control of charging?" button.
+     * @param ev - The respective `or-mwc-input` event
+     * @protected
+     */
+    protected _onAutomaticControlToggle(ev: OrInputChangedEvent) {
+        this._automaticControl = ev.detail.value === 1;
+    }
+
+    /**
+     * Event callback for selecting a car brand in the dropdown/select menu.
+     * @param ev - The respective `or-mwc-input` event
+     * @protected
+     */
     protected _onBrandSelect(ev: OrInputChangedEvent) {
         this._selectedBrand = ev.detail.value;
     }
 
-    protected _onChargerToggle(ev: OrInputChangedEvent) {
-        this._hasCharger = ev.detail.value;
-    }
-
+    /**
+     * Event callback for the "Connect device" / "Add device" button.
+     * If automatic control is enabled, we should link to EARN-E / ENODE.
+     * If automatic control is disabled, we should add the EV to the user's household characteristics manually.'
+     * @param ev - The respective `or-mwc-input` event
+     * @protected
+     */
     protected _onEvAddClick(ev: OrInputChangedEvent) {
         if(this._isValid()) {
-            const characteristics = this.characteristics || [];
-            const evInfo = characteristics.find(c => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
-            const chargerInfo = characteristics.find(c => c.id === WellknownCharacteristics.VEHICLE_CHARGER);
-            if(!evInfo) {
-                // Create Ev characteristics
-                characteristics.push({id: WellknownCharacteristics.ELECTRIC_VEHICLE, shown: true, brand: this._selectedBrand});
-            } else {
-                // Update Ev characteristics
-                evInfo.shown = true;
-                evInfo.brand = this._selectedBrand;
-            }
-            if(!chargerInfo) {
-                // Create charger characteristics
-                characteristics.push({
-                    id: WellknownCharacteristics.VEHICLE_CHARGER,
-                    shown: this._hasCharger || false,
-                    brand: (this._hasCharger ? this._selectedBrand : undefined)
-                });
-            } else {
-                // Update charger characteristics
-                chargerInfo.shown = this._hasCharger || false;
-                if(this._hasCharger) chargerInfo.brand = this._selectedBrand;
-            }
 
-            // Save characteristics
-            this._actionElem.label = "addEv.saveSuccess";
-            this._actionElem.style.setProperty('--or-mwc-input-color', 'var(--og-color-success');
-            rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: characteristics}).finally(() => {
-                setTimeout(() => router.navigate('devices'), 1000);
-            })
+            // If automatic control is ENABLED, we should link to EARN-E / ENODE
+            if(this._automaticControl) {
+                const meterId = this.userAsset?.attributes?.["deviceId"]?.value;
+                if(meterId) {
+                    window.location.href = Constants.AUTHORIZE_EV_URL.replace('{meterId}', meterId);
+                } else {
+                    console.error("Could not authorize EV: No meterId found in user asset")
+                }
+
+
+            // If automatic control is DISABLED, we should add the EV to the user's household manually.
+            } else {
+
+                const characteristics = this.characteristics || [];
+                const evInfo = characteristics.find(c => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
+                const chargerInfo = characteristics.find(c => c.id === WellknownCharacteristics.VEHICLE_CHARGER);
+                if(!evInfo) {
+                    // Create Ev characteristics
+                    characteristics.push({id: WellknownCharacteristics.ELECTRIC_VEHICLE, shown: true, brand: this._selectedBrand});
+                } else {
+                    // Update Ev characteristics
+                    evInfo.shown = true;
+                    evInfo.brand = this._selectedBrand;
+                }
+                if(!chargerInfo) {
+                    // Create charger characteristics
+                    characteristics.push({
+                        id: WellknownCharacteristics.VEHICLE_CHARGER,
+                        shown: this._hasCharger || false,
+                        brand: (this._hasCharger ? this._selectedBrand : undefined)
+                    });
+                } else {
+                    // Update charger characteristics
+                    chargerInfo.shown = this._hasCharger || false;
+                    if(this._hasCharger) chargerInfo.brand = this._selectedBrand;
+                }
+
+                // Save characteristics
+                this._actionElem.label = "addEv.saveSuccess";
+                this._actionElem.style.setProperty('--or-mwc-input-color', 'var(--og-color-success');
+                rest.api.DeviceCharacteristicsResource.setCharacteristics({characteristics: characteristics}).finally(() => {
+                    setTimeout(() => router.navigate('devices'), 1000);
+                })
+            }
         }
     }
 
+    /**
+     * Event callback for the "Go back" button.
+     * @param ev - The respective `or-mwc-input` event.
+     * @protected
+     */
     protected _onBackClick(ev: OrInputChangedEvent) {
         router.navigate('add-device');
     }

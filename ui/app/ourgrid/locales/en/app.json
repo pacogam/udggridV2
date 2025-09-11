@@ -14,6 +14,7 @@
   "tryAgain": "Try again",
   "saved": "saved",
   "delete": "Delete",
+  "connect": "Connect",
   "cancel": "Cancel",
   "areYouSure": "Are you sure?",
   "switch": "Switch",
@@ -100,10 +101,14 @@
   },
   "addEv": {
     "intro": "Your electric vehicle",
+    "question_automaticChargeControl": "Do you have an electric vehicle charger at home?",
     "selectBrand": "Vehicle brand",
     "selectBrandPlaceholder": "Select a brand",
     "addDevice": "Save device",
-    "saveSuccess": "Added your electric vehicle!"
+    "connectDevice": "Connect your device",
+    "goBack": "Back",
+    "saveSuccess": "Added your electric vehicle!",
+    "error_needCharger": "You can only add your car if you charge at home."
   },
   "addHeatpump": {
     "intro": "Your heat pump",
@@ -130,7 +135,9 @@
     "heading": "Tips & Actions",
     "subtitle": "Ways to save energy",
     "text1": "Cook at a later time",
-    "text2": "Delay charging your car",
+    "text2-manual": "Delay charging your car",
+    "text2-automatic": "Car charge has been delayed",
+    "action2-automatic": "We will delay your car charging",
     "text3": "Washing your laundry",
     "text4": "Turn down the heater",
     "text5": "Don't boil any water",
@@ -151,7 +158,7 @@
     "HEAT_PUMP": "Heat pump",
     "question_solarPanels": "I have solar panels.",
     "question_electricVehicle": "I have an electric vehicle.",
-    "question_vehicleCharger": "I have a vehicle charger.",
+    "question_vehicleCharger": "Do you have an electric vehicle charger at home?",
     "question_battery": "I have a battery.",
     "question_heatPump": "I have a heat pump.",
     "select_electricVehicleBrand": "Select the vehicle brand",
@@ -192,8 +199,13 @@
     "yourVehicle": "Your electric vehicle",
     "noVehicleFound": "No electric vehicle found",
     "unknownBrand": "Unkown brand",
+    "unknownModel": "Unknown model",
+    "autoCharge": "Automatic control",
+    "autoChargeConfirm": "To enable automatic control of vehicle charging, you have to connect your car to OurGrid.",
     "hasCharger": "Own charger",
-    "noCharger": "No charger"
+    "noCharger": "No charger",
+    "turnOnSnackbar": "Automatic control is now on!",
+    "turnOffSnackbar": "Automatic control is now off!"
   },
   "panel_solarInfo": {
     "yourSolar": "Your solar panels",
@@ -264,13 +276,29 @@
     "page2-action": "Finish"
   },
   "vehicleBrands": {
+    "AUDI": "Audi",
+    "HYUNDAI": "Hyundai",
+    "KIA": "Kia",
+    "OPEL": "Opel",
+    "PEUGEOT": "Peugeot",
+    "RENAULT": "Renault",
     "TESLA": "Tesla",
+    "VOLKSWAGEN": "Volkswagen",
     "VOLKSWAGEN_ID": "Volkswagen ID",
+    "VOLVO": "Volvo",
     "other": "Other"
   },
   "goToVehicleBrandApp_vehicleBrands": {
+    "AUDI": "Go to your myAudi app",
+    "HYUNDAI": "Go to your Hyundai Bluelink app",
+    "KIA": "Go to your Kia App",
+    "OPEL": "Go to your myOpel app",
+    "PEUGEOT": "Go to your MYPEUGEOT APP",
+    "RENAULT": "Go to your My Renault app",
     "TESLA": "Go to your Tesla app",
-    "VOLKSWAGEN_ID": "Go to your Volkswagen app"
+    "VOLKSWAGEN": "Go to your Volkswagen app",
+    "VOLKSWAGEN_ID": "Go to your Volkswagen app",
+    "VOLVO": "Go to your Volvo Cars app"
   },
   "vehicleChargerBrands": {
     "TESLA": "Tesla",

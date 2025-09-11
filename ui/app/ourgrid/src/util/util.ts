@@ -19,7 +19,10 @@ export enum OgMeterConnectedState {
 }
 
 export enum OgVehicleBrand {
-    TESLA = 'vehicleBrands.TESLA', VOLKSWAGEN_ID = 'vehicleBrands.VOLKSWAGEN_ID', OTHER = 'vehicleBrands.other'
+    AUDI = "vehicleBrands.AUDI", HYUNDAI = "vehicleBrands.HYUNDAI", KIA = "vehicleBrands.KIA", OPEL = "vehicleBrands.OPEL",
+    PEUGEOT = "vehicleBrands.PEUGEOT", RENAULT = "vehicleBrands.RENAULT", TESLA = "vehicleBrands.TESLA",
+    VOLKSWAGEN = "vehicleBrands.VOLKSWAGEN", VOLKSWAGEN_ID = "vehicleBrands.VOLKSWAGEN_ID", VOLVO = "vehicleBrands.VOLVO",
+    OTHER = "vehicleBrands.other"
 }
 
 export enum OgVehicleChargerBrand {
@@ -38,22 +41,52 @@ export enum OgHomeAutomationBrand {
     HOME_ASSISTANT = "homeAutomationBrands.HOME_ASSISTANT", OPENHAB = "homeAutomationBrands.OPENHAB"
 }
 
-export function getVehicleBrandAppUrl(brand?: OgVehicleBrand, store?: 'google' | 'apple'): string | undefined {
-    if (store === 'google') {
+export function getVehicleBrandAppUrl(brand?: OgVehicleBrand, store?: "google" | "apple"): string | undefined {
+    if (store === "google") {
         switch (brand) {
+            case OgVehicleBrand.AUDI:
+                return "https://play.google.com/store/apps/details?id=de.myaudi.mobile.assistant";
+            case OgVehicleBrand.HYUNDAI:
+                return "https://play.google.com/store/apps/details?id=com.hyundai.bluelink.eu.ux20";
+            case OgVehicleBrand.KIA:
+                return "https://play.google.com/store/apps/details?id=com.kia.oneapp.eu";
+            case OgVehicleBrand.OPEL:
+                return "https://play.google.com/store/apps/details?id=com.psa.mym.myopel";
+            case OgVehicleBrand.PEUGEOT:
+                return "https://play.google.com/store/apps/details?id=com.psa.mym.mypeugeot";
+            case OgVehicleBrand.RENAULT:
+                return "https://play.google.com/store/apps/details?id=com.renault.myrenault.one.fr";
             case OgVehicleBrand.TESLA:
-                return 'https://play.google.com/store/apps/details?id=com.teslamotors.tesla';
+                return "https://play.google.com/store/apps/details?id=com.teslamotors.tesla";
+            case OgVehicleBrand.VOLKSWAGEN:
             case OgVehicleBrand.VOLKSWAGEN_ID:
-                return 'https://play.google.com/store/apps/details?id=com.vw.carnet.release';
+                return "https://play.google.com/store/apps/details?id=com.vw.carnet.release";
+            case OgVehicleBrand.VOLVO:
+                return "https://play.google.com/store/apps/details?id=se.volvo.vcc";
             default:
                 return;
         }
-    } else if (store === 'apple') {
+    } else if (store === "apple") {
         switch (brand) {
+            case OgVehicleBrand.AUDI:
+                return "https://apps.apple.com/nl/app/myaudi/id440464115";
+            case OgVehicleBrand.HYUNDAI:
+                return "https://apps.apple.com/nl/app/hyundai-bluelink-europe/id1565286187";
+            case OgVehicleBrand.KIA:
+                return "https://apps.apple.com/nl/app/kia-app/id6740517042";
+            case OgVehicleBrand.OPEL:
+                return "https://apps.apple.com/nl/app/myopel/id1439342035";
+            case OgVehicleBrand.PEUGEOT:
+                return "https://apps.apple.com/nl/app/mypeugeot-app/id1021587274";
+            case OgVehicleBrand.RENAULT:
+                return "https://apps.apple.com/nl/app/my-renault/id1440073013";
             case OgVehicleBrand.TESLA:
-                return 'https://apps.apple.com/nl/app/tesla/id582007913';
+                return "https://apps.apple.com/nl/app/tesla/id582007913";
+            case OgVehicleBrand.VOLKSWAGEN:
             case OgVehicleBrand.VOLKSWAGEN_ID:
-                return 'https://apps.apple.com/nl/app/volkswagen/id1517566572';
+                return "https://apps.apple.com/nl/app/volkswagen/id1517566572";
+            case OgVehicleBrand.VOLVO:
+                return "https://apps.apple.com/nl/app/volvo-cars/id439635293";
             default:
                 return;
         }

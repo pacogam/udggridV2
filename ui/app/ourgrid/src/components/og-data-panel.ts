@@ -15,6 +15,9 @@ export abstract class OgDataPanel extends OgPanel {
     protected batteryAsset: Asset;
 
     @property({type: Object})
+    protected vehicleAsset: Asset;
+
+    @property({type: Object})
     protected challengeAsset: Asset;
 
     @property({type: Object})
@@ -35,6 +38,11 @@ export abstract class OgDataPanel extends OgPanel {
 
     public setBatteryAsset(asset: Asset): this {
         this.batteryAsset = asset;
+        return this;
+    }
+
+    public setVehicleAsset(asset: Asset): this {
+        this.vehicleAsset = asset;
         return this;
     }
 

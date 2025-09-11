@@ -15,7 +15,6 @@ import {GridAppStateKeyed, setDark} from '../util/og-state';
 import {OgPage, OgPageProvider} from './util/og-page';
 import {OgMeterChallengeState, OgMeterConnectedState} from '../util/util';
 import {Constants} from '../util/constants';
-import manager from '@openremote/core';
 import moment from 'moment';
 import {showChallengeMissedDialog, showLastChallengeResultDialog} from '../components/og-dialog';
 import {Defaults} from '../util/defaults';
@@ -51,6 +50,9 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     protected batteryAsset?: Asset;
 
     @state()
+    protected vehicleAsset?: Asset;
+
+    @state()
     protected districtAsset?: Asset;
 
     @state()
@@ -72,6 +74,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     stateChanged(state: GridAppStateKeyed): void {
         this.meterAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
         this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
+        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.language = state.gridApp.language;
@@ -203,7 +206,8 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
                 <panel-usage-overview .dark="${isInChallenge}" .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .challengeAsset="${this.challengeAsset}"></panel-usage-overview>
                 
-                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
+                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .vehicleAsset=${this.vehicleAsset}
+                                  .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
                 <div>
                     ${guard([this.language], () => html`
