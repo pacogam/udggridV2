@@ -12,8 +12,6 @@ import org.openremote.model.attribute.AttributeInfo
 import org.openremote.model.geo.GeoJSONPoint
 import org.openremote.model.query.AssetQuery
 import org.openremote.model.rules.Assets
-import org.openremote.model.rules.Notifications
-import org.openremote.model.rules.Users
 import org.openremote.model.util.ValueUtil
 import org.postgresql.util.PGobject
 
@@ -26,13 +24,13 @@ import java.time.ZoneId
 import java.util.Date
 import java.util.logging.Logger
 
-Logger LOG = binding.LOG
-RulesBuilder rules = binding.rules
-Users users = binding.users
-Notifications notifications = binding.notifications
 Assets assets = binding.assets
+RulesBuilder rules = binding.rules
+Logger LOG = binding.LOG
 
-// Put the asset ID of relevant assets here:
+// -------------------------input------------------------- //
+
+// Set the asset ID of relevant assets here:
 String parentDistrictAssetId = "setId1"
 String parentMeterAssetId = "setId2"
 String solarAssetId = "setId3"
@@ -40,20 +38,28 @@ String researchAsset1Id = "setId4"
 String challengesAssetId = "setId5"
 String peaksAssetId = "setId6"
 
-// Put the attribute names for summation here (or leave empty to include all child asset attribute names with 'Rule state'):
+// Set the attribute names for summation here (or leave empty to include all child asset attribute names with 'Rule state'):
 String[] attributeNames = ["power", "energyImportTotal", "energyExportTotal", "energyNetTotal", "gasImportTotal", "gasFlowRate"]
 
 
+// Set 'true' if you want district power to be calculated by OurGrid, set 'false' if you want to connect district power attributes manually:
+boolean calculatePowerNetDistrict = true
+boolean calculatePowerNetDistrictForecast = true
+boolean calculatePowerConsumptionDistrict = true
+
+// ------------------------------------------------------- //
+
 // Time triggers for rules
-long previousMillisRule1 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
-long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis() % (5 * 60 * 1000) + (5 * 60 * 1000)
-long previousMillisRule3 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
+long rulesStartTimeMillis = System.currentTimeMillis()
+long previousTimeMillisRule1 = rulesStartTimeMillis - rulesStartTimeMillis % (1 * 60 * 1000) + (1 * 60 * 1000)
+long previousTimeMillisRule2 = rulesStartTimeMillis - rulesStartTimeMillis % (5 * 60 * 1000) + (5 * 60 * 1000)
+long previousTimeMillisRule3 = rulesStartTimeMillis - rulesStartTimeMillis % (1 * 60 * 1000) + (1 * 60 * 1000)
 
 // Date triggers for rules
 SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd")
-String datePreviousRule5 = dateOnlyFormat.format(new Date())
-String datePreviousRule6 = dateOnlyFormat.format(new Date())
-String datePreviousRule8 = dateOnlyFormat.format(new Date())
+String previousDateRule5 = dateOnlyFormat.format(new Date())
+String previousDateRule6 = dateOnlyFormat.format(new Date())
+String previousDateRule8 = dateOnlyFormat.format(new Date())
 
 // Forecast variables
 TreeMap<String, Double> previousDatapoints = new TreeMap<>()
@@ -73,13 +79,11 @@ rules.add()
         .priority(1)
         .name("Group summation rule")
         .when({ facts ->
-            boolean triggerRule = false
-            long currentMillis = facts.clock.currentTimeMillis
+            long currentTimeMillis = facts.clock.currentTimeMillis
 
-            // Trigger rule every 1 minute = 60000 ms
-            if (currentMillis > previousMillisRule1) {
-                previousMillisRule1 += 60000
-                triggerRule = true
+            // Trigger rule every 1 minute
+            if (currentTimeMillis > previousTimeMillisRule1) {
+                previousTimeMillisRule1 += (1 * 60 * 1000)
             } else {
                 return false
             }
@@ -88,7 +92,7 @@ rules.add()
             Optional<AttributeInfo> parent = facts.matchFirstAssetState(new AssetQuery().ids(parentMeterAssetId))
 
             if (parent.isEmpty()) {
-                LOG.warning("No Parent Asset found with ID: '" + parentMeterAssetId + "'; Check Parent Asset ID and if the rule state configuration is added to the attribute")
+                LOG.warning("No Parent Asset found with ID: '" + parentMeterAssetId + "'; Check Parent Asset ID and if the 'Rule state' configuration item is added to the attribute")
                 return false
             }
 
@@ -142,7 +146,7 @@ rules.add()
             }
 
             // Trigger rule
-            return triggerRule
+            return true
         })
         .then({ facts ->
             String[] changesAttributeNames = facts.bound("changesAttributeNames")
@@ -384,12 +388,31 @@ rules.add()
 
             // Update district parent
             if (netPowerMetersWatt != null && numberOfHouseholds != null && numberOfActivePowerReadings > 0) {
-                def powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings as Double
-                def netPowerDistrict = (powerCorrectionFactor * netPowerMetersWatt).round() / 1000 as Double
-                def consumptionPowerDistrict = netPowerDistrict as Double
+                def powerCorrectionFactor = 1.0 as Double
+                def consumptionPowerDistrict
+                def netPowerDistrict
 
-                // Update district parent - net power attribute
-                assets.dispatch(parentDistrictAssetId, "powerDistrict", netPowerDistrict)
+                if (calculatePowerNetDistrict) {
+                    powerCorrectionFactor = numberOfHouseholds / numberOfActivePowerReadings as Double
+                    netPowerDistrict = (powerCorrectionFactor * netPowerMetersWatt).round() / 1000 as Double
+                    consumptionPowerDistrict = netPowerDistrict
+
+                    // Update district parent - net power attribute
+                    assets.dispatch(parentDistrictAssetId, "powerDistrict", netPowerDistrict)
+                } else {
+                    netPowerDistrict = facts
+                            .matchFirstAssetState(new AssetQuery().ids(parentDistrictAssetId).attributeName("powerDistrict"))
+                            .flatMap { it.value }
+                            .orElse(null) as Double
+
+                    consumptionPowerDistrict = netPowerDistrict
+                }
+
+                // Update district parent - power import percentage attribute
+                if (powerImportMax != null && netPowerDistrict != null) {
+                    def netPowerDistrictPercentage = (netPowerDistrict / powerImportMax * 100).round() as Integer
+                    assets.dispatch(parentDistrictAssetId, "powerImportPercentage", netPowerDistrictPercentage)
+                }
 
                 // Update district parent - power correction factor attribute
                 if (powerCorrectionFactor != powerCorrectionFactorPrevious) {
@@ -416,12 +439,8 @@ rules.add()
                 }
 
                 // Update district parent - power consumption attribute
-                assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", consumptionPowerDistrict)
-
-                // Update district parent - power import percentage attribute
-                if (powerImportMax != null) {
-                    def netPowerDistrictPercentage = (netPowerDistrict / powerImportMax * 100).round() as Integer
-                    assets.dispatch(parentDistrictAssetId, "powerImportPercentage", netPowerDistrictPercentage)
+                if (calculatePowerConsumptionDistrict && consumptionPowerDistrict != null) {
+                    assets.dispatch(parentDistrictAssetId, "powerConsumptionDistrict", consumptionPowerDistrict)
                 }
             }
         })
@@ -430,31 +449,31 @@ rules.add()
         .priority(2)
         .name("Forecast rule")
         .when({ facts ->
-            boolean triggerRule = false
+            long currentTimeMillis = facts.clock.currentTimeMillis
 
-            long currentMillis = facts.clock.currentTimeMillis
-
-            // Trigger rule every 5 minutes = 300000 ms
-            if (currentMillis > previousMillisRule2) {
-                previousMillisRule2 += 300000
-                triggerRule = true
+            // Trigger rule every 5 minutes
+            if (currentTimeMillis > previousTimeMillisRule2) {
+                previousTimeMillisRule2 += (5 * 60 * 1000)
+                return true
             }
 
-            return triggerRule
+            return false
         })
         .then({ facts ->
-            long currentTimestamp = facts.clock.currentTimeMillis
+            long currentTimeMillis = facts.clock.currentTimeMillis
 
             // Calculate 'net power forecast' from 'solar power forecast' & 'consumption power forecast'
-            Object[] result = calculateNetPowerForecast(currentTimestamp, solarAssetId, parentDistrictAssetId, previousDatapoints, consumptionForecastHistorical)
-            previousDatapoints = (TreeMap<String, Double>) result[0]
-            consumptionForecastHistorical = (TreeMap<String, Double>) result[1]
+            if (calculatePowerNetDistrictForecast) {
+                Object[] result = calculateNetPowerForecast(currentTimeMillis, solarAssetId, parentDistrictAssetId, previousDatapoints, consumptionForecastHistorical)
+                previousDatapoints = (TreeMap<String, Double>) result[0]
+                consumptionForecastHistorical = (TreeMap<String, Double>) result[1]
+            }
 
             // Interpolate solar power value from solar power forecast
-            Double interpolatedSolarValue = calculateForecastValue(currentTimestamp, solarAssetId, "powerForecast")
+            Double interpolatedSolarValue = calculateForecastValue(currentTimeMillis, solarAssetId, "powerForecast")
 
             // Interpolate net power value from net power forecast
-            Double interpolatedNetPowerValue = calculateForecastValue(currentTimestamp, parentDistrictAssetId, "powerDistrict")
+            Double interpolatedNetPowerValue = calculateForecastValue(currentTimeMillis, parentDistrictAssetId, "powerDistrict")
 
             // Update district parent - solar power attribute
             if (interpolatedSolarValue != null) {
@@ -561,8 +580,8 @@ rules.add()
             long currentMillis = facts.clock.currentTimeMillis
 
             // Trigger rule every 1 minute = 60000 ms
-            if (currentMillis > previousMillisRule3) {
-                previousMillisRule3 += 60000
+            if (currentMillis > previousTimeMillisRule3) {
+                previousTimeMillisRule3 += 60000
                 triggerRule = true
             }
 
@@ -1157,8 +1176,8 @@ rules.add()
                 String dateCurrent = dateOnlyFormat.format(new Date(currentMillis))
 
                 // Trigger rule at 0:00am
-                if (dateCurrent != datePreviousRule5) {
-                    datePreviousRule5 = dateCurrent
+                if (dateCurrent != previousDateRule5) {
+                    previousDateRule5 = dateCurrent
                     triggerRule = true
                 }
 
@@ -1255,7 +1274,7 @@ rules.add()
                 // Prevent instant rule trigger when peak points are turned on
                 if (turnOnPeakPoints && !turnOnPeakPointsPrevious) {
                     turnOnPeakPointsPrevious = true
-                    datePreviousRule6 = dateOnlyFormat.format(new Date())
+                    previousDateRule6 = dateOnlyFormat.format(new Date())
                 } else if (!turnOnPeakPoints && turnOnPeakPointsPrevious) {
                     turnOnPeakPointsPrevious = false
                 }
@@ -1285,10 +1304,10 @@ rules.add()
                 String dateCurrent = dateOnlyFormat.format(new Date(currentMillis))
 
                 // Trigger rule at 0:00am
-                if (dateCurrent != datePreviousRule6) {
-                    facts.bind("dateFromStr", datePreviousRule6)
+                if (dateCurrent != previousDateRule6) {
+                    facts.bind("dateFromStr", previousDateRule6)
                     facts.bind("dateToStr", dateCurrent)
-                    datePreviousRule6 = dateCurrent
+                    previousDateRule6 = dateCurrent
                     triggerRule = true
                 }
 
@@ -1597,10 +1616,10 @@ rules.add()
             // Trigger rule at 1:00am
             String dateCurrent = dateOnlyFormat.format(new Date(currentMillis - 3600000L))
 
-            if (dateCurrent != datePreviousRule8) {
-                facts.bind("dateFromStr", datePreviousRule8)
+            if (dateCurrent != previousDateRule8) {
+                facts.bind("dateFromStr", previousDateRule8)
                 facts.bind("dateToStr", dateCurrent)
-                datePreviousRule8 = dateCurrent
+                previousDateRule8 = dateCurrent
                 triggerRule = true
             }
 
