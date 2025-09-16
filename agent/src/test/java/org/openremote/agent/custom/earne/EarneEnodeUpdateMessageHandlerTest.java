@@ -79,6 +79,8 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @BeforeEach
     void beforeEach() {
+        meterAsset.setId(METER_ASSET_ID);
+
         when(agentMock.getName()).thenReturn("Earn-E Enode Agent Mock");
         when(agentMock.getId()).thenReturn(AGENT_ASSET_ID);
         when(agentMock.getProtocolInstance()).thenReturn(protocolMock);
@@ -138,10 +140,12 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
         OurgridChargerAsset existingAsset = new OurgridChargerAsset("testName");
         existingAsset.getAttributes().setValue(OurgridChargerAsset.TIMESTAMP, "2025-05-30T14:00:00Z");
 
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(CHARGER_ASSET_ID)).thenReturn(existingAsset);
 
         handler.handleMessage(readFile("charger-message.json"));
 
+        verify(assetServiceMock, times(1)).findAssets(any());
         verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
 
         verifyChargerAttributeEventsSend();
@@ -149,15 +153,15 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewChargerAssetCreatedUsingCompleteMessageWithMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(CHARGER_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
+        when(assetServiceMock.findAsset(CHARGER_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("charger-message.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(CHARGER_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
+        verify(assetServiceMock, times(1)).findAsset(CHARGER_ASSET_ID);
         verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(chargerAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
@@ -170,39 +174,33 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewChargerAssetCreatedUsingCompleteMessageWithoutMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(CHARGER_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of());
-        when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("charger-message.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(CHARGER_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
-        verify(assetServiceMock).mergeAsset(chargerAssetCapture.capture());
-        verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
-
-        Asset<OurgridChargerAsset> asset = chargerAssetCapture.getValue();
-        assertNewChargerCreated(asset, AGENT_ASSET_ID);
-
-        verifyChargerAttributeEventsSend();
+        verify(assetServiceMock, never()).findAsset(CHARGER_ASSET_ID);
+        verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
+        verify(assetServiceMock, never()).sendAttributeEvent(any());
     }
-
 
     @Test
     void testNewChargerAssetCreatedUsingMessageWithUnknownProperties() throws IOException {
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(CHARGER_ASSET_ID)).thenReturn(null);
-        when(assetServiceMock.findAssets(any())).thenReturn(List.of());
+        when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("charger-message-unknowns.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(CHARGER_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
+        verify(assetServiceMock, times(1)).findAsset(CHARGER_ASSET_ID);
+        verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(chargerAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
 
         Asset<OurgridChargerAsset> asset = chargerAssetCapture.getValue();
-        assertNewChargerCreated(asset, AGENT_ASSET_ID);
+        assertNewChargerCreated(asset, METER_ASSET_ID);
 
         verifyChargerAttributeEventsSend();
     }
@@ -226,15 +224,18 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
         verifyAttributeEventSend(HVAC_ASSET_ID, OurgridHvacAsset.MODEL, "Neo Wi-Fi Skirting");
         verifyAttributeEventSend(HVAC_ASSET_ID, OurgridHvacAsset.TIMESTAMP, "2020-04-07T17:04:26Z");
     }
+
     @Test
     void testExistingHvacAssetUpdatedUsingCompleteMessage() throws IOException {
         OurgridHvacAsset existingAsset = new OurgridHvacAsset("testName");
         existingAsset.getAttributes().setValue(OurgridHvacAsset.TIMESTAMP, "2025-05-30T14:00:00Z");
 
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(HVAC_ASSET_ID)).thenReturn(existingAsset);
 
         handler.handleMessage(readFile("hvac-message.json"));
 
+        verify(assetServiceMock, times(1)).findAssets(any());
         verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
 
         verifyHvacAttributeEventsSend();
@@ -242,16 +243,16 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewHvacAssetCreatedUsingCompleteMessageWithMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(HVAC_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
+        when(assetServiceMock.findAsset(HVAC_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("hvac-message.json"));
 
+        verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock, times(1)).findAsset(HVAC_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
-        verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(hvacAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
 
@@ -263,38 +264,33 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewHvacAssetCreatedUsingCompleteMessageWithoutMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(HVAC_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of());
-        when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("hvac-message.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(HVAC_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
-        verify(assetServiceMock).mergeAsset(hvacAssetCapture.capture());
-        verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
-
-        Asset<OurgridHvacAsset> asset = hvacAssetCapture.getValue();
-        assertNewHvacCreated(asset, AGENT_ASSET_ID);
-
-        verifyHvacAttributeEventsSend();
+        verify(assetServiceMock, never()).findAsset(HVAC_ASSET_ID);
+        verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
+        verify(assetServiceMock, never()).sendAttributeEvent(any());
     }
 
     @Test
     void testNewHvacAssetCreatedUsingMessageWithUnknownProperties() throws IOException {
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(HVAC_ASSET_ID)).thenReturn(null);
-        when(assetServiceMock.findAssets(any())).thenReturn(List.of());
+        when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("hvac-message-unknowns.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(HVAC_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
+        verify(assetServiceMock, times(1)).findAsset(HVAC_ASSET_ID);
+        verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(hvacAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
 
         Asset<OurgridHvacAsset> asset = hvacAssetCapture.getValue();
-        assertNewHvacCreated(asset, AGENT_ASSET_ID);
+        assertNewHvacCreated(asset, METER_ASSET_ID);
 
         verifyHvacAttributeEventsSend();
     }
@@ -336,10 +332,12 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
         OurgridVehicleAsset existingAsset = new OurgridVehicleAsset("testName");
         existingAsset.getAttributes().setValue(OurgridVehicleAsset.TIMESTAMP, "2025-05-30T14:00:00Z");
 
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(VEHICLE_ASSET_ID)).thenReturn(existingAsset);
 
         handler.handleMessage(readFile("vehicle-message.json"));
 
+        verify(assetServiceMock, times(1)).findAssets(any());
         verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
 
         verifyVehicleAttributeEventsSend();
@@ -347,15 +345,15 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewVehicleAssetCreatedUsingCompleteMessageWithMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(VEHICLE_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
+        when(assetServiceMock.findAsset(VEHICLE_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("vehicle-message.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(VEHICLE_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
+        verify(assetServiceMock, times(1)).findAsset(VEHICLE_ASSET_ID);
         verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(vehicleAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
@@ -368,38 +366,33 @@ public class EarneEnodeUpdateMessageHandlerTest extends AbstractEarneMessageHand
 
     @Test
     void testNewVehicleAssetCreatedUsingCompleteMessageWithoutMeterParent() throws IOException {
-        when(assetServiceMock.findAsset(VEHICLE_ASSET_ID)).thenReturn(null);
         when(assetServiceMock.findAssets(any())).thenReturn(List.of());
-        when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("vehicle-message.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(VEHICLE_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
-        verify(assetServiceMock).mergeAsset(vehicleAssetCapture.capture());
-        verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
-
-        Asset<OurgridVehicleAsset> asset = vehicleAssetCapture.getValue();
-        assertNewVehicleCreated(asset, AGENT_ASSET_ID);
-
-        verifyVehicleAttributeEventsSend();
+        verify(assetServiceMock, never()).findAsset(VEHICLE_ASSET_ID);
+        verify(assetServiceMock, never()).mergeAsset(any(Asset.class));
+        verify(assetServiceMock, never()).sendAttributeEvent(any());
     }
 
     @Test
     void testNewVehicleAssetCreatedUsingMessageWithUnknownProperties() throws IOException {
+        when(assetServiceMock.findAssets(any())).thenReturn(List.of(meterAsset));
         when(assetServiceMock.findAsset(VEHICLE_ASSET_ID)).thenReturn(null);
-        when(assetServiceMock.findAssets(any())).thenReturn(List.of());
+        when(assetServiceMock.findAsset(METER_ASSET_ID)).thenReturn(meterAsset);
         when(assetServiceMock.mergeAsset(any(Asset.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         handler.handleMessage(readFile("vehicle-message-unknowns.json"));
 
-        verify(assetServiceMock, times(1)).findAsset(VEHICLE_ASSET_ID);
         verify(assetServiceMock, times(1)).findAssets(any());
+        verify(assetServiceMock, times(1)).findAsset(VEHICLE_ASSET_ID);
+        verify(assetServiceMock, times(1)).findAsset(METER_ASSET_ID);
         verify(assetServiceMock).mergeAsset(vehicleAssetCapture.capture());
         verify(assetServiceMock, times(1)).mergeAsset(any(Asset.class));
 
         Asset<OurgridVehicleAsset> asset = vehicleAssetCapture.getValue();
-        assertNewVehicleCreated(asset, AGENT_ASSET_ID);
+        assertNewVehicleCreated(asset, METER_ASSET_ID);
 
         verifyVehicleAttributeEventsSend();
     }

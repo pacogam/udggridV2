@@ -72,11 +72,23 @@ public class EarneEnodeUpdateMessageHandler extends AbstractEarneMessageHandler<
             throw new IllegalArgumentException("Received EARN-E Enode update message without deviceId: " + assetUpdate);
         }
 
+        String meterDeviceId = assetUpdate.userId;
+        if (meterDeviceId == null || meterDeviceId.isBlank()) {
+            throw new IllegalArgumentException("Received EARN-E Enode update message without userId: " + assetUpdate);
+        }
+
+        OurgridMeterAsset meterAsset = findMeterAsset(meterDeviceId);
+        if (meterAsset == null) {
+            LOG.fine(String.format("Ignoring EARN-E Enode update message for unknown meter with deviceId '%s'", meterDeviceId));
+            return;
+        }
+
+        String parentId = meterAsset.getId();
         String assetId = generateAssetId(deviceId);
 
         switch (assetUpdate) {
             case ChargerUpdate chargerUpdate -> {
-                OurgridChargerAsset chargerAsset = findOrCreateAsset(assetId, deviceId, updateMessage, () -> {
+                OurgridChargerAsset chargerAsset = findOrCreateAsset(assetId, deviceId, parentId, updateMessage, () -> {
                     OurgridChargerAsset asset = new OurgridChargerAsset(deviceId);
                     asset.addOrReplaceAttributes(new Attribute<>(OurgridChargerAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON, true));
                     return asset;
@@ -84,7 +96,7 @@ public class EarneEnodeUpdateMessageHandler extends AbstractEarneMessageHandler<
                 updateChargerAsset(assetId, deviceId, updateMessage, chargerAsset);
             }
             case HvacUpdate hvacUpdate -> {
-                OurgridHvacAsset hvacAsset = findOrCreateAsset(assetId, deviceId, updateMessage, () -> {
+                OurgridHvacAsset hvacAsset = findOrCreateAsset(assetId, deviceId, parentId, updateMessage, () -> {
                     OurgridHvacAsset asset = new OurgridHvacAsset(deviceId);
                     asset.addOrReplaceAttributes(new Attribute<>(OurgridHvacAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON, true));
                     return asset;
@@ -92,7 +104,7 @@ public class EarneEnodeUpdateMessageHandler extends AbstractEarneMessageHandler<
                 updateHvacAsset(assetId, deviceId, updateMessage, hvacAsset);
             }
             case VehicleUpdate vehicleUpdate -> {
-                OurgridVehicleAsset vehicleAsset = findOrCreateAsset(assetId, deviceId, updateMessage, () -> {
+                OurgridVehicleAsset vehicleAsset = findOrCreateAsset(assetId, deviceId, parentId,updateMessage, () -> {
                     OurgridVehicleAsset asset = new OurgridVehicleAsset(deviceId);
                     asset.addOrReplaceAttributes(new Attribute<>(OurgridVehicleAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON, true));
                     return asset;
@@ -126,14 +138,11 @@ public class EarneEnodeUpdateMessageHandler extends AbstractEarneMessageHandler<
         assetStorageService.storeUserAssetLinks(userAssetLinks);
     }
 
-    private <T extends Asset<?>> T findOrCreateAsset(String assetId, String deviceId, EarneEnodeUpdateMessage updateMessage, Supplier<T> newAssetSupplier) {
+    private <T extends Asset<?>> T findOrCreateAsset(String assetId, String deviceId, String parentId, EarneEnodeUpdateMessage updateMessage, Supplier<T> newAssetSupplier) {
         T existingAsset = assetService.findAsset(assetId);
         if (existingAsset != null) {
             return existingAsset;
         }
-
-        OurgridMeterAsset meterAsset = findMeterAsset(updateMessage.getUserId());
-        String parentId = meterAsset == null ? null : meterAsset.getId();
 
         T asset = newAssetSupplier.get();
         updateAssetIds(asset, assetId, deviceId, parentId);
@@ -141,9 +150,7 @@ public class EarneEnodeUpdateMessageHandler extends AbstractEarneMessageHandler<
 
         asset = assetService.mergeAsset(asset);
 
-        if (meterAsset != null) {
-            copyParentUserAssetLinks(parentId, assetId);
-        }
+        copyParentUserAssetLinks(parentId, assetId);
 
         LOG.info(String.format("agentName='%s', agentId='%s'; Created %s: '%s'", agent.getName(), agent.getId(), asset.getAssetType(), deviceId));
         return asset;
