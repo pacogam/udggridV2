@@ -20,14 +20,14 @@ String challengesAssetId = "setId2"
 String peaksAssetId = "setId3"
 
 def assetType = OurgridMeterAsset
-String[] attributeNames = [OurgridMeterAsset.CHALLENGE_POINTS.name, OurgridMeterAsset.PEAK_POINTS.name]
+String[] attributeNames = [OurgridMeterAsset.CHALLENGE_POINTS.name, OurgridMeterAsset.PEAK_POINTS.name, OurgridMeterAsset.CHALLENGE_EARNINGS.name]
 int newAttributeValue = 0
 
 // ------------------------------------------------------- //
 
 String attributeNameButton = "collectAndResetEarnedPoints"
 String attributeNameSummary = "totalPointsSummary"
-boolean resetEarnedPoints = true
+boolean resetEarnedPoints = false
 
 rules.add()
         .name("Collect and reset earned points rule")
@@ -63,6 +63,7 @@ rules.add()
             // 1. Update attributes with new value
             Map<String, Integer> challengePointsMap = new HashMap<>()
             Map<String, Double> peakPointsMap = new HashMap<>()
+            Map<String, Double> earningsMap = new HashMap<>()
 
             attributeList.forEach { attributeInfo ->
                 String assetId = attributeInfo.id
@@ -75,6 +76,9 @@ rules.add()
                 } else if (attributeName == OurgridMeterAsset.PEAK_POINTS.name) {
                     def peakPoints = attributeInfo.value.orElse(0) as Double
                     peakPointsMap.put(assetName, peakPoints)
+                } else if (attributeName == OurgridMeterAsset.CHALLENGE_EARNINGS.name) {
+                    def earnings = attributeInfo.value.orElse(0) as Double
+                    earningsMap.put(assetName, earnings)
                 }
 
                 if (resetEarnedPoints) {
@@ -89,7 +93,7 @@ rules.add()
 
 
             // 2. Create earned points summary in CSV format
-            String outputCSV = "assetName,challengePoints,peakPoints,totalPoints\n"
+            String outputCSV = "assetName,challengePoints,peakPoints,totalPoints,earnings\n"
 
             // Sort asset names in alphabetical order
             List<String> assetNames = challengePointsMap.keySet().sort()
@@ -98,8 +102,9 @@ rules.add()
                 def challengePoints = challengePointsMap.get(assetName)
                 def peakPoints = peakPointsMap.get(assetName)
                 def totalPoints = challengePoints + peakPoints
+                def earnings = earningsMap.get(assetName)
 
-                String rowCSV = assetName + "," + challengePoints + "," + peakPoints + "," + totalPoints + "\n"
+                String rowCSV = assetName + "," + challengePoints + "," + peakPoints + "," + totalPoints + "," + earnings + "\n"
                 outputCSV = outputCSV + rowCSV
             }
 
