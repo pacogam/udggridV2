@@ -101,7 +101,7 @@
   },
   "addEv": {
     "intro": "Your electric vehicle",
-    "question_automaticChargeControl": "Do you have an electric vehicle charger at home?",
+    "question_automaticChargeControl": "Do you want to automatically join challenges, and delay your loading session?",
     "selectBrand": "Vehicle brand",
     "selectBrandPlaceholder": "Select a brand",
     "addDevice": "Save device",
