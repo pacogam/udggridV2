@@ -20,6 +20,7 @@
 package org.openremote.agent.custom.earne;
 
 import com.rabbitmq.client.DeliverCallback;
+import org.openremote.container.message.MessageBrokerService;
 import org.openremote.manager.event.ClientEventService;
 import org.openremote.model.Container;
 
@@ -37,6 +38,7 @@ public class EarneEnodeProtocol extends AbstractEarneProtocol<EarneEnodeAgent> {
     public static final String PROTOCOL_DISPLAY_NAME = "Earne Enode";
 
     private ClientEventService clientEventService;
+    private MessageBrokerService messageBrokerService;
 
     // Message handlers
     private EarneEnodeControlResponseMessageHandler controlResponseMessageHandler;
@@ -63,6 +65,7 @@ public class EarneEnodeProtocol extends AbstractEarneProtocol<EarneEnodeAgent> {
     @Override
     public void start(Container container) throws Exception {
         clientEventService = container.getService(ClientEventService.class);
+        messageBrokerService = container.getService(MessageBrokerService.class);
         super.start(container);
     }
 
@@ -82,7 +85,7 @@ public class EarneEnodeProtocol extends AbstractEarneProtocol<EarneEnodeAgent> {
     protected void doStart(Container container) {
         controlResponseMessageHandler = new EarneEnodeControlResponseMessageHandler(agent, assetService, assetStorageService);
         updateMessageHandler = new EarneEnodeUpdateMessageHandler(agent, assetService, assetStorageService);
-        controlHandler = new EarneEnodeControlHandler(assetStorageService, clientEventService, this);
+        controlHandler = new EarneEnodeControlHandler(assetStorageService, clientEventService, messageBrokerService, this);
 
         super.doStart(container);
 

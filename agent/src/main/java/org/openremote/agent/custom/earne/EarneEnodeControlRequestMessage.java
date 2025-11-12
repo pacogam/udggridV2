@@ -21,6 +21,7 @@ package org.openremote.agent.custom.earne;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.StringJoiner;
@@ -102,6 +103,28 @@ public class EarneEnodeControlRequestMessage {
         }
     }
 
+    // Unlink control command classes
+
+    public enum UnlinkControlCommand implements Command {
+        UNLINK;
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
+    }
+
+    public static class UnlinkControlRequestMessage extends EarneEnodeControlRequestMessage {
+
+        @Deprecated // Default constructor for Jackson deserialization only
+        public UnlinkControlRequestMessage() {
+        }
+
+        public UnlinkControlRequestMessage(String userId) {
+            super(userId, null, null, UnlinkControlCommand.UNLINK);
+        }
+    }
+
     // Common fields
     public String userId;
     public String deviceId;
@@ -117,6 +140,10 @@ public class EarneEnodeControlRequestMessage {
         this.deviceId = deviceId;
         this.discipline = discipline;
         this.command = command.toString();
+    }
+
+    public String toJson() throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsString(this);
     }
 
     @Override

@@ -83,10 +83,6 @@ export class PanelEvInfo extends OgDataPanel {
                 this._updateAutomaticControlButtonState(this._isAutomaticControlEnabled(this.vehicleAsset));
             }
         }
-        // When vehicle asset is present, the "remove" button must be disabled
-        if(this._chips?.[1] !== undefined) {
-            this._chips[1].disabled = !!this.vehicleAsset;
-        }
     }
 
     protected async getPanelContent(): Promise<TemplateResult> {

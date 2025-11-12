@@ -140,7 +140,7 @@ export class PanelDeviceInfo extends OgDataPanel {
                 actionName: 'ok',
                 content: i18next.t('remove'),
                 action: () => {
-                    this.removeDevice(this.meterAsset.name);
+                    this.removeDevice(this.meterAsset.name, this.meterAsset.type);
                 }
             }
         ];
@@ -154,9 +154,9 @@ export class PanelDeviceInfo extends OgDataPanel {
         );
     }
 
-    protected async removeDevice(deviceName: string): Promise<void> {
+    protected async removeDevice(deviceName: string, assetType: string): Promise<void> {
         this.removingState = true;
-        await rest.api.DeviceResource.removeDevice({ deviceName: deviceName });
+        await rest.api.DeviceResource.removeDevice({ deviceName: deviceName, assetType: assetType });
         await new Promise(resolve => setTimeout(resolve, 500));
         this.removingState = false;
         this.dispatchEvent(new CustomEvent('remove'));

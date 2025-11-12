@@ -280,16 +280,27 @@ export class PageDevices extends OgPage<GridAppStateKeyed> {
         );
     }
 
-    protected _onDeviceRemove(info: DeviceCharacteristic): void {
+    protected async _onDeviceRemove(info: DeviceCharacteristic): Promise<void> {
         if(!info) {
             console.error('Could not remove device: No information provided');
             return;
         }
-        if(info.id === WellknownCharacteristics.HOME_AUTOMATION) {
-            rest.api.UserAccountResource.deleteServiceUserAccount(); // Attempt to delete service user of home automation
+
+        let reload = false;
+        if(info.id === WellknownCharacteristics.ELECTRIC_VEHICLE && this.vehicleAsset) {
+            await rest.api.DeviceResource.removeDevice({ deviceName: this.vehicleAsset.id, assetType: this.vehicleAsset.type });
+            reload = true;
         }
-        this._removeDevice(info);
+
+        if(info.id === WellknownCharacteristics.HOME_AUTOMATION) {
+            await rest.api.UserAccountResource.deleteServiceUserAccount(); // Attempt to delete service user of home automation
+        }
+        await this._removeDevice(info);
         this.requestUpdate();
+
+        if (reload) {
+            window.location.reload();
+        }
     }
 
     /**

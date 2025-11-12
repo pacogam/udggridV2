@@ -50,8 +50,6 @@ import static org.mockito.Mockito.when;
 
 public abstract class AbstractEarneMessageHandlerTest {
 
-    static final String AGENT_ASSET_ID = "m1g1bR4qCcLyxnjUSnSMjt";
-
     public static class AttributeEventMatcher implements ArgumentMatcher<AttributeEvent> {
 
         private AttributeEvent left;

@@ -20,11 +20,13 @@ public interface DeviceResource {
         public DeviceLinkDetails() {
         }
 
-        public DeviceLinkDetails(String deviceName) {
+        public DeviceLinkDetails(String deviceName, String assetType) {
             this.deviceName = deviceName;
+            this.assetType = assetType;
         }
 
         public String deviceName;
+        public String assetType;
     }
 
 
