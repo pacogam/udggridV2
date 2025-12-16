@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import org.openremote.model.asset.Asset;
 import org.openremote.model.asset.AssetDescriptor;
 import org.openremote.model.attribute.MetaItem;
+import org.openremote.model.util.TimeUtil;
 import org.openremote.model.value.AttributeDescriptor;
 import org.openremote.model.value.ForecastConfigurationWeightedExponentialAverage;
 import org.openremote.model.value.MetaItemType;
@@ -15,9 +16,9 @@ import static org.openremote.model.Constants.*;
 public class OurgridDistrictAsset extends Asset<OurgridDistrictAsset> {
 
     static ForecastConfigurationWeightedExponentialAverage forecastConfig = new ForecastConfigurationWeightedExponentialAverage(
-            new ForecastConfigurationWeightedExponentialAverage.ExtendedPeriodAndDuration("P7D"),
+            new TimeUtil.ExtendedPeriodAndDuration("P7D"),
             3,
-            new ForecastConfigurationWeightedExponentialAverage.ExtendedPeriodAndDuration("PT15M"),
+            new TimeUtil.ExtendedPeriodAndDuration("PT15M"),
             96
     );
 
