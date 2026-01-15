@@ -1,8 +1,8 @@
 package org.openremote.agent.custom.ourgrid;
 
 import jakarta.persistence.Entity;
+import org.openremote.extension.energy.model.ElectricityBatteryAsset;
 import org.openremote.model.asset.AssetDescriptor;
-import org.openremote.model.asset.impl.ElectricityBatteryAsset;
 import org.openremote.model.attribute.AttributeExecuteStatus;
 import org.openremote.model.attribute.MetaItem;
 import org.openremote.model.value.AttributeDescriptor;

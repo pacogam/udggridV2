@@ -15,6 +15,7 @@ dependencies {
     api project(":model")
     api "io.openremote:openremote-agent:$openremoteVersion"
     api "io.openremote:openremote-manager:$openremoteVersion"
+    api "io.openremote.extension:openremote-energy-extension:$openremoteVersion"
 
     // https://mvnrepository.com/artifact/com.rabbitmq/amqp-client
     implementation "com.rabbitmq:amqp-client:$rabbitMqAmqpClientVersion"
