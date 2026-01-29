@@ -205,7 +205,7 @@ rules.add()
                     def powerSetpointNew = powerSetpoint as Double
 
                     if (powerSetpointNew == null || energyLevelPercentage == null || energyLevelPercentageMax == null ||
-                            (powerSetpointNew > 0.0 && energyLevelPercentage >= energyLevelPercentageMax) || (powerSetpointNew < 0.0)
+                            (powerSetpointNew > 0.0 && energyLevelPercentage >= energyLevelPercentageMax)
                     ) {
                         powerSetpointNew = 0.0
                     }
