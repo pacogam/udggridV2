@@ -1,6 +1,5 @@
 const util = require("@openremote/util");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const webpack = require("webpack");
+const {rspack} = require("@rspack/core");
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const packageJson = require('./package.json');
 const rawLoader = require('raw-loader');
@@ -16,7 +15,7 @@ module.exports = (env, argv) => {
     if (IS_DEV_SERVER && customConfigDir) {
         console.log("CUSTOM_CONFIG_DIR: " + customConfigDir);
         // Try and include the static files in the specified config dir if we're in dev server mode
-        config.plugins.push(new CopyWebpackPlugin({
+        config.plugins.push(new rspack.CopyRspackPlugin({
             patterns: [
                 {
                     from: customConfigDir
@@ -35,7 +34,7 @@ module.exports = (env, argv) => {
         use: 'raw-loader'
     });
 
-    config.plugins.push(new CopyWebpackPlugin({
+    config.plugins.push(new rspack.CopyRspackPlugin({
         patterns: [
             { from: 'locales', to: 'locales' },
             { from: 'fonts', to: 'fonts' }
@@ -44,7 +43,7 @@ module.exports = (env, argv) => {
 
     // Add a custom base URL to resolve the config dir to the path of the dev server not root
     config.plugins.push(
-        new webpack.DefinePlugin({
+        new rspack.DefinePlugin({
             CONFIG_URL_PREFIX: JSON.stringify(IS_DEV_SERVER && customConfigDir ? "/ourgrid" : ""),
             OURGRID_APP_VERSION: JSON.stringify(packageJson.version)
         })

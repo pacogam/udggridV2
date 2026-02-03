@@ -142,7 +142,7 @@ export class OgUsageChart extends OrChart {
         amountOfPoints: 100
     };
 
-    static get styles() {
+    static get styles(): any {
         return [...super.styles, getAppStyle(), styling];
     }
 
@@ -244,7 +244,7 @@ export class OgUsageChart extends OrChart {
     }
 
     // Override so the interval for 24 hours is four hours.
-    protected _getInterval(diffInHours: number): [number, DatapointInterval] {
+    protected _getInterval(diffInHours: number): any {
         if(diffInHours <= 24) {
             return [4, DatapointInterval.HOUR];
         } else {
