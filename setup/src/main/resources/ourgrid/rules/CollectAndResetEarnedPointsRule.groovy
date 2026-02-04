@@ -15,19 +15,27 @@ Logger LOG = binding.LOG
 
 // -------------------------input------------------------- //
 
+/* Add the following attributes to the challenges asset:
+    - attributeName="collectAndResetEarnedPoints", valueType="Boolean"; Configuration items: "Read only", "Rule state"
+    - attributeName="totalPointsSummary", valueType="Text"; Configuration items: "Multiline", "Read only", "Rule state"
+ */
+
+// Set asset ID's:
 String meterSumAssetId = "setId1"
 String challengesAssetId = "setId2"
 String peaksAssetId = "setId3"
+
+// Set this variable to true when you want to reset all data-points when creating a points summary:
+boolean resetEarnedPoints = false
+
+// ------------------------------------------------------- //
 
 def assetType = OurgridMeterAsset
 String[] attributeNames = [OurgridMeterAsset.CHALLENGE_POINTS.name, OurgridMeterAsset.PEAK_POINTS.name, OurgridMeterAsset.CHALLENGE_EARNINGS.name]
 int newAttributeValue = 0
 
-// ------------------------------------------------------- //
-
 String attributeNameButton = "collectAndResetEarnedPoints"
 String attributeNameSummary = "totalPointsSummary"
-boolean resetEarnedPoints = false
 
 rules.add()
         .name("Collect and reset earned points rule")
