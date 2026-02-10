@@ -68,7 +68,9 @@
     "challengeAssetDataFailed": "Could not retrieve data from the challenges.",
     "challengeAssetDataPermission": "You do not have permission to read data of the challenges.",
     "peakPointsAssetDataFailed": "Could not retrieve data from the peak points.",
-    "peakPointsAssetDataPermission": "You do not have permission to read data of the peak points."
+    "peakPointsAssetDataPermission": "You do not have permission to read data of the peak points.",
+    "userDataFailed": "Unexpected error. Something went wrong when getting your user data.",
+    "userDataPermission": "Unexpected error. You do not have permission to read data of this account."
   },
   "onboarding": {
     "introText1": "Welcome to OurGrid. Through challenges and useful tips, we help you become aware of your electricity consumption and encourage you to optimize your consumption.",
