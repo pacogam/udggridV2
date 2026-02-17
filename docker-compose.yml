@@ -33,6 +33,7 @@ volumes:
   deployment-data:
   postgresql-data:
   manager-data:
+  ml-forecast-data:
   efs-data:
     driver: local
     driver_opts:
@@ -77,11 +78,11 @@ services:
       DOMAINNAME: ${OR_HOSTNAME?OR_HOSTNAME must be set}
       DOMAINNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       # USE A CUSTOM PROXY CONFIG - COPY FROM https://github.com/openremote/proxy/blob/main/haproxy.cfg
-      #HAPROXY_CONFIG: '/data/proxy/haproxy.cfg'
+      HAPROXY_CONFIG: '/data/proxy/haproxy.cfg'
     <<: *awslogs
 
   postgresql:
-    image: openremote/postgresql:${POSTGRESQL_VERSION:-latest}
+    image: openremote/postgresql:${POSTGRESQL_VERSION:-latest-slim}
     restart: always
     shm_size: 128mb
     volumes:
@@ -116,10 +117,6 @@ services:
     volumes:
       - manager-data:/storage
       - deployment-data:/deployment
-      # Map data should be stored local on host
-      # 1). Host filesystem
-#      - /deployment.local:/deployment.local
-      # 2) NFS/EFS network mount
       - efs-data:/efs
     ports:
       - "127.0.0.1:8405:8405" # Localhost metrics access
@@ -144,4 +141,21 @@ services:
       OR_FORECAST_SOLAR_API_KEY:
       OR_FIREBASE_CONFIG_FILE: /deployment/manager/fcm.json
       OR_KEYCLOAK_PUBLIC_URI:
+    <<: *awslogs
+
+  ml-forecast:
+    image: openremote/service-ml-forecast:${ML_FORECAST_VERSION:-latest}
+    restart: always
+    environment:
+      ML_LOG_LEVEL: INFO
+      ML_ENVIRONMENT: production
+      ML_WEBSERVER_ORIGINS: '["https://${OR_HOSTNAME?OR_HOSTNAME must be set}"]'
+      ML_OR_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}
+      ML_OR_KEYCLOAK_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}/auth
+      ML_OR_SERVICE_USER: mlforecast
+      ML_OR_SERVICE_USER_SECRET: ${ML_OR_SERVICE_USER_SECRET?ML_OR_SERVICE_USER_SECRET must be set}
+      ML_OR_SERVICE_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}
+      ML_API_PUBLISH_DOCS: false
+    volumes:
+      - ml-forecast-data:/app/deployment/data
     <<: *awslogs
