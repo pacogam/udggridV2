@@ -1,0 +1,94 @@
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+import UserNotifications
+import ORLib
+
+class NotificationService: UNNotificationServiceExtension {
+
+    public var contentHandler: ((UNNotificationContent) -> Void)?
+    public var bestAttemptContent: UNMutableNotificationContent?
+
+    open override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+        self.contentHandler = contentHandler
+        bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
+
+        if let bestAttemptContent {
+            processNotificationContent(bestAttemptContent)
+
+            if let notificationIdString = bestAttemptContent.userInfo[ActionType.notificationId] as? String, let notificationId = Int64(notificationIdString) {
+                if let defaults = UserDefaults(suiteName: DefaultsKey.groupEntitlement), let consoleId = defaults.string(forKey: GeofenceProvider.consoleIdKey) {
+                    ORNotificationResource.sharedInstance.notificationDelivered(notificationId: notificationId, targetId: consoleId)
+                }
+            }
+
+            contentHandler(bestAttemptContent.copy() as! UNNotificationContent)
+        }
+    }
+
+    open override func serviceExtensionTimeWillExpire() {
+        // Called just before the extension will be terminated by the system.
+        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
+        NSLog("NotifExtension Time has expired")
+        if let contentHandler, let bestAttemptContent {
+            processNotificationContent(bestAttemptContent)
+            contentHandler(bestAttemptContent)
+        }
+    }
+
+    private func processNotificationContent(_ content: UNMutableNotificationContent) {
+        let categoryName = "openremoteNotification"
+        content.categoryIdentifier = categoryName
+
+        // Buttons
+        if let buttonsString = content.userInfo[DefaultsKey.buttonsKey] as? String {
+            if let buttonsData = buttonsString.data(using: .utf8) {
+                if let buttons = try? JSONDecoder().decode([ORPushNotificationButton].self, from: buttonsData) {
+
+                    var notificationActions = [UNNotificationAction]()
+
+                    for button in buttons {
+                        if button.action != nil {
+                            notificationActions.append(UNNotificationAction(identifier: button.title, title: button.title, options: UNNotificationActionOptions.foreground))
+                        } else {
+                            notificationActions.append(UNNotificationAction(identifier: "declineAction", title: button.title, options: UNNotificationActionOptions.destructive))
+                        }
+                    }
+
+                    let category = UNNotificationCategory(identifier: categoryName, actions: notificationActions, intentIdentifiers: [], options: [])
+                    let categories: Set = [category]
+                    UNUserNotificationCenter.current().setNotificationCategories(categories)
+                }
+            }
+        }
+
+        // Actions
+        if let actionString = content.userInfo[DefaultsKey.actionKey] as? String {
+            if let actionsData = actionString.data(using: .utf8) {
+                if let action = try? JSONDecoder().decode(ORPushNotificationAction.self, from: actionsData) {
+                    content.userInfo[ActionType.appUrl] = action.url
+                    content.userInfo[ActionType.silent] = action.silent
+                    content.userInfo[ActionType.openInBrowser] = action.openInBrowser
+                    content.userInfo[ActionType.httpMethod] = action.httpMethod ?? "GET"
+                    content.userInfo[DefaultsKey.dataKey] = action.data ?? "null"
+                }
+            }
+        }
+    }
+}

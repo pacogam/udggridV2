@@ -1,0 +1,7 @@
+//
+//  Release.xcconfig
+//  OurGrid
+//
+
+// Base URL for Release configuration
+BASE_URL = https:/$()/ourgrid.openremote.app

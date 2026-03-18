@@ -1,0 +1,7 @@
+//
+//  Staging.xcconfig
+//  OurGrid
+//
+
+// Base URL for Staging configuration
+BASE_URL = https:/$()/staging.ourgrid.openremote.app

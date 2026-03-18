@@ -1,0 +1,7 @@
+//
+//  Debug.xcconfig
+//  OurGrid
+//
+
+// Base URL for Debug configuration
+BASE_URL = https:/$()/ourgrid.openremote.app
