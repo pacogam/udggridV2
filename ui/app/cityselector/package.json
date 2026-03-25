@@ -20,13 +20,13 @@
   },
   "dependencies": {
     "@lit/task": "^1.0.0",
-    "@openremote/or-mwc-components": "~1.17.3",
+    "@openremote/or-mwc-components": "~1.20.2",
     "lit": "^3.3.2",
     "model": "workspace:*",
     "rest": "workspace:*"
   },
   "devDependencies": {
-    "@openremote/util": "~1.17.3",
+    "@openremote/util": "~1.20.2",
     "webpack-bundle-analyzer": "^4.10.2"
   }
 }
