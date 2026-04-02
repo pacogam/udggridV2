@@ -5,6 +5,7 @@ dependencies {
     api project(":model")
     api "io.openremote:openremote-container:$openremoteVersion"
     api "io.openremote:openremote-manager:$openremoteVersion"
+    api "io.openremote.extension:openremote-ems-extension:$openremoteExtensionsVersion"
 }
 
 tasks.register('installDist') {
