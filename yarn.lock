@@ -1306,21 +1306,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/or-app@npm:~1.20.2":
-  version: 1.20.2
-  resolution: "@openremote/or-app@npm:1.20.2"
+"@openremote/or-app@npm:~1.22.0":
+  version: 1.22.0
+  resolution: "@openremote/or-app@npm:1.22.0"
   dependencies:
-    "@openremote/core": "npm:1.20.2"
-    "@openremote/model": "npm:1.20.2"
-    "@openremote/or-icon": "npm:1.20.2"
-    "@openremote/or-mwc-components": "npm:1.20.2"
-    "@openremote/or-translate": "npm:1.20.2"
+    "@openremote/core": "npm:1.22.0"
+    "@openremote/model": "npm:1.22.0"
+    "@openremote/or-icon": "npm:1.22.0"
+    "@openremote/or-mwc-components": "npm:1.22.0"
+    "@openremote/or-translate": "npm:1.22.0"
     "@reduxjs/toolkit": "npm:^1.8.1"
     "@webcomponents/webcomponentsjs": "npm:^2.6.0"
     lit: "npm:^3.3.1"
     navigo: "npm:^8.11.1"
     pwa-helpers: "npm:^0.9.0"
-  checksum: 10/d6c3e09431bbac7f5340d51f86519d07f5f8527b9312ec3cadc7ef9479a968220d1fd808f22f376125d589f15100a0b86d04fcf3ca42be1decc3ba3efe9de896
+  checksum: 10/f88311bb6f19484f8043ab33801c756219d6c5d4fdf4e58c660ebf9d0bc9baf644ff1d1c52d123c4d2c736908fc365d9831890a662435caf16fddec0e30dc50a
   languageName: node
   linkType: hard
 
@@ -1460,9 +1460,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/util@npm:~1.20.2":
-  version: 1.20.2
-  resolution: "@openremote/util@npm:1.20.2"
+"@openremote/util@npm:~1.22.0":
+  version: 1.22.0
+  resolution: "@openremote/util@npm:1.22.0"
   dependencies:
     "@custom-elements-manifest/analyzer": "npm:^0.11.0"
     "@rspack/cli": "npm:~1.7.5"
@@ -1493,7 +1493,7 @@ __metadata:
     webpack: "npm:^5.105.4"
   bin:
     orutil: ./cli.js
-  checksum: 10/6972614a6613fbdd03b05a59cdc129f8cad4bb6d64e3feeafcfc986f67435c766fc64770cd89a1593d5bb726d431dd839f3587f5284cbfedc30ff8f545625bf3
+  checksum: 10/370474bacc31326fb20373453f2d195b47fc78c0f7d67abd1dd8b3ff9ec1a2ddcd66fcb184dcc0732e86255dcc1a235e2ee29cf6ab0c95ac883b3f3097c91135
   languageName: node
   linkType: hard
 
@@ -3202,8 +3202,8 @@ __metadata:
   resolution: "cityselector-app@workspace:ui/app/cityselector"
   dependencies:
     "@lit/task": "npm:^1.0.0"
-    "@openremote/or-mwc-components": "npm:~1.20.2"
-    "@openremote/util": "npm:~1.20.2"
+    "@openremote/or-mwc-components": "npm:~1.22.0"
+    "@openremote/util": "npm:~1.22.0"
     lit: "npm:^3.3.2"
     model: "workspace:*"
     rest: "workspace:*"
@@ -6107,7 +6107,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "model@workspace:ui/component/model"
   dependencies:
-    "@openremote/util": "npm:~1.20.2"
+    "@openremote/util": "npm:~1.22.0"
   languageName: unknown
   linkType: soft
 
@@ -6439,12 +6439,12 @@ __metadata:
     "@lit/task": "npm:^1.0.0"
     "@material/chips": "npm:^14.0.0"
     "@material/circular-progress": "npm:^14.0.0"
-    "@openremote/core": "npm:~1.20.2"
-    "@openremote/model": "npm:~1.20.2"
-    "@openremote/or-app": "npm:~1.20.2"
+    "@openremote/core": "npm:~1.22.0"
+    "@openremote/model": "npm:~1.22.0"
+    "@openremote/or-app": "npm:~1.22.0"
     "@openremote/or-chart": "npm:~1.7.0"
-    "@openremote/or-mwc-components": "npm:~1.20.2"
-    "@openremote/util": "npm:~1.20.2"
+    "@openremote/or-mwc-components": "npm:~1.22.0"
+    "@openremote/util": "npm:~1.22.0"
     countup.js: "npm:^2.8.0"
     keen-slider: "npm:^6.8.6"
     lit: "npm:^3.3.2"
@@ -7099,8 +7099,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rest@workspace:ui/component/rest"
   dependencies:
-    "@openremote/rest": "npm:~1.20.2"
-    "@openremote/util": "npm:~1.20.2"
+    "@openremote/rest": "npm:~1.22.0"
+    "@openremote/util": "npm:~1.22.0"
     "@types/qs": "npm:^6.9.7"
     model: "workspace:*"
     qs: "npm:^6.8.0"
@@ -7143,7 +7143,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@openremote/util": "npm:~1.20.2"
+    "@openremote/util": "npm:~1.22.0"
     "@types/ws": "npm:<8.5.5"
   languageName: unknown
   linkType: soft
