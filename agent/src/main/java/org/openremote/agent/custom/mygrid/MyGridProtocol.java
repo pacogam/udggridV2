@@ -38,40 +38,41 @@ import static org.openremote.model.syslog.SyslogCategory.PROTOCOL;
 import static org.openremote.container.web.WebTargetBuilder.createClient;
 
 /**
- * Protocol implementation for integrating MyGrid batteries with
- * OpenRemote/Ourgrid.
- * 
+ * Integrates MyGrid {@code ModuleOneAsset} and {@code ModuleTwoAsset}
+ * batteries as {@link OurgridBatteryAsset}s.
+ *
  * <p>
- * This protocol provides the following functionality:
+ * The protocol syncs/provisions supported MyGrid assets, tracks their source
+ * asset type by id, forwards subscribed telemetry attributes, and configures
+ * MQTT links for writable attributes. Asset create/update events refresh the
+ * local asset and type tracking; delete events remove both.
  * </p>
- * 
- * <ul>
- * <li>Establishes and manages connection to the MyGrid MQTT broker using
- * configuration
- * from {@link MyGridAgent}</li>
- * 
- * <li>Provisions {@link OurgridBatteryAsset} assets by initially querying the
- * MyGrid OpenRemote HTTP API during startup and every minute thereafter
- * to retrieve assets of type ModuleOneAsset linked to the restricted MyGrid
- * service user</li>
- * 
- * <li>Subscribes to asset events via MQTT to provision the assets if they don't
- * exist yet locally</li>
- * 
- * <li>Subscribes to attribute events via MQTT to forward the attribute events
- * to the internal message broker</li>
- * 
- * <li>Automatically configures {@link MQTTAgentLink}s for each provisioned
- * {@link OurgridBatteryAsset} for publishing specific attributes</li>
- * </ul>
- * 
+ *
+ * <p>
+ * Writes to {@link OurgridBatteryAsset#ALLOW_AUTOMATIC_CONTROL_BUTTON} map
+ * {@code false} to {@code controlSource=MyGrid} and {@code true} to
+ * {@code controlSource=OurGrid}. {@code ModuleOneAsset} receives both the
+ * legacy {@code externalControl} boolean and the new {@code controlSource}
+ * enum value; {@code ModuleTwoAsset} receives only {@code controlSource}.
+ * Writes are ignored when the source MyGrid asset type is unknown.
+ * </p>
+ *
  * @see MyGridAgent
  * @see MyGridMQTTProtocol
  */
 public class MyGridProtocol implements Protocol<MyGridAgent> {
 
     public static final String PROTOCOL_DISPLAY_NAME = "MyGrid";
-    public static final String MYGRID_ASSET_TYPE = "ModuleOneAsset";
+    public static final String MYGRID_MODULE_ONE_ASSET_TYPE = "ModuleOneAsset";
+    public static final String MYGRID_MODULE_TWO_ASSET_TYPE = "ModuleTwoAsset";
+
+    private static final Set<String> MYGRID_ASSET_TYPES = Set.of(
+            MYGRID_MODULE_ONE_ASSET_TYPE,
+            MYGRID_MODULE_TWO_ASSET_TYPE);
+    private static final String EXTERNAL_CONTROL_ATTRIBUTE = "externalControl";
+    private static final String CONTROL_SOURCE_ATTRIBUTE = "controlSource";
+    private static final String CONTROL_SOURCE_MYGRID = "MyGrid";
+    private static final String CONTROL_SOURCE_OURGRID = "OurGrid";
 
     private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, MyGridProtocol.class);
 
@@ -82,12 +83,6 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             "powerSetpoint",
             "energyLevelPercentage",
     };
-
-    private static final Map<String, String> OURGRID_TO_MYGRID_MAPPING = new HashMap<>();
-
-    static {
-        OURGRID_TO_MYGRID_MAPPING.put("allowAutomaticControlButton", "externalControl");
-    }
 
     protected MyGridAgent agent;
     protected MyGridMQTTProtocol mqttProtocol;
@@ -106,6 +101,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
     // Subscribed topics
     protected final Set<String> subscribedTopics = ConcurrentHashMap.newKeySet();
+    protected final Map<String, String> myGridAssetTypes = new ConcurrentHashMap<>();
 
     public MyGridProtocol(MyGridAgent agent) {
         this.agent = agent;
@@ -176,6 +172,12 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     public void processLinkedAttributeWrite(AttributeEvent event) {
         LOG.info("MyGrid protocol processing linked attribute write: " + event.getName() + " for asset "
                 + event.getId());
+
+        if (OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName().equals(event.getName())) {
+            processAllowAutomaticControlButtonWrite(event);
+            return;
+        }
+
         mqttProtocol.processLinkedAttributeWrite(event);
     }
 
@@ -196,7 +198,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 10, 5000);
             tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 10, 5000);
 
-            // Syncing the assets from MyGrid (ModuleOneAsset) if the last sync was more
+            // Syncing the assets from MyGrid if the last sync was more
             // than MIN_INTERVAL_BETWEEN_SYNCS ago
             // This is to prevent constant syncs when the client gets disconnected and
             // re-connected.
@@ -280,6 +282,8 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             return;
         }
 
+        myGridAssetTypes.put(asset.getId(), asset.getType());
+
         // Update the existing asset with new agent links if it exists
         var existingAsset = getBatteryAssets().stream().filter(a -> a.getId().equals(asset.getId())).findFirst()
                 .orElse(null);
@@ -339,11 +343,8 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         var allowAutomaticControlButtonAttribute = batteryAsset
                 .getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON);
         if (allowAutomaticControlButtonAttribute.isPresent()) {
-            // Get the equivalent MyGrid attribute name for the publish topic
-            var mygridAttributeName = OURGRID_TO_MYGRID_MAPPING
-                    .get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName());
             var allowAutomaticControlButtonAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
-                    mygridAttributeName);
+                    CONTROL_SOURCE_ATTRIBUTE);
             allowAutomaticControlButtonAttribute.get().addOrReplaceMeta(
                     new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
                             .setPublishTopic(allowAutomaticControlButtonAttributePublishTopic).setUpdateOnWrite(true)));
@@ -379,10 +380,51 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         return getTopicPrefix() + "/writeattributevalue/" + attributeName + "/" + assetId;
     }
 
-    // Sync the relevant assets (ModuleOneAsset) from MyGrid to the local OpenRemote
+    protected boolean isSupportedMyGridAssetType(String assetType) {
+        return assetType != null && MYGRID_ASSET_TYPES.contains(assetType);
+    }
+
+    protected void processAllowAutomaticControlButtonWrite(AttributeEvent event) {
+        Boolean externalControl = event.getValue(Boolean.class).orElse(null);
+        if (externalControl == null) {
+            LOG.warning("Ignoring allowAutomaticControlButton write with non-boolean value for asset " + event.getId());
+            return;
+        }
+
+        String assetType = myGridAssetTypes.get(event.getId());
+        if (!isSupportedMyGridAssetType(assetType)) {
+            LOG.warning("Ignoring allowAutomaticControlButton write for asset " + event.getId()
+                    + " with unknown MyGrid asset type");
+            return;
+        }
+
+        if (mqttClient == null) {
+            LOG.warning("Ignoring allowAutomaticControlButton write because the MQTT client is not available");
+            return;
+        }
+
+        if (MYGRID_MODULE_ONE_ASSET_TYPE.equals(assetType)) {
+            publishMyGridAttribute(event.getId(), EXTERNAL_CONTROL_ATTRIBUTE, externalControl);
+        }
+
+        publishMyGridAttribute(event.getId(), CONTROL_SOURCE_ATTRIBUTE,
+                externalControl ? CONTROL_SOURCE_OURGRID : CONTROL_SOURCE_MYGRID);
+        mqttProtocol.updateLinkedAttribute(event.getRef(), externalControl);
+    }
+
+    protected void publishMyGridAttribute(String assetId, String attributeName, Object value) {
+        String topic = getAttributePublishTopic(assetId, attributeName);
+        String payload = ValueUtil.asJSON(value).orElse(String.valueOf(value));
+
+        LOG.info("Publishing MyGrid attribute write: " + attributeName + " for asset " + assetId
+                + " with payload " + payload);
+        mqttClient.sendMessage(new MQTTMessage<>(topic, payload));
+    }
+
+    // Sync the relevant assets from MyGrid to the local OpenRemote
     // instance
     protected void syncMyGridAssets() {
-        LOG.info("Syncing battery assets (ModuleOneAsset) from MyGrid");
+        LOG.info("Syncing battery assets (ModuleOneAsset, ModuleTwoAsset) from MyGrid");
 
         String myGridRealm = this.agent.getMyGridRealm()
                 .orElseThrow(() -> new IllegalArgumentException("Agent mygrid realm was not configured"));
@@ -393,7 +435,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         Map<String, String> oAuthResponse = getMyGridOAuthToken(url, myGridRealm);
 
         if (oAuthResponse.isEmpty()) {
-            LOG.severe("Failed to get auth token response while syncing battery assets (ModuleOneAsset) from MyGrid");
+            LOG.severe("Failed to get auth token response while syncing battery assets from MyGrid");
             return;
         }
 
@@ -401,7 +443,7 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
 
         if (accessToken == null) {
             LOG.severe(
-                    "Failed to get access token from OAuth response while syncing battery assets (ModuleOneAsset) from MyGrid");
+                    "Failed to get access token from OAuth response while syncing battery assets from MyGrid");
             return;
         }
 
@@ -412,15 +454,14 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
         mygridAssets.forEach(this::provisionBatteryAsset);
     }
 
-    // Query the MyGrid OpenRemote API for the assets with the ModuleOneAsset type
+    // Query the MyGrid OpenRemote API for the supported battery asset types
     protected List<Asset<?>> getMyGridAssets(String url, String realm, String accessToken) {
         String assetQueryUrl = url + "/api/" + realm + "/asset/query";
 
         ResteasyClient client = resteasyClient.get();
         Map<String, Object> assetQuery = new HashMap<>();
 
-        // Only query for ModuleOneAsset types
-        assetQuery.put("types", List.of(MYGRID_ASSET_TYPE));
+        assetQuery.put("types", List.of(MYGRID_MODULE_ONE_ASSET_TYPE, MYGRID_MODULE_TWO_ASSET_TYPE));
 
         try (Response response = client.target(assetQueryUrl)
                 .request()
@@ -507,19 +548,25 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     /*
      * Asset Event Consumer
      * Process the asset events from the MyGrid MQTT broker
-     * DELETE: delete the battery asset
+     * CREATE/UPDATE: provision or refresh the battery asset and source type
+     * DELETE: delete the battery asset and remove the source type
      */
     protected void onMyGridAssetEvent(MQTTMessage<String> msg) {
         SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
 
         if (event instanceof AssetEvent assetEvent) {
-            if (!assetEvent.getAssetType().equals(MYGRID_ASSET_TYPE)) {
+            if (!isSupportedMyGridAssetType(assetEvent.getAssetType())) {
                 return; // Don't process unrelated asset types.
             }
 
-            // Handle battery asset event for removal
+            // Handle battery asset lifecycle events
             switch (assetEvent.getCause()) {
+                case CREATE:
+                case UPDATE:
+                    provisionBatteryAsset(assetEvent.getAsset());
+                    break;
                 case DELETE:
+                    myGridAssetTypes.remove(assetEvent.getAsset().getId());
                     protocolAssetService.deleteAssets(assetEvent.getAsset().getId());
                     break;
                 default:
