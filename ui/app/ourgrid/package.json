@@ -23,11 +23,11 @@
     "@lit/task": "^1.0.0",
     "@material/chips": "^14.0.0",
     "@material/circular-progress": "^14.0.0",
-    "@openremote/core": "~1.22.0",
-    "@openremote/model": "~1.22.0",
-    "@openremote/or-app": "~1.22.0",
+    "@openremote/core": "~1.22.1",
+    "@openremote/model": "~1.22.1",
+    "@openremote/or-app": "~1.22.1",
     "@openremote/or-chart": "npm:~1.7.0",
-    "@openremote/or-mwc-components": "~1.22.0",
+    "@openremote/or-mwc-components": "~1.22.1",
     "countup.js": "^2.8.0",
     "keen-slider": "^6.8.6",
     "lit": "^3.3.2",
@@ -36,7 +36,7 @@
     "rest": "workspace:*"
   },
   "devDependencies": {
-    "@openremote/util": "~1.22.0",
+    "@openremote/util": "~1.22.1",
     "raw-loader": "^4.0.2",
     "webpack-bundle-analyzer": "^4.10.2"
   }

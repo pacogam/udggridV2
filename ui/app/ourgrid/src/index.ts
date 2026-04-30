@@ -3,7 +3,6 @@ import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {AppConfig, appReducer, RealmAppConfig} from '@openremote/or-app';
 import {pageHomeProvider} from './pages/page-home';
 import {OgApp} from './util/og-app';
-import {MapType} from '@openremote/model';
 import {page1SetupProvider} from './pages/setup/page1-setup';
 import {gridAppReducer} from './util/og-state';
 import {pageMenuProvider} from './pages/page-menu';
@@ -73,7 +72,6 @@ export const DefaultRealmConfig: RealmAppConfig = {
 ogApp.managerConfig = {
     loadTranslations: ['app', 'or'],
     autoLogin: true,
-    mapType: MapType.VECTOR
 };
 
 export const DEFAULT_LANGUAGE: string = 'nl';
