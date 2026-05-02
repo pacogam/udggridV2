@@ -1279,7 +1279,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/core@npm:1.22.1, @openremote/core@npm:~1.22.1":
+"@openremote/core@npm:1.22.1":
   version: 1.22.1
   resolution: "@openremote/core@npm:1.22.1"
   dependencies:
@@ -1299,34 +1299,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/core@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/core@npm:1.7.0"
-  dependencies:
-    "@openremote/or-icon": "npm:1.7.0"
-    "@openremote/rest": "npm:1.7.0"
-    i18next: "npm:^21.5.3"
-    i18next-http-backend: "npm:^1.3.1"
-    keycloak-js: "npm:^25.0.1"
-    moment: "npm:^2.29.4"
-    platform: "npm:^1.3.6"
-    qs: "npm:^6.8.0"
-    url-search-params-polyfill: "npm:^8.1.0"
-  checksum: 10/08a822d3d72160fb096072061b0c9f554b02c9d5fe600b86ee7f9d7bf10d9089291caba0cf306258ed98cf7f2a558d1a417405843864c8efcf4cbf16c25cb8a3
-  languageName: node
-  linkType: hard
-
-"@openremote/model@npm:1.22.1, @openremote/model@npm:~1.22.1":
+"@openremote/model@npm:1.22.1":
   version: 1.22.1
   resolution: "@openremote/model@npm:1.22.1"
   checksum: 10/3e7cd332cbb11354a29c005393107da0eb148f51283bbb160a0561babba5af882e18cc14c8ab57e4fac010a235acef6fa771a0ae4efc2be24fd8c7babfeb2ef6
-  languageName: node
-  linkType: hard
-
-"@openremote/model@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/model@npm:1.7.0"
-  checksum: 10/db95031de41fbe2984c7c03fdd890343c0134ee0595e702c7cfb79b968d3d9124f66b6b75f16b4c6f37aa03da8ccaacd6f4469b863d28271a24a03d80faebaf2
   languageName: node
   linkType: hard
 
@@ -1425,17 +1401,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/or-icon@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/or-icon@npm:1.7.0"
-  dependencies:
-    "@mdi/font": "npm:latest"
-    lit: "npm:^2.0.2"
-  checksum: 10/3b7a77177d90faae4cc1894cdedcbecc7aadaa315da2da320e7b5dc8944e395f15d997a041169ee38edad803436d8f0728d4f266550826f858acb09596b757c9
-  languageName: node
-  linkType: hard
-
-"@openremote/or-mwc-components@npm:1.22.1, @openremote/or-mwc-components@npm:~1.22.1":
+"@openremote/or-mwc-components@npm:1.22.1":
   version: 1.22.1
   resolution: "@openremote/or-mwc-components@npm:1.22.1"
   dependencies:
@@ -1474,37 +1440,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/or-mwc-components@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/or-mwc-components@npm:1.7.0"
-  dependencies:
-    "@material/button": "npm:^9.0.0"
-    "@material/checkbox": "npm:^9.0.0"
-    "@material/data-table": "npm:^9.0.0"
-    "@material/dialog": "npm:^9.0.0"
-    "@material/drawer": "npm:^9.0.0"
-    "@material/fab": "npm:^9.0.0"
-    "@material/floating-label": "npm:^9.0.0"
-    "@material/form-field": "npm:^9.0.0"
-    "@material/icon-button": "npm:^9.0.0"
-    "@material/line-ripple": "npm:^9.0.0"
-    "@material/menu": "npm:^9.0.0"
-    "@material/radio": "npm:^9.0.0"
-    "@material/ripple": "npm:^9.0.0"
-    "@material/select": "npm:^9.0.0"
-    "@material/slider": "npm:^9.0.0"
-    "@material/snackbar": "npm:^9.0.0"
-    "@material/switch": "npm:^9.0.0"
-    "@material/tab-bar": "npm:^9.0.0"
-    "@material/textfield": "npm:^9.0.0"
-    "@openremote/core": "npm:1.7.0"
-    "@openremote/or-icon": "npm:1.7.0"
-    "@openremote/or-translate": "npm:1.7.0"
-    lit: "npm:^2.0.2"
-  checksum: 10/0c29fb91b7ae92a1333b92a6425690a3565211c5152efc08189fbb73639f0fb0676bb33fc93c88ff782f6f3847b30830d07457fdabf2946a282b99161cdd9bab
-  languageName: node
-  linkType: hard
-
 "@openremote/or-translate@npm:1.22.1":
   version: 1.22.1
   resolution: "@openremote/or-translate@npm:1.22.1"
@@ -1515,34 +1450,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openremote/or-translate@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/or-translate@npm:1.7.0"
-  dependencies:
-    i18next: "npm:^21.5.3"
-    lit: "npm:^2.0.2"
-  checksum: 10/27d5ca1ea3a614e1c5e204da84a3ae6bd3c53e4eccabef24402995d10df6d3bdd3af1934ee11bc3101e6b86950b93ccbbf620b9ee8e6344b251e4f93db25ad37
-  languageName: node
-  linkType: hard
-
-"@openremote/rest@npm:1.22.1, @openremote/rest@npm:~1.22.1":
+"@openremote/rest@npm:1.22.1":
   version: 1.22.1
   resolution: "@openremote/rest@npm:1.22.1"
   dependencies:
     axios: "npm:1.13.6"
     qs: "npm:^6.8.0"
   checksum: 10/f8f146a8cde27762996efcaa8e820190c410941ac52361d5e6cb73f304f317705c637951739e1a1697bb8f45b146dbcf07bc0d9fc6b277176bc806e1d1a20ec3
-  languageName: node
-  linkType: hard
-
-"@openremote/rest@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@openremote/rest@npm:1.7.0"
-  dependencies:
-    "@openremote/model": "npm:1.7.0"
-    axios: "npm:0.24.0"
-    qs: "npm:^6.8.0"
-  checksum: 10/32d7a29e3bf0fba36a7bee1fe7464f0561509d6c8c5dfe27f75264a98a3dad19c7b9d1f065bf1f551cd268ef9313f942759458caa21bc98b5bbec5df32d82da7
   languageName: node
   linkType: hard
 
