@@ -13,6 +13,11 @@
         "realm": "arnhem"
       },
       {
+        "name": "Hilversum",
+        "ourGridUrl": "https://ourgrid.openremote.app/ourgrid",
+        "realm": "hilversum"
+      },
+      {
         "name": "Scheveningen",
         "ourGridUrl": "https://denhaag.openremote.app/ourgrid",
         "realm": "gems"
