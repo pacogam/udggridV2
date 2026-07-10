@@ -2,12 +2,12 @@
   "packageManager": "yarn@4.13.0",
   "private": true,
   "resolutions": {
-    "@openremote/core": "1.22.1",
-    "@openremote/model": "1.22.1",
-    "@openremote/or-icon": "1.22.1",
-    "@openremote/or-mwc-components": "1.22.1",
-    "@openremote/or-translate": "1.22.1",
-    "@openremote/rest": "1.22.1",
+    "@openremote/core": "1.26.1",
+    "@openremote/model": "1.26.1",
+    "@openremote/or-icon": "1.26.1",
+    "@openremote/or-mwc-components": "1.26.1",
+    "@openremote/or-translate": "1.26.1",
+    "@openremote/rest": "1.26.1",
     "axios": "1.13.2"
   },
   "workspaces": [
