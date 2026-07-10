@@ -15,26 +15,42 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.logging.Logger
 
-Logger LOG = binding.LOG
-RulesBuilder rules = binding.rules
 Assets assets = binding.assets
+RulesBuilder rules = binding.rules
+Logger LOG = binding.LOG
+
+
+// -------------------------input------------------------- //
 
 // Set the asset ID's:
 String meterSumAssetId = "setId1"
 String challengesAssetId = "setId2"
 
+// ------------------------------------------------------- //
 
-// Time triggers for rules
-ZoneId zone = ZoneId.of("Europe/Amsterdam")
+
+// Triggers for rules
+boolean chargingTriggered = false
 int previousHourRule1 = -1
-long previousMillisRule2 = System.currentTimeMillis() - System.currentTimeMillis() % (1 * 60 * 1000) + (1 * 60 * 1000)
-
-// Action triggers for rules
 String challengeGeneralStatusPreviousRule2 = ""
 String challengeGeneralStatusPreviousRule3 = ""
-String challengeGeneralStatusPreviousRule4 = ""
 
+ZoneId zone = ZoneId.of("Europe/Amsterdam")
 def sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") as SimpleDateFormat
+
+// Time triggers for rules
+long rulesStartTimeMillis = System.currentTimeMillis()
+
+// Set the [triggerPeriodMillis, triggerDelayMillis]:
+long[] triggerInputsRule4 = [1 * 60 * 1000, 1 * 60 * 1000]
+long triggerTimeMillisRule4 = calculateNextTriggerTime(rulesStartTimeMillis, triggerInputsRule4)
+
+private static long calculateNextTriggerTime(long timeMillis, long[] triggerInputs) {
+    long triggerPeriodMillis = triggerInputs[0]
+    long triggerDelayMillis = triggerInputs[1]
+
+    return timeMillis - timeMillis % triggerPeriodMillis + triggerPeriodMillis + triggerDelayMillis
+}
 
 rules.add()
         .priority(1)
@@ -43,7 +59,7 @@ rules.add()
             boolean triggerRule = false
             int currentHour = ZonedDateTime.ofInstant(facts.getClock().getNow(), zone).toLocalDateTime().getHour()
 
-            // Trigger rule at 2:00am and 1:00pm
+            // Trigger rule at 2:00 and 13:00
             if ((previousHourRule1 == 1 && currentHour == 2) || (previousHourRule1 == 12 && currentHour == 13)) {
                 triggerRule = true
             }
@@ -54,6 +70,7 @@ rules.add()
         })
         .then({ facts ->
             def attributeNames = [
+                    OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
                     OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
                     OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name,
                     OurgridBatteryAsset.POWER_IMPORT_MAX.name,
@@ -64,37 +81,30 @@ rules.add()
 
             batteriesAttributes.each {
                 def assetId = it.key as String
-                def energyLevelPercentage = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name) as Double
-                def energyLevelPercentageMax = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name) as Double
-                def powerImportMax = it.value.get(OurgridBatteryAsset.POWER_IMPORT_MAX.name) as Double
-                def powerSetpoint = it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double
+                def allowAutomaticControlButton = it.value.getOrDefault(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name, null) as Boolean
+                def energyLevelPercentage = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name, null) as Double
+                def energyLevelPercentageMax = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name, null) as Double
+                def powerImportMax = it.value.getOrDefault(OurgridBatteryAsset.POWER_IMPORT_MAX.name, null) as Double
+                def powerSetpoint = it.value.getOrDefault(OurgridBatteryAsset.POWER_SETPOINT.name, 0.0) as double
 
-                if (powerImportMax == null || energyLevelPercentage == null || energyLevelPercentageMax == null || energyLevelPercentage >= energyLevelPercentageMax) {
-                    powerImportMax = 0.0
-                }
+                if (allowAutomaticControlButton == true) {
+                    if (energyLevelPercentage == null || energyLevelPercentageMax == null || powerImportMax == null || energyLevelPercentage >= energyLevelPercentageMax) {
+                        powerImportMax = 0.0
+                    }
 
-                if (powerSetpoint == null) {
-                    powerSetpoint = 0.0
-                }
-
-                if (powerSetpoint != powerImportMax) {
-                    assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, powerImportMax)
+                    if (powerSetpoint != powerImportMax) {
+                        assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, powerImportMax)
+                        chargingTriggered = true
+                    }
                 }
             }
         })
 
 rules.add()
         .priority(2)
-        .name("OurGrid battery control power set-point rule")
-        .when({ facts ->
+        .name("OurGrid battery start of challenge rule")
+        .when(facts -> {
             boolean triggerRule = false
-            long currentMillis = facts.clock.currentTimeMillis
-
-            // Trigger rule every 1 minute = 60000 ms
-            if (currentMillis >= previousMillisRule2) {
-                previousMillisRule2 += 60000
-                return true
-            }
 
             def challengeGeneralStatus = facts
                     .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name))
@@ -112,107 +122,48 @@ rules.add()
 
             return triggerRule
         })
-        .then({ facts ->
-            def challengeGeneralStatus = facts
-                    .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name))
+        .then(facts -> {
+            def challengeStart = facts
+                    .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_START.name))
                     .flatMap { it.value }
                     .orElse(null) as String
 
-            def activeChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.activeChallenge.toString() as String
+            def challengeEnd = facts
+                    .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
+                    .flatMap { it.value }
+                    .orElse(null) as String
 
-            if (challengeGeneralStatus == activeChallenge) {
-                def challengeEnd = facts
-                        .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
-                        .flatMap { it.value }
-                        .orElse(null) as String
+            long currentTimeMillis = facts.clock.currentTimeMillis
+            long challengeStartMillis = sdf.parse(challengeStart).getTime()
+            long challengeEndMillis = sdf.parse(challengeEnd).getTime()
 
-                long challengeEndMillis = sdf.parse(challengeEnd).getTime()
-                long currentMillis = facts.clock.currentTimeMillis
+            def attributeNames = [
+                    OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
+                    OurgridBatteryAsset.ENERGY_CAPACITY.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name,
+                    OurgridBatteryAsset.POWER_EXPORT_MAX.name,
+                    OurgridBatteryAsset.POWER_SETPOINT.name
+            ] as String[]
 
-                // Power set-point logic during challenge
-                def attributeNames = [
-                        OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
-                        OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name,
-                        OurgridBatteryAsset.ENERGY_CAPACITY.name,
-                        OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
-                        OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name,
-                        OurgridBatteryAsset.POWER_EXPORT_MAX.name,
-                        OurgridBatteryAsset.POWER_SETPOINT.name
-                ] as String[]
+            def batteriesAttributes = getBatteriesAttributes(meterSumAssetId, attributeNames, facts) as Map<String, Map<String, Object>>
 
-                def batteriesAttributes = getBatteriesAttributes(meterSumAssetId, attributeNames, facts) as Map<String, Map<String, Object>>
+            batteriesAttributes.each {
+                def assetId = it.key as String
+                def allowAutomaticControlButton = it.value.get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name) as Boolean
+                def energyCapacity = it.value.get(OurgridBatteryAsset.ENERGY_CAPACITY.name) as Double
+                def energyLevelPercentage = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name) as Double
+                def energyLevelPercentageMax = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name) as Double
+                def energyLevelPercentageMin = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name) as Double
+                def powerExportMax = it.value.get(OurgridBatteryAsset.POWER_EXPORT_MAX.name) as Double
+                def powerSetpoint = it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double
 
-                batteriesAttributes.each {
-                    def assetId = it.key as String
-                    def allowAutomaticControlButton = it.value.get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name) as Boolean
-                    def allowDischargingButton = it.value.get(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name) as Boolean
-                    def energyCapacity = it.value.get(OurgridBatteryAsset.ENERGY_CAPACITY.name) as Double
-                    def energyLevelPercentage = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name) as Double
-                    def energyLevelPercentageMin = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name) as Double
-                    def powerExportMax = it.value.get(OurgridBatteryAsset.POWER_EXPORT_MAX.name) as Double
-                    def powerSetpoint = (it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double)
-
-                    if (powerSetpoint == null || energyLevelPercentage == null || energyLevelPercentageMin == null ||
-                            (powerSetpoint < 0.0 && energyLevelPercentage <= energyLevelPercentageMin)) {
-                        powerSetpoint = 0.0
-                    }
-
-                    if (allowDischargingButton == null) {
-                        allowDischargingButton = false
-                    }
-
-                    if (allowAutomaticControlButton == true && allowDischargingButton == false) {
-                        allowDischargingButton = true
-                        assets.dispatch(assetId, OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, true)
-                    }
-
-                    def powerSetpointDischarge = 0.0 as Double
-
-                    if (challengeEnd != null && energyCapacity != null && energyLevelPercentage != null && energyLevelPercentageMin != null && powerExportMax != null &&
-                            allowDischargingButton == true && currentMillis < challengeEndMillis) {
-                        def challengeDurationHours = (challengeEndMillis - currentMillis) / 3600000 as Double
-                        def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
-
-                        if (energyCapacityUsable > 0.0) {
-                            powerSetpointDischarge = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
-
-                            if (powerSetpointDischarge < -powerExportMax) {
-                                powerSetpointDischarge = -powerExportMax
-                            }
-                        }
-                    }
-
-                    if (powerSetpoint != powerSetpointDischarge) {
-                        assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, powerSetpointDischarge)
-                    }
-                }
-            } else {
-                // Power set-point logic outside challenge
-                def attributeNames = [
-                        OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
-                        OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name,
-                        OurgridBatteryAsset.POWER_SETPOINT.name
-                ] as String[]
-
-                def batteriesAttributes = getBatteriesAttributes(meterSumAssetId, attributeNames, facts) as Map<String, Map<String, Object>>
-
-                batteriesAttributes.each {
-                    def assetId = it.key as String
-                    def energyLevelPercentage = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name) as Double
-                    def energyLevelPercentageMax = it.value.get(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name) as Double
-                    def powerSetpoint = it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double
-
-                    def powerSetpointNew = powerSetpoint as Double
-
-                    if (powerSetpointNew == null || energyLevelPercentage == null || energyLevelPercentageMax == null ||
-                            (powerSetpointNew > 0.0 && energyLevelPercentage >= energyLevelPercentageMax)
-                    ) {
-                        powerSetpointNew = 0.0
-                    }
-
-                    if (powerSetpoint == null || powerSetpoint != powerSetpointNew) {
-                        assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, 0.0)
-                    }
+                if (allowAutomaticControlButton == true) {
+                    boolean allowDischargingButtonNew = true
+                    double powerSetpointNew = calculatePowerSetpoint(energyCapacity, energyLevelPercentage, energyLevelPercentageMax, energyLevelPercentageMin, powerExportMax, powerSetpoint, allowDischargingButtonNew, currentTimeMillis, challengeStartMillis, challengeEndMillis)
+                    updatePowerSetpoint(assets, assetId, allowAutomaticControlButton, allowDischargingButtonNew, powerSetpoint, powerSetpointNew)
+                    assets.dispatch(assetId, OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, allowDischargingButtonNew)
                 }
             }
         })
@@ -244,16 +195,21 @@ rules.add()
         })
         .then({ facts ->
             def attributeNames = [
-                    OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name
+                    OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
+                    OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name,
+                    OurgridBatteryAsset.POWER_SETPOINT.name
             ] as String[]
 
             def batteriesAttributes = getBatteriesAttributes(meterSumAssetId, attributeNames, facts) as Map<String, Map<String, Object>>
 
             batteriesAttributes.each {
                 def assetId = it.key as String
+                def allowAutomaticControlButton = it.value.get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name) as Boolean
                 def allowDischargingButton = it.value.get(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name) as Boolean
+                def powerSetpoint = it.value.get(OurgridBatteryAsset.POWER_SETPOINT.name) as Double
 
                 if (allowDischargingButton == true) {
+                    updatePowerSetpoint(assets, assetId, allowAutomaticControlButton, allowDischargingButton, powerSetpoint, 0.0)
                     assets.dispatch(assetId, OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, false)
                 }
             }
@@ -261,60 +217,169 @@ rules.add()
 
 rules.add()
         .priority(4)
-        .name("OurGrid battery join challenge automatically rule")
+        .name("OurGrid battery control set-point rule")
         .when({ facts ->
-            boolean triggerRule = false
+            long currentTimeMillis = facts.clock.currentTimeMillis
 
-            // Check if challenges asset ID is valid
-            def challengesAsset = facts.matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_GENERAL_STATUS.name)) as Optional<AttributeInfo>
-
-            if (challengesAsset.isEmpty()) {
-                LOG.warning("No Challenges asset found with ID: '" + challengesAssetId + "'; Check asset ID and if the rule state configuration is added to the attribute")
-                return false
+            // Trigger rule on a time-based interval
+            if (currentTimeMillis > triggerTimeMillisRule4) {
+                triggerTimeMillisRule1 = calculateNextTriggerTime(currentTimeMillis, triggerInputsRule4)
+                return true
             }
 
-            def challengeGeneralStatus = challengesAsset.get().value.orElse(null).toString() as String
-            def joinedChallenge = OurgridChallengesAsset.ChallengeStatusGeneralValueType.joinedChallenge.toString() as String
-
-            if (challengeGeneralStatus == joinedChallenge && challengeGeneralStatusPreviousRule4 != joinedChallenge) {
-                def joinChallenge = OurgridMeterAsset.ChallengeStatusValueType.joinChallenge.toString() as String
-                def metersReadyToJoin = assets.getResults(new AssetQuery().parents(meterSumAssetId).types(OurgridMeterAsset).attributeValue(OurgridMeterAsset.CHALLENGE_STATUS.name, joinChallenge)).any()
-                // Trigger rule after district rules have updated meter challenge status to joinChallenge
-                if (metersReadyToJoin) {
-                    challengeGeneralStatusPreviousRule4 = joinedChallenge
-                    triggerRule = true
-                }
-            } else {
-                challengeGeneralStatusPreviousRule4 = challengeGeneralStatus
-            }
-
-            return triggerRule
+            return false
         })
         .then({ facts ->
-            def joinedChallenge = OurgridMeterAsset.ChallengeStatusValueType.joinedChallenge.toString() as String
+            // Charging triggered, skip set-point calculation for this cycle
+            if (chargingTriggered) {
+                chargingTriggered = false
+                return
+            }
 
-            def attributeNamesMeterAsset = [
-                    OurgridMeterAsset.CHALLENGE_STATUS.name
+            def challengeStart = facts
+                    .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_START.name))
+                    .flatMap { it.value }
+                    .orElse(null) as String
+
+            def challengeEnd = facts
+                    .matchFirstAssetState(new AssetQuery().ids(challengesAssetId).attributeName(OurgridChallengesAsset.CHALLENGE_END.name))
+                    .flatMap { it.value }
+                    .orElse(null) as String
+
+            long currentTimeMillis = facts.clock.currentTimeMillis
+            long challengeStartMillis = sdf.parse(challengeStart).getTime()
+            long challengeEndMillis = sdf.parse(challengeEnd).getTime()
+
+            def attributeNames = [
+                    OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name,
+                    OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name,
+                    OurgridBatteryAsset.ENERGY_CAPACITY.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name,
+                    OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name,
+                    OurgridBatteryAsset.POWER_EXPORT_MAX.name,
+                    OurgridBatteryAsset.POWER_SETPOINT.name
             ] as String[]
 
-            def metersAttributes = getChildrenAttributes(meterSumAssetId, attributeNamesMeterAsset, OurgridMeterAsset, facts) as Map<String, Map<String, Object>>
+            def batteriesAttributes = getBatteriesAttributes(meterSumAssetId, attributeNames, facts) as Map<String, Map<String, Object>>
+
+            batteriesAttributes.each {
+                def assetId = it.key as String
+                def allowAutomaticControlButton = it.value.get(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name) as Boolean
+                def allowDischargingButton = it.value.getOrDefault(OurgridBatteryAsset.ALLOW_DISCHARGING_BUTTON.name, false) as Boolean
+                def energyCapacity = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_CAPACITY.name, null) as Double
+                def energyLevelPercentage = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE.name, null) as Double
+                def energyLevelPercentageMax = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.name, null) as Double
+                def energyLevelPercentageMin = it.value.getOrDefault(OurgridBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.name, null) as Double
+                def powerExportMax = it.value.getOrDefault(OurgridBatteryAsset.POWER_EXPORT_MAX.name, null) as Double
+                def powerSetpoint = it.value.getOrDefault(OurgridBatteryAsset.POWER_SETPOINT.name, null) as Double
+
+                double powerSetpointNew = calculatePowerSetpoint(energyCapacity, energyLevelPercentage, energyLevelPercentageMax, energyLevelPercentageMin, powerExportMax, powerSetpoint, allowDischargingButton, currentTimeMillis, challengeStartMillis, challengeEndMillis)
+                updatePowerSetpoint(assets, assetId, allowAutomaticControlButton, allowDischargingButton, powerSetpoint, powerSetpointNew)
+            }
+        })
+
+rules.add()
+        .priority(5)
+        .name("OurGrid battery disable automatic control rule")
+        .when({ facts ->
 
             // Get household meter asset ID's
             def meterAssetIds = assets.getResults(new AssetQuery().parents(meterSumAssetId).types(OurgridMeterAsset)).map { it.id }.toList() as String[]
 
-            // Join challenge if meter has a battery with allowed automatic control
-            facts.matchAssetState(new AssetQuery().parents(meterAssetIds).types(OurgridBatteryAsset).attributeNames(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name))
-                    .each {
-                        if (it.value.orElse(false)) {
-                            def meterAssetId = it.parentId as String
-                            def meterChallengeStatus = metersAttributes[meterAssetId]?.get(OurgridMeterAsset.CHALLENGE_STATUS.name)?.toString() as String
-                            if (meterChallengeStatus != joinedChallenge) {
-                                assets.dispatch(meterAssetId, OurgridMeterAsset.CHALLENGE_STATUS.name, joinedChallenge)
-                            }
+            AssetQuery assetQuery = new AssetQuery().parents(meterAssetIds).types(OurgridBatteryAsset).attributeNames(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.name)
+
+            // Find attribute changes
+            List<AttributeInfo> attributeChanges = facts
+                    .matchAssetState(assetQuery)
+                    .filter { attributeInfo ->
+                        boolean timestampChanged = false
+
+                        // Get previous attribute state from facts
+                        Optional<AttributeInfo> attributeInfoPrevious = facts.matchFirst(attributeInfo.id + attributeInfo.name)
+
+                        // Check if attribute timestamp has been updated (attribute value can be the same)
+                        if (attributeInfo.timestamp > attributeInfoPrevious.map { it.timestamp }.orElse(0)) {
+                            timestampChanged = true
                         }
+                        return timestampChanged
                     }
+                    .toList()
+
+            // Bind attribute info for the then trigger
+            if (!attributeChanges.isEmpty()) {
+                facts.bind("attributeChanges", attributeChanges)
+            }
+
+            // Trigger rule if there are attribute changes to process
+            return !attributeChanges.isEmpty()
+        })
+        .then({ facts ->
+            def attributeChanges = facts.bound("attributeChanges") as List<AttributeInfo>
+
+            // Create fact for each attribute change
+            if (attributeChanges != null) {
+                attributeChanges.forEach { attributeInfo -> facts.put(attributeInfo.id + attributeInfo.name, attributeInfo as Object) }
+            }
+
+            attributeChanges.forEach { attributeInfo ->
+                String assetId = attributeInfo.id
+                Boolean value = attributeInfo.value.orElse(null)
+
+                if (value == false) {
+                    // Update attribute
+                    assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, 0.0)
+                }
+            }
         })
 
+
+private static double calculatePowerSetpoint(Double energyCapacity, Double energyLevelPercentage, double energyLevelPercentageMax, double energyLevelPercentageMin, Double powerExportMax, Double powerSetpoint, Boolean allowDischargingButton, long currentTimeMillis, long challengeStartMillis, long challengeEndMillis) {
+    double powerSetpointDefault = 0.0
+
+    if (energyCapacity == null || energyLevelPercentage == null || powerExportMax == null) {
+        return powerSetpointDefault
+    }
+
+    if (powerSetpoint < 0.0 && allowDischargingButton == false) {
+        return powerSetpointDefault
+    }
+
+    if (powerSetpoint < 0.0 && energyLevelPercentage <= energyLevelPercentageMin) {
+        return powerSetpointDefault
+    }
+
+    if (powerSetpoint > 0.0 && energyLevelPercentage >= energyLevelPercentageMax) {
+        return powerSetpointDefault
+    }
+
+    double powerSetpointNew = powerSetpoint
+
+    if (allowDischargingButton == true && currentTimeMillis >= challengeStartMillis && currentTimeMillis < challengeEndMillis) {
+        def challengeDurationHours = (challengeEndMillis - currentTimeMillis) / 3600000 as Double
+        def energyCapacityUsable = energyCapacity * (energyLevelPercentage - energyLevelPercentageMin) / 100 as Double
+
+        if (energyCapacityUsable > 0.0) {
+            powerSetpointNew = Math.round(-1000 * energyCapacityUsable / challengeDurationHours) / 1000
+
+            if (powerSetpointNew < -powerExportMax) {
+                powerSetpointNew = -powerExportMax
+            }
+        }
+    }
+
+    return powerSetpointNew
+}
+
+private static void updatePowerSetpoint(Assets assets, String assetId, Boolean allowAutomaticControlButton, Boolean allowDischargingButton, Double powerSetpoint, double powerSetpointNew) {
+    if (allowAutomaticControlButton == false && allowDischargingButton == false) {
+        return
+    }
+
+    if (powerSetpoint == null || powerSetpoint != powerSetpointNew) {
+        assets.dispatch(assetId, OurgridBatteryAsset.POWER_SETPOINT.name, powerSetpointNew)
+    }
+}
 
 private Map<String, Map<String, Object>> getBatteriesAttributes(String meterSumAssetId, String[] attributeNames, RulesFacts facts) {
     // Check if parent asset ID is valid
@@ -344,35 +409,4 @@ private Map<String, Map<String, Object>> getBatteriesAttributes(String meterSumA
     }
 
     return batteriesAttributes
-}
-
-private Map<String, Map<String, Object>> getChildrenAttributes(String parentAssetId, String[] attributeNames, Class<Asset> assetType, RulesFacts facts) {
-    // Check if parent asset ID is valid
-    def parentAsset = assets.getResults(new AssetQuery().ids(parentAssetId)).findFirst() as Optional<Asset>
-
-    if (parentAsset.isEmpty()) {
-        LOG.warning("No parent asset found with ID: '" + parentAsset + "'; Check asset ID")
-        return
-    }
-
-    def attributesList = facts
-            .matchAssetState(new AssetQuery().parents(parentAssetId).types(assetType).attributeNames(attributeNames))
-            .toList() as List<AttributeInfo>
-
-    // Group attributes per asset ID
-    def attributes = [:].withDefault { [:].withDefault { null } } as Map<String, Map<String, Object>>
-
-    attributesList.each { attributeInfo ->
-        def id = attributeInfo.id as String
-        def attributeName = attributeInfo.name as String
-        def value = attributeInfo.value.orElse(null)
-
-        attributes[id][attributeName] = value
-    }
-
-    if (attributes.isEmpty()) {
-        LOG.warning("No attributes found for children of parent asset with ID: '" + parentAsset + "'; Check children assets and if the rule state configuration is added to the attributes")
-    }
-
-    return attributes
 }

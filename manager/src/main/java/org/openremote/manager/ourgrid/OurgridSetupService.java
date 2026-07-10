@@ -258,6 +258,7 @@ public class OurgridSetupService implements ContainerService {
         String rulesName1 = "OurGrid: " + districtName + " District rules";
         String rulesName2 = "OurGrid: " + districtName + " District Batteries rules";
         String rulesName3 = "OurGrid: " + districtName + " District Vehicle rules";
+        String rulesName4 = "OurGrid: " + districtName + " District Join challenge automatically rule";
 
         try (InputStream inputStream = OurgridSetupService.class.getResourceAsStream("/ourgrid/rules/OurgridDistrictRules.groovy")) {
             if (inputStream != null) {
@@ -308,6 +309,22 @@ public class OurgridSetupService implements ContainerService {
             }
         } catch (Exception e) {
             LOG.warning(String.format("assetName='%s', assetId='%s'; Rule '%s' was not created for district '%s'; Exception: %s", rulesName3 , ourgridSetupAsset.getName(), ourgridSetupAsset.getId(), districtAssetName, e));
+        }
+
+        try (InputStream inputStream = OurgridSetupService.class.getResourceAsStream("/ourgrid/rules/OurgridJoinChallengeAutomaticallyRule.groovy")) {
+            if (inputStream != null) {
+
+                String rules = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+
+                rules = rules.replaceFirst("setId1", ourgridMeterSumAsset.getId());
+                rules = rules.replaceFirst("setId2", ourgridChallengesAsset.getId());
+                RealmRuleset districtRuleSet = new RealmRuleset(realmName, rulesName4, GROOVY, rules);
+
+                // Merge rules into database
+                persistenceService.doReturningTransaction(entityManager -> entityManager.merge(districtRuleSet));
+            }
+        } catch (Exception e) {
+            LOG.warning(String.format("assetName='%s', assetId='%s'; Rule '%s' was not created for district '%s'; Exception: %s", rulesName4 , ourgridSetupAsset.getName(), ourgridSetupAsset.getId(), districtAssetName, e));
         }
 
         infoFieldMessage = "Created district \"" + districtAssetName + "\":\n" +
