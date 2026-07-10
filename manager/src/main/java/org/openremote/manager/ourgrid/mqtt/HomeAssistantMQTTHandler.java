@@ -21,12 +21,10 @@ package org.openremote.manager.ourgrid.mqtt;
 
 import io.netty.buffer.ByteBuf;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
-import org.keycloak.KeycloakSecurityContext;
+import org.openremote.container.security.AuthContext;
 import org.openremote.manager.mqtt.MQTTHandler;
 import org.openremote.model.protocol.mqtt.Topic;
 import org.openremote.model.syslog.SyslogCategory;
-
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -58,20 +56,20 @@ public class HomeAssistantMQTTHandler extends MQTTHandler {
 
     // Always return reject, don't need Home Assistant to subscribe to any topics
     @Override
-    public boolean canSubscribe(RemotingConnection connection, KeycloakSecurityContext securityContext, Topic topic) {
+    public boolean canSubscribe(RemotingConnection connection, AuthContext authContext, Topic topic) {
         return false;
     }
 
     // Override checkCanPublish to directly call canPublish
     @Override
-    public boolean checkCanPublish(RemotingConnection connection, KeycloakSecurityContext securityContext, Topic topic) {
-        return canPublish(connection, securityContext, topic);
+    public boolean checkCanPublish(RemotingConnection connection, AuthContext authContext, Topic topic) {
+        return canPublish(connection, authContext, topic);
     }
 
 
     // Allow always for home assistant topic
     @Override
-    public boolean canPublish(RemotingConnection connection, KeycloakSecurityContext securityContext, Topic topic) {
+    public boolean canPublish(RemotingConnection connection, AuthContext authContext, Topic topic) {
         return true;
     }
 
