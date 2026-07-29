@@ -1,0 +1,335 @@
+{
+  "appName": "OurGrid",
+  "home": "Home",
+  "menu": "Menu",
+  "intro": "Introductie",
+  "devices": "Apparaten",
+  "energies": "Energies",
+  "houseCharacteristics": "Mijn huis",
+  "privacyStatement": "Privacy",
+  "language": "Taal",
+  "continue": "Verder",
+  "remove": "Verwijderen",
+  "save": "Opslaan",
+  "success": "Opgeslagen",
+  "tryAgain": "Probeer opnieuw",
+  "saved": "bespaard",
+  "delete": "Verwijderen",
+  "connect": "Verbinden",
+  "cancel": "Annuleren",
+  "areYouSure": "Weet je het zeker?",
+  "switch": "Verander",
+  "logout": "Log uit",
+  "copy": "Kopieer",
+  "copySuccess": "Gekopieerd naar je klipbord!",
+  "calendar": {
+    "lastWeek": "[Afgelopen] dddd",
+    "lastDay": "[Gisteren]",
+    "sameDay": "[Vandaag]",
+    "sameElse": "[Afgelopen] dddd",
+    "nextDay": "[Morgen]"
+  },
+  "page-account": {
+    "heading": "Jouw Account",
+    "username": "Gebruikersnaam",
+    "email": "Email adres",
+    "changePassword": "Wachtwoord wijzigen",
+    "deleteAccount": "Account verwijderen",
+    "deleteAccountConfirm": "Hiermee verwijder je hele account, en alle data die eraan gekoppeld is.\n\nDit kan niet worden teruggedraaid.",
+    "city": "Stad",
+    "switchCity": "Verander van stad"
+  },
+  "page-privacy": {
+    "heading": "Privacy verklaring",
+    "accept": "Accepteer"
+  },
+  "page-homeAutomation": {
+    "heading": "Instructies"
+  },
+  "challenge": {
+    "point": "punt",
+    "points": "punten",
+    "percentOfPointsEarned": "% van de punten verdiend"
+  },
+  "error": {
+    "noOurGridAccess": "Je hebt geen toegang tot OurGrid.",
+    "districtAssetDataFailed": "Kon data van de wijk niet ophalen.",
+    "districtAssetDataPermission": "Je hebt geen toestemming on de data van de wijk in te zien.",
+    "historicalAssetData": "Fout tijdens het ophalen van sensordata uit het verleden.",
+    "historicalDistrictData": "Fout tijdens het ophalen van wijkdata uit het verleden.",
+    "challengeDataFailed": "Kon lijst aan uitdagingen niet laden.",
+    "setupCodeInvalid": "This device code is invalid.",
+    "setupDeviceNotFound": "Dit apparaat bestaat niet.",
+    "setupDeviceAlreadyLinked": "Dit apparaat is al verbonden met een andere gebruiker.",
+    "setupDeviceServerError": "We hebben je meter gevonden, maar er was een onbekende fout op de server. Probeer de app te herstarten.",
+    "unknown": "Onbekende error",
+    "userAssetFailed": "Kon data van de sensor niet vinden.",
+    "userAssetDataFailed": "Kon data van de sensor niet ophalen.",
+    "userAssetDataPermission": "Je hebt geen toestemming om de data van de sensor te lezen.",
+    "challengeAssetDataFailed": "Kon uitdagingen niet ophalen.",
+    "challengeAssetDataPermission": "Je hebt geen toestemming om de data van uitdagingen te lezen.",
+    "peakPointsAssetDataFailed": "Kon data van de pieken niet ophalen",
+    "peakPointsAssetDataPermission": "Je hebt geen toestemming om de data van pieken te lezen."
+  },
+  "onboarding": {
+    "introText1": "Welkom bij OurGrid. Door middel van uitdagingen en nuttige tips helpen wij je bewust te maken van je electriciteitsverbruik en moedigen we je aan je verbruik te optimaliseren.",
+    "introText2": "Doe mee met onze gemeenschap van energiebewuste gebruikers en maak een verschil voor de toekomst!",
+    "page2-heading": "Piekverbruik",
+    "page2-text1": "De meeste mensen gebruiken 's ochtends en 's avonds de meeste electriciteit. Maar hun zonnepanelen leveren juist overdag het meest.",
+    "page2-text2": "Dit leidt tot grote verschillen en piekbelastingen op het electriciteitsnet, hier is het netwerk niet voor gemaakt.",
+    "page2-text3": "Het spreiden van je verbruik is belangrijk om het netwerk te ontlasten en duurzamer gebruik te bevorderen.",
+    "page3-heading": "Actueel verbruik",
+    "page3-text": "Door de aangesloten dongle krijg je live inzicht in je eigen verbruik. Als het netwerk overbelast dreigt te raken zal je scherm rood kleuren."
+  },
+  "deviceList": {
+    "addDevice": "Voeg apparaat toe",
+    "deleteHeatPump": "Verwijderen?",
+    "deleteHeatPumpConfirm": "Weet je het zeker dat je je warmtepomp wilt ontkoppelen?",
+    "deleteEv": "Auto verwijderen?",
+    "deleteEvConfirm": "Weet je het zeker dat je je elektrische auto wilt ontkoppelen?",
+    "deleteBattery": "Batterij verwijderen?",
+    "deleteBatteryConfirm": "Weet je het zeker dat je je batterij wilt ontkoppelen?",
+    "deleteHomeAutomation": "Verwijderen?",
+    "deleteHomeAutomationConfirm": "Weet je het zeker dat je je huis automatisering wilt ontkoppelen?"
+  },
+  "addDevice": {
+    "intro": "Voeg apparaat toe",
+    "subtitle": "Welk apparaat wil je toevoegen?",
+    "select-ev": "Elektrische auto",
+    "select-heatpump": "Warmtepomp",
+    "select-battery": "Batterij",
+    "select-homeautomation": "Huis automatisering"
+  },
+  "addEv": {
+    "intro": "Jouw elektrische auto",
+    "question_automaticChargeControl": "Wil je automatisch meedoen aan uitdagingen, en het auto laden uitstellen?",
+    "selectBrand": "Automerk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "connectDevice": "Verbind uw apparaat",
+    "goBack": "Terug",
+    "saveSuccess": "Je elektrische auto is toegevoegd!",
+    "error_needCharger": "Je kunt alleen je auto toevoegen als je thuis een laadpaal hebt."
+  },
+  "addHeatpump": {
+    "intro": "Jouw warmtepomp",
+    "selectBrand": "Thermostaat merk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je warmtepomp is toegevoegd!"
+  },
+  "addBattery": {
+    "intro": "Jouw batterij",
+    "selectBrand": "Batterij merk",
+    "selectBrandPlaceholder": "Selecteer een merk",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je batterij is toegevoegd!"
+  },
+  "addHomeAutomation": {
+    "intro": "Jouw huis automatisering",
+    "selectBrand": "Systeem",
+    "selectBrandPlaceholder": "Selecteer systeem",
+    "addDevice": "Apparaat opslaan",
+    "saveSuccess": "Je huis automatisering is toegevoegd!"
+  },
+  "panel_tips": {
+    "heading": "Tips & Acties",
+    "subtitle": "Manieren om te besparen",
+    "text1": "Even niet koken",
+    "text2-manual": "Auto laden uitstellen",
+    "text2-automatic": "Auto laden uitstellen",
+    "action2-automatic": "Auto laden uitgesteld.",
+    "text3": "Een wasje draaien",
+    "text4": "Verwarming omlaag",
+    "text5": "Even geen water koken",
+    "text6-alt": "Ontlaad je batterij",
+    "text6-on": "Batterij is aan het ontladen",
+    "text6-on-inactive": "Batterij ontlaadt niet",
+    "text6-off": "Je batterij ontladen?",
+    "text6-off-active": "We ontladen je batterij",
+    "action6-on": "Stop met ontladen",
+    "action6-off": "Ja, ga je gang",
+    "action6-success-on": "Batterij aan het ontladen",
+    "action6-success-off": "Gestopt met ontladen"
+  },
+  "panel_characteristics": {
+    "SOLAR_PANELS": "Zonnepanelen",
+    "ELECTRIC_VEHICLE": "Elektrische auto",
+    "VEHICLE_CHARGER": "Auto oplader",
+    "HEAT_PUMP": "Warmte pomp",
+    "question_solarPanels": "Ik heb zonnepanelen.",
+    "question_electricVehicle": "Ik heb een elektrische auto.",
+    "question_vehicleCharger": "Heb je een laadpaal thuis?",
+    "question_battery": "Ik heb een batterij.",
+    "question_heatPump": "Ik heb een warmtepomp.",
+    "select_electricVehicleBrand": "Kies het automerk",
+    "select_vehicleChargerBrand": "Kies merk van de laadpaal",
+    "select_heatPumpBrand": "Kies merk van de thermostaat.",
+    "select_batteryBrand": "Kies merk van de batterij",
+    "notApplicable": "Niet van toepassing."
+  },
+  "panel_deviceInfo": {
+    "yourDevice": "Jouw meter",
+    "noDeviceFound": "Geen apparaat verbonden",
+    "noDeviceText": "Stel een apparaat in",
+    "version": "Versie",
+    "unknownModel": "Onbekend model",
+    "unknownID": "Onbekend dongle ID",
+    "unknownVersion": "Onbekende versie",
+    "buttonText": "Stel apparaat in",
+    "refreshData": "Eigenschappen",
+    "removePromptText": "Je apparaat word losgekoppeld van je huishouden."
+  },
+  "panel_batteryInfo": {
+    "yourBattery": "Jouw batterij",
+    "noBatteryFound": "Geen batterij gevonden",
+    "unknownManufacturer": "Onbekende fabrikant",
+    "version": "Versie",
+    "unknown": "Onbekend",
+    "autoCharge": "Automatische sturing",
+    "turnOnSnackbar": "Automatische sturing staat nu aan!",
+    "turnOffSnackbar": "Automatische sturing staat nu uit."
+  },
+  "panel_heatpumpInfo": {
+    "yourHeatpump": "Jouw warmtepomp",
+    "noHeatpumpFound": "Geen warmtepomp gevonden",
+    "thermostat": "Thermostaat",
+    "unknownBrand": "Onbekend merk"
+  },
+  "panel_evInfo": {
+    "yourVehicle": "Jouw elektrische auto",
+    "noVehicleFound": "Geen elektrische auto gevonden",
+    "unknownBrand": "Onbekend merk",
+    "unknownModel": "Onbekend model",
+    "autoCharge": "Automatische sturing",
+    "autoChargeConfirm": "Om automatisch het laden van je auto uit te stellen, moet je je auto verbinden met OurGrid.",
+    "hasCharger": "Eigen laadpaal",
+    "noCharger": "Zonder laadpaal",
+    "turnOnSnackbar": "Automatische sturing staat nu aan!",
+    "turnOffSnackbar": "Automatische sturing staat nu uit."
+  },
+  "panel_solarInfo": {
+    "yourSolar": "Jouw zonnepanelen",
+    "noSolarFound": "Geen zonnepanelen gevonden",
+    "unknownManufacturer": "Onbekende fabrikant",
+    "estimatedCapacity": "Voorspelde capaciteit: {{capacity}} kWp"
+  },
+  "panel_homeAutomationInfo": {
+    "yourHomeAutomation": "Jouw huis automatisering",
+    "noHomeAutomationFound": "Kon details van je huis automatisering systeem niet vinden!",
+    "unknownBrand": "Onbekend systeem",
+    "info": "Instructies",
+    "credentials": "Inloggegevens"
+  },
+  "panel_peakUsage": {
+    "heading": "Onze wijk heeft piekbelasting!"
+  },
+  "panel_peakNotification": {
+    "heading": "Onze wijk verwacht piekbelasting!",
+    "buttonText": "Doe mee aan uitdaging",
+    "joinedText": "Je doet mee!",
+    "startingSoon": "Uitdaging start binnenkort",
+    "startingInFewSeconds": "Uitdaging start bijna",
+    "startingInFewMinutes": "Uitdaging start over {{time}}",
+    "alreadyJoined": "Je doet al mee aan de uitdaging!",
+    "primaryText": "Help mee door nu energie te besparen. Gebruik tijdens deze uitdaging maximaal ",
+    "wattToSpare": "{{value}}",
+    "maxEarnings": "maximaal {{points}} punten"
+  },
+  "panel_earnings": {
+    "totalPoints": "Totaal aantal punten",
+    "exchangeRate": "Wisselkoers",
+    "expectedEarnings": "Verwachte opbrengst",
+    "perPoint": "per punt"
+  },
+  "panel_trophies": {
+    "heading": "Prijzenkast",
+    "totalPoints": "Totaal aantal punten",
+    "challengesJoined": "Uitdagingen",
+    "pointsEarned": "punten verdiend",
+    "noChallengesFound": "Geen uitdagingen gevonden",
+    "totalPeaksAvoided": "Pieken vermeden",
+    "peakPointsEarned": "punten verdiend",
+    "noPeaksFound": "Geen pieken gevonden",
+    "loadMore": "Meer laden",
+    "peakTutorial": "Verdien elke dag een piekpunt zolang je verbruik in de piek periodes lager is dan je gemiddelde verbruik gedurende die dag."
+  },
+  "panel_usageHistory": {
+    "heading": "Historisch verbruik",
+    "headingpv": "Your generation",
+    "subtitle": "met voorspelde netwerkbelasting"
+  },
+  "panel_challengeComplete": {
+    "heading": "Uitdaging voltooid!",
+    "subtitle": "Bedankt voor het deelnemen aan deze uitdaging.",
+    "pointsEarned": "{{value}} punten verdiend",
+    "minutesJoined": "{{value}} minuten meegedaan",
+    "action": "Uitdaging afsluiten"
+  },
+  "panel_challengeMissed": {
+    "heading": "Wat jammer!",
+    "text": "Je hebt de uitdaging gemist, probeer het de volgende keer opnieuw.",
+    "action": "Sluiten"
+  },
+  "setup": {
+    "page2-heading": "Installatie",
+    "page2-text": "Verbind je apparaat door de gekopieerde code uit de Dongle Connect App hier te plakken:",
+    "page2-inputlabel": "Plak code hier",
+    "page2-action": "Klaar"
+  },
+  "vehicleBrands": {
+    "AUDI": "Audi",
+    "HYUNDAI": "Hyundai",
+    "KIA": "Kia",
+    "OPEL": "Opel",
+    "PEUGEOT": "Peugeot",
+    "RENAULT": "Renault",
+    "TESLA": "Tesla",
+    "VOLKSWAGEN": "Volkswagen",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "VOLVO": "Volvo",
+    "other": "Anders"
+  },
+  "goToVehicleBrandApp_vehicleBrands": {
+    "AUDI": "Ga naar je myAudi app",
+    "HYUNDAI": "Ga naar je Hyundai Bluelink app",
+    "KIA": "Ga naar je Kia App",
+    "OPEL": "Ga naar je myOpel app",
+    "PEUGEOT": "Ga naar je MYPEUGEOT APP",
+    "RENAULT": "Ga naar je My Renault app",
+    "TESLA": "Ga naar je Tesla app",
+    "VOLKSWAGEN": "Ga naar je Volkswagen app",
+    "VOLKSWAGEN_ID": "Ga naar je Volkswagen app",
+    "VOLVO": "Ga naar je Volvo Cars app"
+  },
+  "vehicleChargerBrands": {
+    "TESLA": "Tesla",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "other": "Anders"
+  },
+  "heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Resideo / Honeywell",
+    "TOON": "Toon",
+    "NEST": "Nest",
+    "other": "Anders"
+  },
+  "goToHeatPumpBrandApp_heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Ga naar je Resideo app",
+    "TOON": "Ga naar je Toon app",
+    "NEST": "Ga naar je Nest app"
+  },
+  "batteryBrands": {
+    "MYGRID": "MyGrid",
+    "LG": "LG",
+    "SONNEN_BATTERIE": "sonnenBatterie",
+    "TESLA_POWERWALL": "Tesla Powerwall",
+    "other": "Anders"
+  },
+  "homeAutomationBrands": {
+    "HOME_ASSISTANT": "Home Assistant",
+    "OPENHAB": "openHAB"
+  },
+  "privacy-statement": "Met de OurGrid app gebruiken we je energie verbruiksdata voor de volgende doelen: je persoonlijk inzicht geven in je eigen verbruik; het voorspellen van het buurtverbruik; het bepalen welke uitdagingen we aan welke gebruiker sturen, en het bijhouden van je individueel verdiende punten. Je energie verbruiksdata worden na 3 maanden automatisch verwijderd, je verdiende punten bewaren we een kalenderjaar.\n\nJe geanonimiseerde energie verbruiksdata wordt verder alleen gedeeld met je gemeente, OpenRemote en Resourcefully. Deze organisaties gebruiken deze data alleen om de effectiviteit van het voorkomen van netwerkcongestie te evalueren en de applicatie verder te verbeteren en juist te laten functioneren.\n\nMocht je je data verwijderd willen hebben, dan kun je altijd de dongle loskoppelen van je slimme meter en je account verwijderen. Alle meter data wordt na drie maanden automatisch verwijderd.",
+  "switchCity": "Verander van stad",
+  "switchCityConfirm": "Weet je zeker dat je van stad wil veranderen?"
+}

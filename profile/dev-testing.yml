@@ -4,13 +4,13 @@
 #
 # Please see profile/deploy.yml for configuration details for each service.
 #
-x-base: &base https://github.com/openremote/openremote.git#1.26.1:profile/deploy.yml
+version: '2.4'
 
 services:
 
   keycloak:
     extends:
-      file: *base
+      file: ../../openremote/profile/deploy.yml
       service: keycloak
     volumes:
       # Map custom themes
@@ -29,10 +29,11 @@ services:
 
   postgresql:
     extends:
-      file: *base
+      file: ../../openremote/profile/deploy.yml
       service: postgresql
+    image: openremote/postgresql@sha256:b0a39e4baa12b2d02a9e694c1104edc8c0b8029f5d066cde4d373dfbf500fe22
     volumes:
-      - ./tmp:/storage
+      - ../openremote/tmp:/storage
     # Access directly if needed on localhost
     ports:
       - "5432:5432"

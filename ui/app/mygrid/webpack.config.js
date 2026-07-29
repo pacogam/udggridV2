@@ -1,0 +1,66 @@
+const util = require("@openremote/util");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const packageJson = require('./package.json');
+const rawLoader = require('raw-loader');
+
+module.exports = (env, argv) => {
+
+    const customConfigDir = env.config;
+    const managerUrl = env.managerUrl;
+    const keycloakUrl = env.keycloakUrl;
+    const IS_DEV_SERVER = process.argv.find(arg => arg.includes("serve"));
+    const config = util.getAppConfig(argv.mode, IS_DEV_SERVER, __dirname, managerUrl, keycloakUrl);
+
+    if (IS_DEV_SERVER && customConfigDir) {
+        console.log("CUSTOM_CONFIG_DIR: " + customConfigDir);
+        // Try and include the static files in the specified config dir if we're in dev server mode
+        config.plugins.push(new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: customConfigDir
+                },
+            ]
+        }));
+
+        console.log("Webpack bundle analyzer URL: http://127.0.0.1:8888")
+        config.plugins.push(new BundleAnalyzerPlugin({
+            openAnalyzer: false
+        }))
+    }
+
+    config.module.rules.push({
+        test: /\.md$/i,
+        use: 'raw-loader'
+    });
+
+    config.plugins.push(new CopyWebpackPlugin({
+        patterns: [
+            { from: 'locales', to: 'locales' },
+            { from: 'fonts', to: 'fonts' },
+            { from: 'images', to: 'images' }
+        ]
+    }));
+
+    // Add a custom base URL to resolve the config dir to the path of the dev server not root
+    config.plugins.push(
+        new webpack.DefinePlugin({
+            CONFIG_URL_PREFIX: JSON.stringify(IS_DEV_SERVER && customConfigDir ? "/ourgrid" : ""),
+            OURGRID_APP_VERSION: JSON.stringify(packageJson.version)
+        })
+    );
+
+
+    /*  config.resolve = {
+    ...config.resolve,
+    alias: {
+        'lit': require('path').resolve(__dirname, 'node_modules/lit'),
+        'lit-html': require('path').resolve(__dirname, 'node_modules/lit-html'),
+        'lit-element': require('path').resolve(__dirname, 'node_modules/lit-element')
+    }
+    }; */
+
+
+    return config;
+};

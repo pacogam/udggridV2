@@ -1,0 +1,350 @@
+{
+  "appName": "OurGrid",
+  "home": "Home",
+  "menu": "Menu",
+  "intro": "Introduction",
+  "devices": "Devices",
+  "energies": "Energies",
+  "houseCharacteristics": "My House",
+  "privacyStatement": "Privacy Statement",
+  "language": "Language",
+  "continue": "Continue",
+  "remove": "Remove",
+  "save": "Save",
+  "success": "Saved",
+  "tryAgain": "Try again",
+  "saved": "saved",
+  "delete": "Delete",
+  "connect": "Connect",
+  "cancel": "Cancel",
+  "areYouSure": "Are you sure?",
+  "switch": "Switch",
+  "logout": "Log out",
+  "copy": "Copy",
+  "copySuccess": "Copied to your clipboard!",
+  "calendar": {
+    "lastWeek": "[Last] dddd",
+    "lastDay": "[Yesterday]",
+    "sameDay": "[Today]",
+    "sameElse": "[Last] dddd",
+    "nextDay": "[Tomorrow]"
+  },
+  "page-account": {
+    "heading": "Your Account",
+    "username": "Username",
+    "email": "Email address",
+    "changePassword": "Change password",
+    "deleteAccount": "Delete account",
+    "deleteAccountConfirm": "This will delete your account, and all the data it contains.\n\nThis action cannot be reversed.",
+    "city": "City",
+    "switchCity": "Switch city"
+  },
+  "page-privacy": {
+    "heading": "Privacy Statement",
+    "accept": "Accepteer"
+  },
+  "page-homeAutomation": {
+    "heading": "Instructions"
+  },
+  "challenge": {
+    "point": "point",
+    "points": "points",
+    "percentOfPointsEarned": "% of points earned"
+  },
+  "error": {
+    "noOurGridAccess": "You do not have access to OurGrid.",
+    "districtAssetDataFailed": "Could not retrieve data from the district.",
+    "districtAssetDataPermission": "You do not have permission to read data from the district.",
+    "historicalAssetData": "Error when receiving historical sensor data.",
+    "historicalDistrictData": "Error when receiving historical district data.",
+    "challengeDataFailed": "Failed to get challenge history.",
+    "setupCodeInvalid": "This device code is invalid.",
+    "setupDeviceNotFound": "This device does not exist.",
+    "setupDeviceAlreadyLinked": "This device is already linked to a user.",
+    "setupDeviceServerError": "Your device was found, but there was an error on the server. Try to restart the app.",
+    "unknown": "Unknown error.",
+    "userAssetFailed": "Could not find your sensor at home.",
+    "userAssetDataFailed": "Could not retrieve data from your sensor at home.",
+    "userAssetDataPermission": "You do not have permission to read data from your sensor.",
+    "challengeAssetDataFailed": "Could not retrieve data from the challenges.",
+    "challengeAssetDataPermission": "You do not have permission to read data of the challenges.",
+    "peakPointsAssetDataFailed": "Could not retrieve data from the peak points.",
+    "peakPointsAssetDataPermission": "You do not have permission to read data of the peak points."
+  },
+  "onboarding": {
+    "introText1": "Welcome to OurGrid. Through challenges and useful tips, we help you become aware of your electricity consumption and encourage you to optimize your consumption.",
+    "introText2": "Join our community of energy-conscious users and make a difference for the future!",
+    "page2-heading": "Peak usage",
+    "page2-text1": "Most people use the most electricity in the morning and evening. But their solar panels deliver the most during the day.",
+    "page2-text2": "This leads to large differences and peak loads on the electricity grid, the network is not designed for this.",
+    "page2-text3": "Spreading your consumption is important to relieve the network and promote more sustainable use.",
+    "page3-heading": "Current usage",
+    "page3-text": "The connected dongle gives you live insight into your own consumption. If the network is in danger of becoming overloaded, your screen will turn red."
+  },
+  "deviceList": {
+    "addDevice": "Add Device",
+    "deleteHeatPump": "Delete heat pump?",
+    "deleteHeatPumpConfirm": "Are you sure you want to remove your heat pump?",
+    "deleteEv": "Delete vehicle?",
+    "deleteEvConfirm": "Are you sure you want to remove your electric vehicle?",
+    "deleteBattery": "Delete battery?",
+    "deleteBatteryConfirm": "Are you sure you want to remove your battery?",
+    "deleteHomeAutomation": "Are you sure?",
+    "deleteHomeAutomationConfirm": "Are you sure you want to remove your home automation?"
+  },
+  "addDevice": {
+    "intro": "Add Device",
+    "subtitle": "What device do you want to add?",
+    "select-ev": "Electric vehicle",
+    "select-heatpump": "Heat pump",
+    "select-battery": "Battery",
+    "select-homeautomation": "Home automation"
+  },
+  "addEv": {
+    "intro": "Your electric vehicle",
+    "question_automaticChargeControl": "Do you have an electric vehicle charger at home?",
+    "selectBrand": "Vehicle brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "connectDevice": "Connect your device",
+    "goBack": "Back",
+    "saveSuccess": "Added your electric vehicle!",
+    "error_needCharger": "You can only add your car if you charge at home."
+  },
+  "addHeatpump": {
+    "intro": "Your heat pump",
+    "selectBrand": "Thermostat brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your heat pump!"
+  },
+  "addBattery": {
+    "intro": "Your battery",
+    "selectBrand": "Battery brand",
+    "selectBrandPlaceholder": "Select a brand",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your battery!"
+  },
+  "addHomeAutomation": {
+    "intro": "Your home automation",
+    "selectBrand": "System",
+    "selectBrandPlaceholder": "Select system",
+    "addDevice": "Save device",
+    "saveSuccess": "Added your home automation!"
+  },
+  "panel_tips": {
+    "heading": "Tips & Actions",
+    "subtitle": "Ways to save energy",
+    "text1": "Cook at a later time",
+    "text2-manual": "Delay charging your car",
+    "text2-automatic": "Car charge has been delayed",
+    "action2-automatic": "We will delay your car charging",
+    "text3": "Washing your laundry",
+    "text4": "Turn down the heater",
+    "text5": "Don't boil any water",
+    "text6-alt": "Discharge your battery",
+    "text6-on": "Battery is discharging",
+    "text6-on-inactive": "Battery is not discharging",
+    "text6-off": "Discharge your battery?",
+    "text6-off-active": "We are discharging your battery",
+    "action6-on": "Please don't discharge",
+    "action6-off": "Yes, go ahead",
+    "action6-success-on": "Discharging your battery",
+    "action6-success-off": "Stopped discharging"
+  },
+  "panel_characteristics": {
+    "SOLAR_PANELS": "Solar panels",
+    "ELECTRIC_VEHICLE": "Electric vehicle",
+    "VEHICLE_CHARGER": "Vehicle charger",
+    "HEAT_PUMP": "Heat pump",
+    "question_solarPanels": "I have solar panels.",
+    "question_electricVehicle": "I have an electric vehicle.",
+    "question_vehicleCharger": "Do you have an electric vehicle charger at home?",
+    "question_battery": "I have a battery.",
+    "question_heatPump": "I have a heat pump.",
+    "select_electricVehicleBrand": "Select the vehicle brand",
+    "select_vehicleChargerBrand": "Select the charger brand",
+    "select_heatPumpBrand": "Select the thermostat brand",
+    "select_batteryBrand": "Select the battery brand",
+    "notApplicable": "Not applicable."
+  },
+  "panel_deviceInfo": {
+    "yourDevice": "Your meter",
+    "noDeviceFound": "No device connected",
+    "noDeviceText": "Please set up your device",
+    "unknownModel": "Unknown model",
+    "version": "Version",
+    "unknownID": "Unknown dongle ID",
+    "unknownVersion": "Unknown version",
+    "buttonText": "Setup device",
+    "refreshData": "Refresh data",
+    "removePromptText": "Your device will be unlinked from your household."
+  },
+  "panel_batteryInfo": {
+    "yourBattery": "Your battery",
+    "noBatteryFound": "No battery connected",
+    "unknownManufacturer": "Unknown manufacturer",
+    "version": "Version",
+    "unknown": "Unknown",
+    "autoCharge": "Automatic control",
+    "turnOnSnackbar": "Automatic control is now on!",
+    "turnOffSnackbar": "Automatic control is now off!"
+  },
+  "panel_heatpumpInfo": {
+    "yourHeatpump": "Your heat pump",
+    "noHeatpumpFound": "No heat pump found",
+    "thermostat": "Thermostat",
+    "unknownBrand": "Unkown brand"
+  },
+  "panel_evInfo": {
+    "yourVehicle": "Your electric vehicle",
+    "noVehicleFound": "No electric vehicle found",
+    "unknownBrand": "Unkown brand",
+    "unknownModel": "Unknown model",
+    "autoCharge": "Automatic control",
+    "autoChargeConfirm": "To enable automatic control of vehicle charging, you have to connect your car to OurGrid.",
+    "hasCharger": "Own charger",
+    "noCharger": "No charger",
+    "turnOnSnackbar": "Automatic control is now on!",
+    "turnOffSnackbar": "Automatic control is now off!"
+  },
+  "panel_solarInfo": {
+    "yourSolar": "Your solar panels",
+    "noSolarFound": "No solar panels found",
+    "unknownManufacturer": "Unknown manufacturer",
+    "estimatedCapacity": "Estimated capacity: {{capacity}} kWp"
+  },
+  "panel_homeAutomationInfo": {
+    "yourHomeAutomation": "Your home automation",
+    "noHomeAutomationFound": "Error: could not get information from your home automation system!",
+    "unknownBrand": "Unknown system",
+    "info": "Instructions",
+    "credentials": "Credentials"
+  },
+  "panel_peakUsage": {
+    "heading": "Our district has a peak load!"
+  },
+  "panel_peakNotification": {
+    "heading": "Our district expects a peak load!",
+    "buttonText": "Join the challenge",
+    "joinedText": "Joined!",
+    "startingSoon": "Challenge starts any second",
+    "startingInFewSeconds": "Challenge starts any second",
+    "startingInFewMinutes": "Challenge starts in {{time}}",
+    "alreadyJoined": "Already joined the challenge!",
+    "primaryText": "Help by saving energy right now. During this challenge, use a maximum of ",
+    "wattToSpare": "{{value}}",
+    "maxEarnings": "maximum {{points}} points"
+  },
+  "panel_peakNotification_udg": {
+    "heading": "Our district expects a peak load!",
+    "buttonText": "OK",
+    "joinedText": "I read it!",
+    "startingSoon": "Challenge starts any second",
+    "startingInFewSeconds": "Challenge starts any second",
+    "startingInFewMinutes": "Challenge starts in {{time}}",
+    "alreadyJoined": "Already joined the challenge!",
+    "primaryText": "Help by saving energy right now. During this challenge, use a maximum of ",
+    "reduceConsumption1": "Help by saving energy right now.",
+    "reduceConsumption2": "Reduce consumption between {{start}} and {{end}}.",
+    "timeStart": "{{value}}",
+    "timeEnd": "{{value}}",
+    "maxEarnings": "maximum {{points}} points"    
+  },   
+  "panel_earnings": {
+    "totalPoints": "Total points earned",
+    "exchangeRate": "Exchange rate",
+    "expectedEarnings": "Expected earnings",
+    "perPoint": "per point"
+  },
+  "panel_trophies": {
+    "heading": "Your Trophies",
+    "totalPoints": "Total amount of points",
+    "challengesJoined": "Challenges",
+    "pointsEarned": "points earned",
+    "noChallengesFound": "No challenges found",
+    "totalPeaksAvoided": "Peaks avoided",
+    "peakPointsEarned": "points earned",
+    "noPeaksFound": "No peaks found",
+    "loadMore": "Load more",
+    "peakTutorial": "Earn a peak point every day as long as your consumption during peak periods is lower than your average consumption during that day."
+  },
+  "panel_usageHistory": {
+    "heading": "Your Consumption",
+    "headingpv": "Your generation",
+    "subtitle": "with predicted load on the grid"
+  },
+  "panel_challengeComplete": {
+    "heading": "Challenge completed!",
+    "subtitle": "Thank you for participating in the challenge.",
+    "pointsEarned": "{{value}} points earned",
+    "minutesJoined": "Joined for {{value}} minutes",
+    "action": "End challenge"
+  },
+  "panel_challengeMissed": {
+    "heading": "Sorry!",
+    "text": "You missed the challenge, try again next time!",
+    "action": "Close"
+  },
+  "setup": {
+    "page2-heading": "Device Setup",
+    "page2-text": "Setup your device by filling in the code that you copied from the Dongle Connect App here:",
+    "page2-inputlabel": "Paste code here",
+    "page2-action": "Finish"
+  },
+  "vehicleBrands": {
+    "AUDI": "Audi",
+    "HYUNDAI": "Hyundai",
+    "KIA": "Kia",
+    "OPEL": "Opel",
+    "PEUGEOT": "Peugeot",
+    "RENAULT": "Renault",
+    "TESLA": "Tesla",
+    "VOLKSWAGEN": "Volkswagen",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "VOLVO": "Volvo",
+    "other": "Other"
+  },
+  "goToVehicleBrandApp_vehicleBrands": {
+    "AUDI": "Go to your myAudi app",
+    "HYUNDAI": "Go to your Hyundai Bluelink app",
+    "KIA": "Go to your Kia App",
+    "OPEL": "Go to your myOpel app",
+    "PEUGEOT": "Go to your MYPEUGEOT APP",
+    "RENAULT": "Go to your My Renault app",
+    "TESLA": "Go to your Tesla app",
+    "VOLKSWAGEN": "Go to your Volkswagen app",
+    "VOLKSWAGEN_ID": "Go to your Volkswagen app",
+    "VOLVO": "Go to your Volvo Cars app"
+  },
+  "vehicleChargerBrands": {
+    "TESLA": "Tesla",
+    "VOLKSWAGEN_ID": "Volkswagen ID",
+    "other": "Other"
+  },
+  "heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Resideo / Honeywell",
+    "TOON": "Toon",
+    "NEST": "Nest",
+    "other": "Other"
+  },
+  "goToHeatPumpBrandApp_heatPumpBrands": {
+    "RESIDEO_HONEYWELL": "Go to your Resideo app",
+    "TOON": "Go to your Toon app",
+    "NEST": "Go to your Nest app"
+  },
+  "batteryBrands": {
+    "MYGRID": "MyGrid",
+    "LG": "LG",
+    "SONNEN_BATTERIE": "sonnenBatterie",
+    "TESLA_POWERWALL": "Tesla Powerwall",
+    "other": "Other"
+  },
+  "homeAutomationBrands": {
+    "HOME_ASSISTANT": "Home Assistant",
+    "OPENHAB": "openHAB"
+  },
+  "privacy-statement": "With the OurGrid app we use your energy consumption data for the following purposes: giving you personal insight into your own consumption; predicting neighbourhood consumption; determining which challenges we send to which user, and keeping track of your earned points. Your energy consumption data is automatically deleted after 3 months. We store your earned points for one calendar year.\n\nYour anonymised energy consumption data is only shared with your city, OpenRemote, and Resourcefully. These organisations only use this data to: use the power values for preventing network congestion, further improving the application, and to ensure the application functions properly.\n\nIf you want data deleted, you can always disconnect the dongle from your meter and delete your account. All meter data automatically gets deleted after three months.",
+  "switchCity": "Switch city",
+  "switchCityConfirm": "Are you sure you want to switch cities?"
+}
