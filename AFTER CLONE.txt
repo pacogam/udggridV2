@@ -1,0 +1,4 @@
+git checkout udgversion
+git remote add upstream https://github.com/openremote/ourgrid.git
+git fetch upstream
+git remote -v

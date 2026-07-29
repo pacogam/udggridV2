@@ -56,3 +56,4 @@ deployment/manager/fcm.json
 *.tsbuildinfo
 *~
 *.tar.gz
+.env
