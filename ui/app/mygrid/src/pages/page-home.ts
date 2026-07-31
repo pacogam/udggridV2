@@ -7,12 +7,10 @@ import '../components/og-panel-wrapper';
 import '../panels/panel-usage-overview';
 import '../panels/panel-challenge-progress';
 import '../panels/panel-challenge-points';
-//import '../panels/panel-peak-notification';
+import '../panels/panel-peak-notification';
 import '../panels/panel-peak-usage';
 import '../panels/panel-challenge-tips';
 import '../panels/panel-usage-history';
-//import '../panels/panel-notification';
-import '../panels/panel-peak-notification-udg';
 import {GridAppStateKeyed, setDark} from '../util/og-state';
 import {OgPage, OgPageProvider} from './util/og-page';
 import {OgMeterChallengeState, OgMeterConnectedState} from '../util/util';
@@ -37,9 +35,6 @@ const styling = css`
     height: 100vh;
     background: var(--og-color-primary);
   }
-  panel-notification {
-    margin-bottom: 12px;
-  }    
 `;
 
 @customElement('page-home')
@@ -69,10 +64,6 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     @state()
     protected shownPanels: Set<string> = new Set<string>();
 
-    //@state()
-    //protected notificationAsset?: Asset;
-
-
     /*@state()
     protected temp: boolean = true;*/
 
@@ -82,21 +73,12 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
 
     stateChanged(state: GridAppStateKeyed): void {
         this.meterAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
-        //this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
-        //this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
+        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
+        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
-        /*console.log('[PageHome] assets:', state.gridApp.assets.map(a => ({
-            id: a.id,
-            type: a.type,
-            name: a.name
-        })));*/
         this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
         this.language = state.gridApp.language;
-        //console.log('[PageHome] challengeAsset resolved:', this.challengeAsset);
-        /*this.notificationAsset = state.gridApp.assets.find(
-            a => a.type === 'OurgridDistrictAsset'
-        );
-        console.log('[PageHome] notificationAsset resolved:', this.notificationAsset);*/
+
         return super.stateChanged(state);
     }
 
@@ -111,31 +93,20 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     protected willUpdate(changedProps: PropertyValues) {
         if(changedProps.has('meterAsset') && this.meterAsset) {
 
-            //const connected = true; 
-            const connected = this.meterAsset.attributes['connectionStatus']?.value === OgMeterConnectedState.CONNECTED; //*
+            const connected = this.meterAsset.attributes['connectionStatus']?.value === OgMeterConnectedState.CONNECTED;
             const challengeStatus: OgMeterChallengeState = this.meterAsset.attributes['challengeStatus']?.value;
             const showJoinNotification = connected && [OgMeterChallengeState.JOIN_CHALLENGE, OgMeterChallengeState.JOINED_CHALLENGE].includes(challengeStatus);
             const isInChallenge = connected && challengeStatus === OgMeterChallengeState.ACTIVE_CHALLENGE;
             this._store.dispatch(setDark(isInChallenge)); // TODO: Improve this
-            const challengeGeneralStatus = this.challengeAsset.attributes['challengeGeneralStatus']?.value;
-            //const mostraUdGpeakNotification = connected && this.challengeAsset.attributes['challengeGeneralStatus']?.value === OgMeterChallengeState.ACTIVE_CHALLENGE;
-            const mostraUdGpeakNotification = connected && [OgMeterChallengeState.ACTIVE_CHALLENGE, OgMeterChallengeState.JOINED_CHALLENGE].includes(challengeGeneralStatus);
-
-            //console.log(this.challengeAsset.attributes)
-            //console.log(this.meterAsset.attributes)
-            //console.log(this.challengeAsset.attributes['challengeGeneralStatus']?.value)
 
             const panels = new Set<string>();
-            //* if(showJoinNotification) {
-            if(mostraUdGpeakNotification) {
-               //panels.add('panel-peak-notification');  // OUR DISTRICT EXPECTS A PEAK LOAD!               
-               //panels.add('panel-notification');
-               panels.add('panel-peak-notification-udg');
+            if(showJoinNotification) {
+                panels.add('panel-peak-notification');
             }
             if(isInChallenge) {
-                //*panels.add('panel-challenge-progress');
-                //*panels.add('panel-challenge-points');
-                //*panels.add('panel-peak-usage');
+                panels.add('panel-challenge-progress');
+                panels.add('panel-challenge-points');
+                panels.add('panel-peak-usage');
                 panels.add('panel-challenge-tips');
             }
 
@@ -153,7 +124,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         }
     }
 
-    /*protected firstUpdated(changedProps: PropertyValues) {
+    protected firstUpdated(changedProps: PropertyValues) {
         if(this.meterAsset && this.challengeAsset) {
             this.checkForChallengeFinishModal(this.meterAsset, this.challengeAsset).then(result => {
                 if(result) {
@@ -170,10 +141,10 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
         }
 
         return super.firstUpdated(changedProps);
-    }*/
+    }
 
     // Returns true or false depending on whether a "challenge finished" modal should be shown
-    /*protected async checkForChallengeFinishModal(meterAsset: Asset, challengeAsset: Asset): Promise<boolean> {
+    protected async checkForChallengeFinishModal(meterAsset: Asset, challengeAsset: Asset): Promise<boolean> {
         const lastTimestamp: string | null = localStorage.getItem(Constants.LOCALSTORAGE_LAST_CHALLENGE_COMPLETED_KEY);
 
         const challengeDuration: number = challengeAsset?.attributes?.[Constants.CHALLENGE_DURATION_ATTRIBUTE]?.value || Defaults.CHALLENGE_DURATION_MINUTES;
@@ -197,7 +168,7 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
             }
         }
         return false;
-    }*/
+    }
 
     protected showChallengeCompletedModal(meterAsset: Asset, challengeAsset: Asset) {
         showLastChallengeResultDialog(meterAsset, challengeAsset);
@@ -227,39 +198,25 @@ export class PageHome extends OgPage<GridAppStateKeyed> {
     }
 
     protected render(): TemplateResult {
-        const connected = true; //*this.meterAsset?.attributes['connectionStatus']?.value === OgMeterConnectedState.CONNECTED;
-        const challengeStatus = 'No challenge'; //*: OgMeterChallengeState = this.meterAsset?.attributes['challengeStatus']?.value;
-        const isInChallenge = true; //*connected && challengeStatus === OgMeterChallengeState.ACTIVE_CHALLENGE;
+        const connected = this.meterAsset?.attributes['connectionStatus']?.value === OgMeterConnectedState.CONNECTED;
+        const challengeStatus: OgMeterChallengeState = this.meterAsset?.attributes['challengeStatus']?.value;
+        const isInChallenge = connected && challengeStatus === OgMeterChallengeState.ACTIVE_CHALLENGE;
         return html`
             <div class="page-wrapper">
-                <!-- Panels dinámicos (AQUÍ VA LA NOTIFICACIÓN) -->
-                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .vehicleAsset=${this.vehicleAsset}
-                    .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
-                <!-- Visualizadores medidas -->
                 <panel-usage-overview .dark="${isInChallenge}" .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .challengeAsset="${this.challengeAsset}"></panel-usage-overview>
+                
+                <og-panel-wrapper .panels="${this.shownPanels}" dark .meterAsset="${this.meterAsset}" .batteryAsset="${this.batteryAsset}" .vehicleAsset=${this.vehicleAsset}
+                                  .challengeAsset="${this.challengeAsset}" .districtAsset="${this.districtAsset}"></og-panel-wrapper>
 
-                <!-- Gráficos -->
                 <div>
-                  <panel-usage-history
-                    .meterAsset="${this.meterAsset}"
-                    .districtAsset="${this.districtAsset}"
-                    .language="${this.language}"
-                    .attributeName="${'power'}"
-                    .headingkey="${'panel_usageHistory.heading'}">
-                  </panel-usage-history>
-
-                  <panel-usage-history
-                    .meterAsset="${this.meterAsset}"
-                    .districtAsset="${this.districtAsset}"
-                    .language="${this.language}"
-                    .attributeName="${'pvpower'}"
-                    .headingkey="${'panel_usageHistory.headingpv'}">
-                  </panel-usage-history>
+                    ${guard([this.language], () => html`
+                        <panel-usage-history .meterAsset="${this.meterAsset}" .districtAsset="${this.districtAsset}" .language="${this.language}"></panel-usage-history>
+                    `)}
                 </div>
-                <!--
+
                 <panel-trophies .meterAsset="${this.meterAsset}" .challengeAsset="${this.challengeAsset}"></panel-trophies>
-                -->
+
                 <!-- Bottom margin -->
                 <div style="height: 1px; margin-top: 10vh;"></div>
             </div>

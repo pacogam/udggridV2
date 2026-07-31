@@ -4,7 +4,6 @@
   "menu": "Menu",
   "intro": "Introductie",
   "devices": "Apparaten",
-  "energies": "Energies",
   "houseCharacteristics": "Mijn huis",
   "privacyStatement": "Privacy",
   "language": "Taal",
@@ -69,7 +68,9 @@
     "challengeAssetDataFailed": "Kon uitdagingen niet ophalen.",
     "challengeAssetDataPermission": "Je hebt geen toestemming om de data van uitdagingen te lezen.",
     "peakPointsAssetDataFailed": "Kon data van de pieken niet ophalen",
-    "peakPointsAssetDataPermission": "Je hebt geen toestemming om de data van pieken te lezen."
+    "peakPointsAssetDataPermission": "Je hebt geen toestemming om de data van pieken te lezen.",
+    "userDataFailed": "Onverwachte fout. Er ging iets fout met het ophalen van je account.",
+    "userDataPermission": "Onverwachte fout. Je hebt geen toestemming om dit account te gebruiken."
   },
   "onboarding": {
     "introText1": "Welkom bij OurGrid. Door middel van uitdagingen en nuttige tips helpen wij je bewust te maken van je electriciteitsverbruik en moedigen we je aan je verbruik te optimaliseren.",
@@ -256,7 +257,6 @@
   },
   "panel_usageHistory": {
     "heading": "Historisch verbruik",
-    "headingpv": "Your generation",
     "subtitle": "met voorspelde netwerkbelasting"
   },
   "panel_challengeComplete": {

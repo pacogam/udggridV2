@@ -150,7 +150,7 @@ export class PageHomeAutomation extends OgPage<GridAppStateKeyed> {
     protected characteristics?: DeviceCharacteristic[];
 
     @state()
-    protected _language?: string;
+    protected __language?: string;
 
     protected clickableElements: Element[] = [];
 
@@ -163,7 +163,7 @@ export class PageHomeAutomation extends OgPage<GridAppStateKeyed> {
     }
 
     stateChanged(state) {
-        this._language = state.gridApp.language;
+        this.__language = state.gridApp.language;
         this.serviceUser = state.gridApp.serviceUser;
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
         this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
@@ -243,8 +243,8 @@ export class PageHomeAutomation extends OgPage<GridAppStateKeyed> {
     protected async _getHomeAutomationContent(software?: OgHomeAutomationBrand): Promise<TemplateResult> {
         let markdown: string | undefined;
         switch (software) {
-            case OgHomeAutomationBrand.HOME_ASSISTANT: markdown = this._processMarkdown(this._language === 'nl' ? HomeAssistantMd_NL : HomeAssistantMd_EN); break;
-            case OgHomeAutomationBrand.OPENHAB: markdown = this._processMarkdown(this._language === 'nl' ? OpenHABMd_NL : OpenHABMd_EN); break;
+            case OgHomeAutomationBrand.HOME_ASSISTANT: markdown = this._processMarkdown(this.__language === 'nl' ? HomeAssistantMd_NL : HomeAssistantMd_EN); break;
+            case OgHomeAutomationBrand.OPENHAB: markdown = this._processMarkdown(this.__language === 'nl' ? OpenHABMd_NL : OpenHABMd_EN); break;
             default: markdown = undefined; break;
         }
         return html`

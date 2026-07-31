@@ -145,10 +145,9 @@ export abstract class OgPanel extends LitElement {
 
     protected updated(changedProps: PropertyValues) {
         super.updated(changedProps);
-        this.action = undefined;
-        /*if(changedProps.has('action') && this.action) {
+        if(changedProps.has('action') && this.action) {
             this.dispatchEvent(new OgPanelActionUpdateEvent(this.action));
-        }*/ //* comentada para NO dibujar el botón alargado para unirse al reto
+        }
     }
 
     /* --------------------------------------------------------------------- */
@@ -260,7 +259,6 @@ export abstract class OgPanel extends LitElement {
     }
 
     public async onActionButtonClick() {
-        console.log('onActionButtonClick og-panel');
         const readonly = this.action.loading || this.action.disabled;
         if (this.action.action !== undefined && !readonly) {
             this.action.loading = true;

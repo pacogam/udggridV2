@@ -159,7 +159,8 @@ export class Page1Setup extends OgOnboardingPage {
         console.debug(`Connecting to ${dongleCode}`);
         try {
             await rest.api.DeviceResource.linkDevice({
-                deviceName: dongleCode
+                deviceName: dongleCode,
+                assetType: 'OurgridMeterAsset'
             });
         } catch (e) {
             console.error(e);

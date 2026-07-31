@@ -79,7 +79,7 @@ export class PanelTrophies extends OgDataPanel {
     }
 
     // Lit lifecycle method during UI update
-    /*protected willUpdate(changedProps: PropertyValues) {  //*
+    protected willUpdate(changedProps: PropertyValues) {
 
         // If 'currentHistoryDate' goes down (for example by 1 week), we fetch the challenges that are not present yet.
         // These are then formatted into trophies and added onto the state array.
@@ -100,11 +100,11 @@ export class PanelTrophies extends OgDataPanel {
             });
         }*/
 
-        /*return super.willUpdate(changedProps);
-    }*/  //*
+        return super.willUpdate(changedProps);
+    }
 
     // Fetching challenges between start and end date.
-    /*protected async fetchTrophies(start: Date, end: Date): Promise<TrophyItem[]> {
+    protected async fetchTrophies(start: Date, end: Date): Promise<TrophyItem[]> {
         const promise = rest.api.DeviceChallengesResource.getHistory({ startTimestamp: start.getTime(), endTimestamp: end.getTime() });
         promise.catch(e => {
             console.error(e);
@@ -112,7 +112,7 @@ export class PanelTrophies extends OgDataPanel {
         });
         const data = (await promise).data;
         return data.map(challenge => ({ date: new Date(challenge.startDate), points: challenge.points } as TrophyItem));
-    }*/  //*
+    }
 
     protected async fetchPeaks(start: Date, end: Date): Promise<TrophyItem[]> {
         const pointsPerDay = this.peakPointsAsset?.attributes?.[Constants.METER_PEAK_DAY_POINTS_ATTRIBUTE]?.value || 1;

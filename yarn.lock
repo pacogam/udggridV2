@@ -7138,6 +7138,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mygrid-app@workspace:ui/app/mygrid":
+  version: 0.0.0-use.local
+  resolution: "mygrid-app@workspace:ui/app/mygrid"
+  dependencies:
+    "@lit-labs/motion": "npm:^1.0.3"
+    "@lit/task": "npm:^1.0.0"
+    "@material/chips": "npm:^14.0.0"
+    "@material/circular-progress": "npm:^14.0.0"
+    "@openremote/core": "npm:~1.26.1"
+    "@openremote/model": "npm:~1.26.1"
+    "@openremote/or-app": "npm:~1.26.1"
+    "@openremote/or-chart": "npm:~1.7.0"
+    "@openremote/or-mwc-components": "npm:~1.26.1"
+    "@openremote/util": "npm:~1.26.1"
+    countup.js: "npm:^2.8.0"
+    keen-slider: "npm:^6.8.6"
+    lit: "npm:^3.3.2"
+    lit-markdown: "npm:^1.3.2"
+    model: "workspace:*"
+    raw-loader: "npm:^4.0.2"
+    rest: "workspace:*"
+    webpack-bundle-analyzer: "npm:^4.10.2"
+  languageName: unknown
+  linkType: soft
+
 "nanoid@npm:^3.3.11, nanoid@npm:^3.3.8":
   version: 3.3.11
   resolution: "nanoid@npm:3.3.11"

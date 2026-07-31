@@ -5,7 +5,6 @@ import manager from '@openremote/core';
 import {Asset, AssetDatapointIntervalQueryFormula, AssetDatapointLTTBQuery, Attribute, DatapointInterval, ValueDatapoint} from '@openremote/model';
 import {getAppStyle} from '../styles';
 import moment from 'moment';
-import 'moment/locale/ca';
 import {getStateColorByPowerValue, getStateColorByPowerValueRGB} from '../util/util';
 import {showSnackbar} from '../components/og-snackbar';
 import {i18next} from '@openremote/or-translate';
@@ -84,7 +83,7 @@ const predictedBackgroundPlugin = {
                     }
 
                     // Start drawing/rendering background
-                    ctx.fillStyle = `rgba(${getStateColorByPowerValueRGB(coords.y, options.threshold).toString()}, 0.3)`;
+                    ctx.fillStyle = `rgba(${getStateColorByPowerValueRGB(coords.y, options.threshold).toString()}, 0.4)`;
                     ctx.fillRect(startPx, chartArea.top, width, chartArea.height);
                 }
             });
@@ -116,7 +115,6 @@ const styling = css`
 
 @customElement('og-usage-chart')
 export class OgUsageChart extends OrChart {
-    @property({type: String}) attributeNames: string[] = ['power'];
 
     @property()
     protected districtAsset: Asset;
@@ -130,21 +128,12 @@ export class OgUsageChart extends OrChart {
     @state()
     protected _maxValue?: number;
 
-    @state()
-    protected _minValue?: number;
-
-    @state()
-    protected _maxTimestamp?: number;
-
-    @state()
-    protected _maxRealValue?: number;
-
     // Config of the chart
     public showLegend = false;
     public attributeControls = false;
     public timestampControls = false;
     public realm = manager.displayRealm;
-    public colors = ['#4F2D39', '#F1A208'];
+    public colors = ['#4F2D39'];
     public chartOptions: any = this.getUsageChartOptions();
 
     public assetAttributes: [number, Attribute<any>][] = [];
@@ -153,7 +142,7 @@ export class OgUsageChart extends OrChart {
         amountOfPoints: 100
     };
 
-    static get styles() {
+    static get styles(): any {
         return [...super.styles, getAppStyle(), styling];
     }
 
@@ -170,6 +159,8 @@ export class OgUsageChart extends OrChart {
 
         // If the 'list of assets' (only the meter asset) has been changed, cancel update.
         if(changedProps.has('assets') && changedProps.get('assets') !== undefined) {
+            /*this._data = null;
+            this._loadData();*/
             cancelUpdate = true;
         }
 
@@ -189,11 +180,7 @@ export class OgUsageChart extends OrChart {
     // Lifecycle method that triggers every update, but before rendering.
     willUpdate(changedProps: Map<string, any>) {
         if (changedProps.has('assets') && this.assets.length > 0) {
-            //this.assetAttributes = [[0, this.assets[0].attributes['power']]];
-            this.assetAttributes = this.attributeNames.map(attrName => [
-                0,
-                this.assets[0].attributes[attrName]
-            ]);
+            this.assetAttributes = [[0, this.assets[0].attributes['power']]];
         }
         if (changedProps.has('_data') && this._data) {
             this.applyDataStyling(this._data);
@@ -202,7 +189,6 @@ export class OgUsageChart extends OrChart {
     }
 
     public render() {
-        moment.locale(i18next.language);
         const day = Array.from(this.timePresetOptions)[0][1](new Date())[0];
         const calendarFormat = {
             sameDay: i18next.t('calendar.sameDay'),
@@ -214,34 +200,11 @@ export class OgUsageChart extends OrChart {
         return html`
             <div id="chart-wrapper">
                 <div id="chart-title">
-                    <span opacity: 0.9; style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span class="text-secondary translucent" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         ${moment(day).calendar(calendarFormat)} - ${moment(day).format('D MMMM YYYY')}
                     </span>
-                    ${when(this._maxValue && this._maxTimestamp, () => html`
-                        <div style="
-                            display: flex;
-                            flex-direction: column;
-                            align-items: flex-end;
-                            line-height: 1.2;
-                            min-width: 90px;
-                        ">
-                            <span class="text-secondary" style="font-size: 0.85em;">
-                                Max
-                            </span>
-                            <span style="
-                                font-size: 1.15em;
-                                font-weight: 600;
-                            ">                            
-                                ${this.formatPower(this._maxRealValue)}
-                            </span>
-                            <span style="
-                                font-size: 0.9em;
-                                font-weight: 600;
-                                color: var(--og-color-warning);
-                            ">
-                                ${moment(this._maxTimestamp).format('HH:mm')}
-                            </span>
-                        </div>
+                    ${when(this._maxValue && this._maxValue > 1, () => html`
+                        <span class="text-secondary translucent" style="padding-left: 4px; white-space: nowrap;">${`Max ${this._maxValue}W`}</span>
                     `)}
                 </div>
                 <div style="flex: 1; padding-right: 12px;">
@@ -260,8 +223,8 @@ export class OgUsageChart extends OrChart {
     protected async _loadAttributeData(asset: Asset, attribute: Attribute<any>, color: string | undefined, from: number, to: number, predicted: boolean, label: string | undefined): Promise<any> {
         let data;
         try {
-            const color2 = this.attributeColors.get(attribute.name) ?? '#4F2D39';  //**
-            data = this._loadPowerAttributeData(asset, attribute, color2, from, to, predicted, label);
+            /*data = super._loadAttributeData(asset, attribute, color, from, to, predicted, label);*/
+            data = this._loadPowerAttributeData(asset, attribute, color, from, to, predicted, label);
         } catch (e) {
             console.error(e);
             showSnackbar(undefined, i18next.t('error.historicalAssetData'));
@@ -281,13 +244,14 @@ export class OgUsageChart extends OrChart {
     }
 
     // Override so the interval for 24 hours is four hours.
-    protected _getInterval(diffInHours: number): [number, DatapointInterval] {
+    protected _getInterval(diffInHours: number): any {
         if(diffInHours <= 24) {
             return [4, DatapointInterval.HOUR];
         } else {
             return super._getInterval(diffInHours);
         }
     }
+
 
 
     /* ---------------------------------------- */
@@ -299,39 +263,6 @@ export class OgUsageChart extends OrChart {
             console.error('Expected 2 datasets with current and predicted data.');
             return;
         }
-        // afegeixo
-        const realDataset = data[0]?.data;
-        if (Array.isArray(realDataset) && realDataset.length > 0) {
-            let max = -Infinity;
-            let maxVal = -Infinity;
-            let min = Infinity;
-            let maxTs: number | undefined;
-            for (const p of realDataset) {
-                const realValue =
-                    typeof p?.raw === 'number' ? p.raw :
-                    typeof p?.y === 'number' ? p.y : undefined;
-                if (typeof realValue === 'number' && !isNaN(realValue)) {
-                    if (realValue > max) {
-                        max = realValue;
-                        maxTs = p.x;
-                        maxVal = p.y;
-                    }
-                    if (realValue < min) {
-                        min = realValue;
-                    }
-                }
-                //console.log('point', p);
-            }
-
-            if (max !== -Infinity) {
-                this._maxValue = max;
-                this._maxTimestamp = maxTs;
-                this._minValue = min;
-                this._maxRealValue = maxVal;
-            }
-        }
-        // fins aquí
-
         // Styling applied for both datasets
         data.forEach(value => {
             value.tension = 0.4;
@@ -395,18 +326,10 @@ export class OgUsageChart extends OrChart {
                             lineWidth: ({ tick }) => tick.value === 0 ? 1 : 0
                         },
                         ticks: {
-                            display: true,
-                            /*callback: (value, _index, values) => {
-                                this._minValue = values[0]?.value;
+                            display: false,
+                            callback: (value, _index, values) => {
                                 this._maxValue = values?.[values.length - 1]?.value;
                                 return value;
-                            }*/
-                            maxTicksLimit: 5,
-                            padding: 6,
-                            callback: (value, _index, values) => {
-                                this._minValue = values[0]?.value;
-                                this._maxValue = values?.[values.length - 1]?.value;
-                                return this.formatPower(Number(value));
                             }
                         }
                     }
@@ -502,20 +425,4 @@ export class OgUsageChart extends OrChart {
 
         return datapoints;
     }
-
-    private attributeColors: Map<string, string> = new Map([
-        ['power', '#4F2D39'],    // Rojo/Naranja  F44F1A
-        ['pvpower', '#00AA45'],  // Verde  #00AA45
-    ]);
-
-    private formatPower(value: number): string {
-        if (value === null || value === undefined || isNaN(value)) {
-            return '–';
-        }
-        //if (Math.abs(value) >= 1000) {
-        //    return `${(value / 1000).toFixed(1)} kW`;
-        //}
-        return `${Math.round(value)} W`;
-    }
-
 }

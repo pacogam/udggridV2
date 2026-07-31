@@ -19,6 +19,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.rabbitmq/amqp-client
     implementation "com.rabbitmq:amqp-client:$rabbitMqAmqpClientVersion"
+    implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
 
 

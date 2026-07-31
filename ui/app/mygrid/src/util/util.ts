@@ -2,8 +2,6 @@ import {Asset, Attribute} from '@openremote/model';
 
 export type OurgridMeterAsset = Asset;
 
-export type ExitChallengeAsset = Asset;
-
 export enum OgStateColor {
     GREEN = '#00AA45', RED = '#F44F1A'
 }

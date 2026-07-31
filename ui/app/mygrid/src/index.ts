@@ -3,7 +3,6 @@ import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {AppConfig, appReducer, RealmAppConfig} from '@openremote/or-app';
 import {pageHomeProvider} from './pages/page-home';
 import {OgApp} from './util/og-app';
-import {MapType} from '@openremote/model';
 import {page1SetupProvider} from './pages/setup/page1-setup';
 import {gridAppReducer} from './util/og-state';
 import {pageMenuProvider} from './pages/page-menu';
@@ -21,7 +20,6 @@ import {pageAddHeatpumpProvider} from "./pages/add-device/add-heatpump";
 import {pageAddBatteryProvider} from "./pages/add-device/add-battery";
 import {pageAddHomeAutomationProvider} from "./pages/add-device/add-homeautomation";
 import {pageHomeAutomationProvider} from "./pages/page-homeautomation";
-import {pageEnergiesProvider} from "./pages/page-energies";
 
 const rootReducer = combineReducers({
     app: appReducer,
@@ -51,8 +49,7 @@ export const DefaultPagesConfig: OgPageProvider<any>[] = [
     pageHomeAutomationProvider(store),
     pagePrivacyProvider(store),
     page1SetupProvider(store),
-    pageOnboardingProvider(store),
-    pageEnergiesProvider(store)
+    pageOnboardingProvider(store)
 ];
 
 if(localStorage.getItem('acceptedPrivacy') == null) {
@@ -75,10 +72,9 @@ export const DefaultRealmConfig: RealmAppConfig = {
 ogApp.managerConfig = {
     loadTranslations: ['app', 'or'],
     autoLogin: true,
-    mapType: MapType.VECTOR
 };
 
-export const DEFAULT_LANGUAGE: string = 'cat';
+export const DEFAULT_LANGUAGE: string = 'nl';
 
 ogApp.appConfigProvider = (ogManager) => {
 
@@ -87,8 +83,7 @@ ogApp.appConfigProvider = (ogManager) => {
         pages: [...DefaultPagesConfig],
         languages: {
             nl: 'dutch',
-            en: 'english',
-            cat: 'Català'
+            en: 'english'
         },
         realms: {
             default: {...DefaultRealmConfig}

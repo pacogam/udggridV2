@@ -2,3 +2,44 @@ git checkout udgversion
 git remote add upstream https://github.com/openremote/ourgrid.git
 git fetch upstream
 git remote -v
+
+la primera vez que suba:
+git push -u origin udgversion
+
+paco@paco-linux:~/udggridV2$ git branch --set-upstream-to=origin/udgversion udgversion
+Branch 'udgversion' set up to track remote branch 'udgversion' from 'origin'.
+paco@paco-linux:~/udggridV2$ git branch -vv
+  main       b170a71 [origin/main] bumped version number (#203)
+* udgversion 6f9a11e [origin/udgversion] Act. de ficheros versión udG 2
+
+si sale así ya puedo hacer git pull / git push
+
+
+
+Para el supuesto caso de una instalación en un nuevo ordenador:
+
+1. git clone https://github.com/pacogam/udggridV2.git
+2. cd udggridV2
+3. git checkout udgversion
+4. git remote add upstream https://github.com/openremote/ourgrid.git
+5. git fetch upstream
+6. git config pull.rebase true    # ✅ añadido: para que git pull haga rebase automático
+7. git remote -v                  # comprobar remotos
+8. git branch -vv                 # comprobar tracking
+
+
+
+Y si es que continuo en otro ordenador:
+1. git checkout udgversion       # (si no estás ya ahí)
+2. git status                    # ✅ añadido: confirma que no tienes cambios sin guardar de una sesión anterior olvidada
+3. git pull                      # trae lo que hiciste en el otro ordenador
+4. # ... modificas archivos ...
+5. git status                    # ✅ añadido: revisa qué has tocado antes de añadir
+6. git add -A
+7. git commit -m "..."
+8. git push
+
+
+Y cuando quiera actualizar Openremote:
+git fetch upstream
+git rebase upstream/main    # o merge, según prefieras
