@@ -31,7 +31,8 @@ services:
     extends:
       file: ../../openremote/profile/deploy.yml
       service: postgresql
-    image: openremote/postgresql@sha256:b0a39e4baa12b2d02a9e694c1104edc8c0b8029f5d066cde4d373dfbf500fe22
+    #image: openremote/postgresql@sha256:b0a39e4baa12b2d02a9e694c1104edc8c0b8029f5d066cde4d373dfbf500fe22
+    image: openremote/postgresql:${POSTGRESQL_VERSION:-latest-slim}
     volumes:
       - ../openremote/tmp:/storage
     # Access directly if needed on localhost

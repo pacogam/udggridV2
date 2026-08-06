@@ -22,9 +22,11 @@ const styling = css`
 
 @customElement('panel-usage-history')
 export class PanelUsageHistory extends OgDataPanel {
+    @property({ type: String }) attributeName: string = 'power';
+    @property({ type: String }) headingkey: string = 'panel_usageHistory.heading';
 
-    public heading = html`<or-translate value="panel_usageHistory.heading"></or-translate>`;
-    public subtitle = html`<or-translate value="panel_usageHistory.subtitle"></or-translate>`;
+    //public heading = html`<or-translate value="panel_usageHistory.heading"></or-translate>`;
+    //public subtitle = html`<or-translate value="panel_usageHistory.subtitle"></or-translate>`;
     public fullWidth = true;
 
     protected options: Map<string, TimePresetCallback>[];
@@ -41,6 +43,7 @@ export class PanelUsageHistory extends OgDataPanel {
 
     public connectedCallback() {
         super.connectedCallback();
+        this.heading = html`<or-translate value="${this.headingkey}"></or-translate>`;
         this.options = [
             new Map([['7daysago', _date => [moment(new Date()).subtract(7, 'day').startOf('day').toDate(), moment(new Date()).subtract(7, 'day').endOf('day').toDate()]]]),
             new Map([['6daysago', _date => [moment(new Date()).subtract(6, 'day').startOf('day').toDate(), moment(new Date()).subtract(6, 'day').endOf('day').toDate()]]]),
@@ -122,7 +125,7 @@ export class PanelUsageHistory extends OgDataPanel {
         // Return chart HTML
         return html`
             <og-usage-chart slot="${index}" .timePresetOptions="${options}" style="pointer-events: none;"
-                            .assets="${this.meterAsset ? [this.meterAsset] : []}" .districtAsset="${this.districtAsset}"
+                            .assets="${this.meterAsset ? [this.meterAsset] : []}" .districtAsset="${this.districtAsset}" .attributeNames="${[this.attributeName]}"
             ></og-usage-chart>
         `;
     }
@@ -165,7 +168,7 @@ export class PanelUsageHistory extends OgDataPanel {
 
     protected updateChartsMaxValue(val: number) {
         this.updateComplete.then(() => {
-            console.log(`Updating max value to ${val}`);
+            //console.log(`Updating max value to ${val}`);
             this.currentMax = val;
             this.chartElems.forEach(node => {
                 (node as OgUsageChart).setMax(val);
@@ -175,7 +178,7 @@ export class PanelUsageHistory extends OgDataPanel {
 
     protected updateChartsMinValue(val: number) {
         this.updateComplete.then(() => {
-            console.log(`Updating min value to ${val}`);
+            //console.log(`Updating min value to ${val}`);
             this.currentMin = val;
             this.chartElems.forEach(node => {
                 (node as OgUsageChart).setMin(val);

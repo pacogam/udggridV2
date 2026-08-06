@@ -173,10 +173,14 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
                 this.dispatchEvent(new CustomEvent('navigate', {detail: 'account'}));
                 return;
             }
-            case 'devices': {
+            /*case 'devices': {
                 this.dispatchEvent(new CustomEvent('navigate', {detail: 'devices'}));
                 return;
             }
+            case 'energies': {
+                this.dispatchEvent(new CustomEvent('navigate', {detail: 'energies'}));
+                return;
+            }*/
             case 'language': {
                 this.dispatchEvent(new CustomEvent('language'));
                 return;
@@ -201,7 +205,8 @@ export class PageMenu extends OgPage<GridAppStateKeyed> {
     protected render(): TemplateResult {
         const items: OgListItem[] = [
             {icon: 'home', text: i18next.t('home'), value: 'home'},
-            {icon: 'home-battery-outline', text: i18next.t('devices'), value: 'devices'},
+            /*{icon: 'home-battery-outline', text: i18next.t('devices'), value: 'devices'},
+            {icon: 'home-lightning-bolt-outline', text: i18next.t('energies'), value: 'energies'},*/
             {icon: 'account', text: i18next.t('account'), value: 'account'},
             {icon: 'web', text: i18next.t('language'), value: 'language'},
             /*{icon: 'meter-gas', text: i18next.t('houseCharacteristics'), value: 'characteristics'},*/

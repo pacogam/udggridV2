@@ -120,8 +120,8 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
         const isLargeFooter = (!page.noBottomGraphic && !!page.getActionText);
         const footerStyling = {
             'min-height': anyPageHasActionText ? '48px' : undefined,
-            'height': isLargeFooter ? '35vw' : undefined,
-            'max-height': isLargeFooter ? '20vh' : undefined,
+            'height': isLargeFooter ? '140px' : undefined,
+            'max-height': isLargeFooter ? '160px' : undefined,
             'position': isLargeFooter ? 'relative' : undefined,
             'overflow': 'hidden'
         };
@@ -164,8 +164,10 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                             ${when(typeof page.getActionText === 'function', () => {
                                 const buttonStyling = {
                                     'width': !page.noBottomGraphic ? 'inherit' : undefined,
-                                    'position': !page.noBottomGraphic ? 'absolute' : undefined,
-                                    'bottom': !page.noBottomGraphic ? '16px' : undefined
+                                    //'position': !page.noBottomGraphic ? 'absolute' : undefined,
+                                    'position': 'relative',
+                                    'bottom': 'calc(60px + env(safe-area-inset-bottom))'
+                                    //'bottom': !page.noBottomGraphic ? '46px' : undefined
                                 };
                                 const disabled = typeof page.getActionDisabled === 'function' ? page.getActionDisabled() : false;
                                 return html`

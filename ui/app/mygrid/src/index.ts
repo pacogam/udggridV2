@@ -20,6 +20,7 @@ import {pageAddHeatpumpProvider} from "./pages/add-device/add-heatpump";
 import {pageAddBatteryProvider} from "./pages/add-device/add-battery";
 import {pageAddHomeAutomationProvider} from "./pages/add-device/add-homeautomation";
 import {pageHomeAutomationProvider} from "./pages/page-homeautomation";
+import {pageEnergiesProvider} from "./pages/page-energies";
 
 const rootReducer = combineReducers({
     app: appReducer,
@@ -49,7 +50,8 @@ export const DefaultPagesConfig: OgPageProvider<any>[] = [
     pageHomeAutomationProvider(store),
     pagePrivacyProvider(store),
     page1SetupProvider(store),
-    pageOnboardingProvider(store)
+    pageOnboardingProvider(store),
+    pageEnergiesProvider(store)
 ];
 
 if(localStorage.getItem('acceptedPrivacy') == null) {
@@ -62,7 +64,7 @@ if(localStorage.getItem('acceptedPrivacy') == null) {
 
 
 export const DefaultRealmConfig: RealmAppConfig = {
-    appTitle: 'Our Grid',
+    appTitle: 'My Grid',
     styles: ':host > * {--or-app-color2: #F0F0F0; --or-app-color3: #22211f; --or-app-color4: #4F2D39; --or-app-color5: #CCCCCC;}',
     logo: '../images/logo.png',
     logoMobile: '../images/logo-mobile.png'
@@ -74,7 +76,7 @@ ogApp.managerConfig = {
     autoLogin: true,
 };
 
-export const DEFAULT_LANGUAGE: string = 'nl';
+export const DEFAULT_LANGUAGE: string = 'cat';
 
 ogApp.appConfigProvider = (ogManager) => {
 
@@ -83,7 +85,8 @@ ogApp.appConfigProvider = (ogManager) => {
         pages: [...DefaultPagesConfig],
         languages: {
             nl: 'dutch',
-            en: 'english'
+            en: 'english',
+            cat: 'Català'
         },
         realms: {
             default: {...DefaultRealmConfig}

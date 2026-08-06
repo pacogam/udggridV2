@@ -13,6 +13,7 @@ export class Constants {
     static CHALLENGE_END_TIME_ATTRIBUTE: string = 'challengeEnd';
 
     static METER_POWER_ATTRIBUTE: string = 'power';
+    static METER_SOLAR_POWER_ATTRIBUTE: string = 'pvpower';
     static METER_POWER_MAX_ATTRIBUTE: string = 'powerMax';
     static METER_PEAK_POINTS_ATTRIBUTE: string = 'peakPoints';
     static METER_PEAK_DAY_POINTS_ATTRIBUTE: string = 'peakPointsDay';

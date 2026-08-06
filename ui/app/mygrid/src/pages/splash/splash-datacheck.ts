@@ -10,6 +10,7 @@ import {Store} from "@reduxjs/toolkit";
 import {OgPageProvider} from "../util/og-page";
 import {OgSplashPage, SplashStatus} from "../util/og-splash-page";
 import rest from "rest";
+import { router } from '@openremote/or-app'; //#
 
 export class NeedsOnboardingError extends Error {}
 
@@ -46,10 +47,10 @@ export class SplashDatacheck extends OgSplashPage {
     protected user?: User;
     protected userAsset?: Asset;
     protected batteryAsset?: Asset;
-    protected vehicleAsset?: Asset;
+    //protected vehicleAsset?: Asset;
     protected districtAsset?: Asset;
     protected challengeAsset?: Asset;
-    protected peakPointsAsset?: Asset;
+    //protected peakPointsAsset?: Asset;
 
     // State fields
     protected loadingPromise: Promise<void>;
@@ -78,10 +79,10 @@ export class SplashDatacheck extends OgSplashPage {
     stateChanged(state: GridAppStateKeyed): void {
         this.user = state.gridApp.user;
         this.userAsset = state.gridApp.assets.find(a => a.id === state.gridApp.userAssetId);
-        this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
-        this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
-        this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);
-        this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);
+        //this.batteryAsset = state.gridApp.assets.find(a => a.id === state.gridApp.batteryAssetId);
+        //this.vehicleAsset = state.gridApp.assets.find(a => a.id === state.gridApp.vehicleAssetId);
+        this.districtAsset = state.gridApp.assets.find(a => a.id === state.gridApp.districtAssetId);  //*
+        this.challengeAsset = state.gridApp.assets.find(a => a.id === state.gridApp.challengeAssetId);  //*
         this.page = state.app.page;
     }
 
@@ -131,7 +132,9 @@ export class SplashDatacheck extends OgSplashPage {
             }*/
 
             if(localStorage.getItem("acceptedPrivacy") == null) {
-                throw new RequiresPrivacyConfirmationError("Requires privacy confirmation");
+                //throw new RequiresPrivacyConfirmationError("Requires privacy confirmation"); //#
+                router.navigate('confirm-privacy'); //#
+                return; //#
             }
 
             const minWaitPromise = new Promise(resolve => setTimeout(resolve, MINIMUM_WAIT));
@@ -139,16 +142,16 @@ export class SplashDatacheck extends OgSplashPage {
             const user = await this.checkUserData();
             await this.verifyUserRoles();
             const meterAsset = await this.checkUserAsset(user.id);
-            await this.checkBatteryAsset(meterAsset.id);
-            await this.checkVehicleAsset(user.id);
-            await this.checkDistrictLink();
+            //await this.checkBatteryAsset(meterAsset.id);
+            //await this.checkVehicleAsset(user.id);
+            //await this.checkDistrictLink();
             const districtAsset = await this.checkDistrictAsset(user.id);
             const challengeAssetId = await this.checkChallengeAssetId(districtAsset);
-            await this.checkChallengeAssetLink(challengeAssetId);
+            //await this.checkChallengeAssetLink(challengeAssetId);
             await this.checkChallengeAsset(user.id, challengeAssetId);
-            const peakPointsAssetId = await this.checkPeakPointsAssetId(districtAsset);
-            await this.checkPeakPointsAssetLink(peakPointsAssetId);
-            await this.checkPeakPointsAsset(user.id, peakPointsAssetId);
+            //const peakPointsAssetId = await this.checkPeakPointsAssetId(districtAsset);
+            //await this.checkPeakPointsAssetLink(peakPointsAssetId);
+            //await this.checkPeakPointsAsset(user.id, peakPointsAssetId);
 
             // wait for minimum time to exceed. (will skip if already past MINIMUM_WAIT)
             await minWaitPromise;
@@ -216,8 +219,10 @@ export class SplashDatacheck extends OgSplashPage {
     protected async verifyUserRoles(delay?: number): Promise<void> {
         const needsRestrictedRole = !manager.hasRealmRole("restricted_user");
         const needsReadAssetsRole = !manager.hasRole(ClientRole.READ_ASSETS);
-        const needsWriteAttributesRole = !manager.hasRole(ClientRole.WRITE_ATTRIBUTES);
-        if(needsRestrictedRole || needsReadAssetsRole || needsWriteAttributesRole) {
+        //const needsWriteAttributesRole = !manager.hasRole(ClientRole.WRITE_ATTRIBUTES);
+        //if(needsRestrictedRole || needsReadAssetsRole || needsWriteAttributesRole) {
+         if(needsRestrictedRole || needsReadAssetsRole) {
+           console.info('...roles NO OK');
             try {
                 await rest.api.UserRolesResource.verifyUserRoles();
                 if(delay !== undefined) { await new Promise(resolve => setTimeout(resolve, delay)); }
@@ -241,6 +246,8 @@ export class SplashDatacheck extends OgSplashPage {
                     throw e;
                 }
             }
+        } else {
+          console.info('..roles OK');
         }
     }
 
@@ -274,11 +281,12 @@ export class SplashDatacheck extends OgSplashPage {
     protected async fetchUserAsset(userId: string, delay?: number): Promise<Asset> {
         if(!this.userAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
-                types: ["OurgridMeterAsset"],
+                types: ["ExitMeterAsset"],  //OurgridMeterAsset   CustomAssetGisce   ExitMeterAsset
                 userIds: [userId],
                 limit: 1
             })).data;
             if(assets === undefined || assets.length === 0) {
+                console.info('--> No assets found');
                 throw new NoAssetLinkedError(i18next.t("error.userAssetFailed"));
             }
             // Add additional delay if necessary
@@ -329,15 +337,15 @@ export class SplashDatacheck extends OgSplashPage {
     /* ---------------------------------------- */
     // CHECK 4:     Fetch and check the linked vehicle asset of a user
 
-    protected async checkVehicleAsset(userId: string): Promise<Asset> {
+    /*protected async checkVehicleAsset(userId: string): Promise<Asset> {
         try {
             return await this.fetchVehicleAsset(userId);
         } catch (e) {
             return;
         }
-    }
+    }*/
 
-    protected async fetchVehicleAsset(userId: string, delay?: number): Promise<Asset> {
+    /*protected async fetchVehicleAsset(userId: string, delay?: number): Promise<Asset> {
         if(!this.vehicleAsset) {
             const assets = (await rest.api.AssetResource.queryAssets({ userIds: [userId], types: ["OurgridVehicleAsset"], limit: 1 })).data;
             if(!assets || assets.length === 0) {
@@ -355,13 +363,13 @@ export class SplashDatacheck extends OgSplashPage {
         } else {
             return this.vehicleAsset;
         }
-    }
+    }*/
 
 
     /* ---------------------------------------- */
     // CHECK 4:     Check the district link of the user
 
-    protected async checkDistrictLink(delay?: number) {
+    /*protected async checkDistrictLink(delay?: number) {
         if(!this.districtAsset) {
             try {
                 await rest.api.UserDistrictResource.verifyDistrict();
@@ -370,7 +378,7 @@ export class SplashDatacheck extends OgSplashPage {
                 // If 'verify district request' responds with NOT_FOUND, no district is linked.
                 // So, link the district, and wait 500ms to let the manager/keycloak process possible changes.
                 if(isAxiosError(e) && e.response.status === 404) {
-                    await this.linkDistrict(/*this.RESCHOOL_DISTRICT_NAME*/);
+                    await this.linkDistrict(/*this.RESCHOOL_DISTRICT_NAME*//*);
                     await new Promise(resolve => setTimeout(resolve, 250));
                 } else {
                     this.statusText = i18next.t("error.unknown");
@@ -378,7 +386,7 @@ export class SplashDatacheck extends OgSplashPage {
                 }
             }
         }
-    }
+    }*/ //*
 
     protected async linkDistrict(districtName?: string) {
         try {
@@ -461,7 +469,7 @@ export class SplashDatacheck extends OgSplashPage {
     /* ---------------------------------------- */
     // CHECK 7:     Check the challenge link of the user
 
-    protected async checkChallengeAssetLink(challengeAssetId: string, delay?: number) {
+    /*protected async checkChallengeAssetLink(challengeAssetId: string, delay?: number) {
         if(!this.challengeAsset) {
             try {
                 await rest.api.UserChallengesResource.verifyChallengesAsset();
@@ -478,7 +486,7 @@ export class SplashDatacheck extends OgSplashPage {
                 }
             }
         }
-    }
+    }*/
 
     protected async linkChallengeAsset(challengeAssetId: string) {
         try {
@@ -537,7 +545,7 @@ export class SplashDatacheck extends OgSplashPage {
 
     /* ---------------------------------------- */
 
-    protected async checkPeakPointsAssetId(districtAsset: Asset): Promise<string> {
+    /*protected async checkPeakPointsAssetId(districtAsset: Asset): Promise<string> {
         if(!this.peakPointsAsset) {
             if(districtAsset?.attributes) {
                 const attr = districtAsset.attributes["peaksAssetId"];
@@ -550,9 +558,9 @@ export class SplashDatacheck extends OgSplashPage {
         } else {
             return this.peakPointsAsset.id;
         }
-    }
+    }*/ //*
 
-    protected async checkPeakPointsAssetLink(peakPointsAssetId: string, delay?: number) {
+    /*protected async checkPeakPointsAssetLink(peakPointsAssetId: string, delay?: number) {
         if(!this.peakPointsAsset) {
             try {
                 await rest.api.UserPeakPointsResource.verifyPeakPointsAsset();
@@ -569,9 +577,9 @@ export class SplashDatacheck extends OgSplashPage {
                 }
             }
         }
-    }
+    }*/ //*
 
-    protected async linkPeakPointsAsset(peakPointsAssetId: string) {
+    /*protected async linkPeakPointsAsset(peakPointsAssetId: string) {
         try {
             await rest.api.UserPeakPointsResource.linkPeakPointsAsset({ assetId: peakPointsAssetId });
         } catch (e) {
@@ -579,10 +587,10 @@ export class SplashDatacheck extends OgSplashPage {
             this.statusText = i18next.t("error.unknown");
             throw new Error("Unknown error when linking the peak points.");
         }
-    }
+    }* //¿?
 
     // CHECK 0:     Fetch and check the peak points asset. This data is required for the app to function.
-    protected async checkPeakPointsAsset(userId: string, peakPointsId: string): Promise<void> {
+    /*protected async checkPeakPointsAsset(userId: string, peakPointsId: string): Promise<void> {
         try {
             await this.fetchPeakPointsAsset(userId, peakPointsId);
         } catch (e) {
@@ -599,9 +607,9 @@ export class SplashDatacheck extends OgSplashPage {
             }
             throw e;
         }
-    }
+    }*/
 
-    protected async fetchPeakPointsAsset(userId: string, peakPointsId: string, delay?: number): Promise<void> {
+    /*protected async fetchPeakPointsAsset(userId: string, peakPointsId: string, delay?: number): Promise<void> {
         if(!this.peakPointsAsset) {
             const assets = (await manager.rest.api.AssetResource.queryAssets({
                 ids: [peakPointsId],
@@ -619,5 +627,5 @@ export class SplashDatacheck extends OgSplashPage {
             // cache the asset and its ID.
             this._store.dispatch(setPeakPointsAsset(assets[0]));
         }
-    }
+    }*/ //*
 }

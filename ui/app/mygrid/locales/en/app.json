@@ -1,9 +1,10 @@
 {
-  "appName": "OurGrid",
+  "appName": "MyGrid",
   "home": "Home",
   "menu": "Menu",
   "intro": "Introduction",
   "devices": "Devices",
+  "energies": "Energies",
   "houseCharacteristics": "My House",
   "privacyStatement": "Privacy Statement",
   "language": "Language",
@@ -51,7 +52,7 @@
     "percentOfPointsEarned": "% of points earned"
   },
   "error": {
-    "noOurGridAccess": "You do not have access to OurGrid.",
+    "noOurGridAccess": "You do not have access to MyGrid.",
     "districtAssetDataFailed": "Could not retrieve data from the district.",
     "districtAssetDataPermission": "You do not have permission to read data from the district.",
     "historicalAssetData": "Error when receiving historical sensor data.",
@@ -237,6 +238,21 @@
     "wattToSpare": "{{value}}",
     "maxEarnings": "maximum {{points}} points"
   },
+  "panel_peakNotification_udg": {
+    "heading": "Our district expects a peak load!",
+    "buttonText": "OK",
+    "joinedText": "I read it!",
+    "startingSoon": "Challenge starts any second",
+    "startingInFewSeconds": "Challenge starts any second",
+    "startingInFewMinutes": "Challenge starts in {{time}}",
+    "alreadyJoined": "Already joined the challenge!",
+    "primaryText": "Help by saving energy right now. During this challenge, use a maximum of ",
+    "reduceConsumption1": "Help by saving energy right now.",
+    "reduceConsumption2": "Reduce consumption between {{start}} and {{end}}.",
+    "timeStart": "{{value}}",
+    "timeEnd": "{{value}}",
+    "maxEarnings": "maximum {{points}} points"
+  },
   "panel_earnings": {
     "totalPoints": "Total points earned",
     "exchangeRate": "Exchange rate",
@@ -257,6 +273,7 @@
   },
   "panel_usageHistory": {
     "heading": "Your Consumption",
+    "headingpv": "Your Generation",
     "subtitle": "with predicted load on the grid"
   },
   "panel_challengeComplete": {

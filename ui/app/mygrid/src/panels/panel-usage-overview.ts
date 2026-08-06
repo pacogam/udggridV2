@@ -24,16 +24,17 @@ const styling = css`
     padding-bottom: 6px;
   }
 
-  #graphic-container div {
-    grid-row-start: 1;
-    grid-column-start: 1;
-  }
-
-  #statistic-wrapper {
+  .statistic-wrapper {
+    position: absolute; /* <- esto es clave para que flote encima del gráfico */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none; /* permite clics a través si hace falta */
   }
 
   #statistic-container {
@@ -96,9 +97,12 @@ export class PanelUsageOverview extends OgDataPanel {
         const isInChallenge = challengeAttributes ? this.meterAsset?.attributes['challengeStatus']?.value === OgMeterChallengeState.ACTIVE_CHALLENGE : false;
         const meterPower: number | undefined = attributes ? attributes['power']?.value : undefined;
         const meterPowerMax: number | undefined = isInChallenge && attributes ? attributes['challengePowerLimit']?.value : undefined;
+        const meterPVPower: number | undefined = attributes ? attributes['pvpower']?.value : undefined;
+        const meterPVPowerMax: number | undefined = undefined; // ajusta si hay límite
         const statisticColor = isInChallenge ? getStateColorByPowerValue(meterPower, meterPowerMax) : undefined;
+        const statisticColorPV = isInChallenge ? getStateColorByPowerValue(meterPVPower, meterPVPowerMax) : undefined;
         this.updateComplete.then(() => this.dark = isInChallenge);
-        return html`
+        /*return html`
             <div id="graphic-container">
                 <div id="statistic-wrapper">
                     ${when(isInChallenge, () => this.getTimerHTML(this.meterAsset, this.challengeAsset))}
@@ -106,6 +110,26 @@ export class PanelUsageOverview extends OgDataPanel {
                 </div>
                 <div style="aspect-ratio: ${this.aspectRatio}; overflow: hidden;">
                     <og-usage-graphic .dark="${isInChallenge}" .color="${graphicColor}" .colorAnimation="${this.staticAnimation}"></og-usage-graphic>
+                </div>
+            </div>
+        `;*/
+        return html`
+            <div id="graphic-container">
+                <!-- Primer gráfico + círculo de estadística -->
+                <div style="position: relative; height: 350px; overflow: hidden;">
+                <div class="statistic-wrapper">
+                    ${when(isInChallenge, () => this.getTimerHTML(this.meterAsset, this.challengeAsset))}
+                    ${this.getStatisticHTML(meterPower, meterPowerMax, statisticColor, isInChallenge)}
+                </div>
+                <og-usage-graphic .fill="${true}" .dark="${isInChallenge}" .color="${graphicColor}" .colorAnimation="${this.staticAnimation}"></og-usage-graphic>
+                </div>
+
+                <!-- Segundo gráfico + otro círculo con otros datos -->
+                <div style="position: relative; height: 350px; overflow: hidden;">
+                <div class="statistic-wrapper">
+                    ${this.getStatisticHTML(meterPVPower, meterPVPowerMax, statisticColorPV, isInChallenge, 'solar-power')}
+                </div>
+                <og-usage-graphic .fill="${true}" .dark="${isInChallenge}" .color="${OgStateColor.GREEN}" .colorAnimation="${this.staticAnimation}"></og-usage-graphic>
                 </div>
             </div>
         `;
@@ -117,7 +141,7 @@ export class PanelUsageOverview extends OgDataPanel {
         `;
     }
 
-    protected getStatisticHTML(power?: number, maxPower?: number, color?: OgStateColor, dark = false): TemplateResult {
+    protected getStatisticHTML(power?: number, maxPower?: number, color?: OgStateColor, dark = false, icon = 'lightning-bolt'): TemplateResult {
         const customColor: string = color || (dark ? 'var(--og-color-primary)' : undefined);
         const headingClasses: {} = {
             'text-heading': true,
@@ -128,7 +152,7 @@ export class PanelUsageOverview extends OgDataPanel {
         };
         return html`
             <div id="statistic-container" style="background: ${dark ? 'var(--og-color-primary-dark)' : 'var(--og-color-primary)'}; ${dark ? '' : 'border:solid 8px var(--og-background-shade);'}">
-                <or-icon icon="lightning-bolt" style="${styleMap(iconStyles)}"></or-icon>
+                <or-icon icon=${icon} style="${styleMap(iconStyles)}"></or-icon>
                 ${when(power, () => html`
                     <og-statistic .value="${Math.round(power)}">
                         <span class="${classMap(headingClasses)} line-height" style="color: ${customColor || nothing}" />

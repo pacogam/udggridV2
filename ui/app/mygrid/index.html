@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
-    <title>OurGrid App</title>
+    <title>MyGrid App</title>
     <meta name="application-name" content="OpenRemote Demo">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="apple-mobile-web-app-title" content="OpenRemote Demo">
@@ -13,6 +13,7 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <link rel="icon" href="images/favicon.png">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ffffff">
 
     <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
@@ -91,5 +92,6 @@ insert our 'bundle.js'.
     })();
 </script>
 <script src="modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+<script type="module" src="<%= htmlWebpackPlugin.files.js[0] %>"></script>
 </body>
 </html>

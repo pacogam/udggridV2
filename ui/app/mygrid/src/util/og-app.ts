@@ -407,8 +407,7 @@ export class OgApp<S extends GridAppStateKeyed> extends OrApp<any> {
     // where we listen to changes of attributes using websocket, to change the values live.
 
     protected subscribeAssets = async (realm: string, assetIds: string[], requestCurrent = false) => {
-        console.log(`Subscribing to assets; ${assetIds}`);
-
+        //console.log(`Subscribing to assets; ${assetIds}`);
         try {
 
             // No longer connected or realm has changed

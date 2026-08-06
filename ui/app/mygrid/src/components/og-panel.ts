@@ -145,9 +145,10 @@ export abstract class OgPanel extends LitElement {
 
     protected updated(changedProps: PropertyValues) {
         super.updated(changedProps);
-        if(changedProps.has('action') && this.action) {
+        this.action = undefined;
+        /*if(changedProps.has('action') && this.action) {
             this.dispatchEvent(new OgPanelActionUpdateEvent(this.action));
-        }
+        }*/ //* comentada para NO dibujar el botón alargado para unirse al reto
     }
 
     /* --------------------------------------------------------------------- */

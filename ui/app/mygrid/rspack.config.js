@@ -37,7 +37,8 @@ module.exports = (env, argv) => {
     config.plugins.push(new rspack.CopyRspackPlugin({
         patterns: [
             { from: 'locales', to: 'locales' },
-            { from: 'fonts', to: 'fonts' }
+            { from: 'fonts', to: 'fonts' },
+            { from: 'images', to: 'images' }
         ]
     }));
 

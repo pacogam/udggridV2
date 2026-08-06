@@ -34,28 +34,12 @@ volumes:
   postgresql-data:
   manager-data:
   ml-forecast-data:
-  efs-data:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: "addr=${EFS_DNS},rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport"
-      device: ":/"
-
-x-logging: &awslogs
-  logging:
-    driver: awslogs
-    options:
-      awslogs-region: ${AWS_REGION:-eu-west-1}
-      awslogs-group: ${OR_HOSTNAME}
-      awslogs-create-group: 'true'
-      tag: "{{.Name}}/{{.ID}}"
 
 services:
-
   # This service will only populate an empty volume on startup and then exit.
   # If the volume already contains data, it exits immediately.
   deployment:
-    image: openremote/deployment:${DEPLOYMENT_VERSION?DEPLOYMENT_VERSION must be set}
+    image: openremote/deployment:custom
     volumes:
       - deployment-data:/deployment
 
@@ -78,17 +62,17 @@ services:
       DOMAINNAME: ${OR_HOSTNAME?OR_HOSTNAME must be set}
       DOMAINNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       # USE A CUSTOM PROXY CONFIG - COPY FROM https://github.com/openremote/proxy/blob/main/haproxy.cfg
-      HAPROXY_CONFIG: '/data/proxy/haproxy.cfg'
-    <<: *awslogs
+      # HAPROXY_CONFIG: '/data/proxy/haproxy.cfg'
 
   postgresql:
     image: openremote/postgresql:${POSTGRESQL_VERSION:-latest-slim}
     restart: always
-    shm_size: 128mb
+    #shm_size: 128mb
     volumes:
       - postgresql-data:/var/lib/postgresql/data
       - manager-data:/storage
-    <<: *awslogs
+    ports:
+      - "5432:5432"
 
   keycloak:
     image: openremote/keycloak:${KEYCLOAK_VERSION:-latest}
@@ -97,12 +81,12 @@ services:
       postgresql:
         condition: service_healthy
     volumes:
-      - deployment-data:/deployment
+      #- deployment-data:/deployment
+      - ./deployment-data:/deployment
     environment:
       KEYCLOAK_ADMIN_PASSWORD: ${OR_ADMIN_PASSWORD:?OR_ADMIN_PASSWORD must be set}
       KC_HOSTNAME: ${OR_HOSTNAME:-localhost}
       KC_HOSTNAME_PORT: ${OR_SSL_PORT:--1}
-    <<: *awslogs
 
   manager:
     image: openremote/manager:${MANAGER_VERSION:-latest}
@@ -117,9 +101,12 @@ services:
     volumes:
       - manager-data:/storage
       - deployment-data:/deployment
-      - efs-data:/efs
+      - ./deployment/map:/deployment/map
+      - ./deployment/manager/app/manager_config.json:/deployment/manager/app/manager_config.json:ro
     ports:
       - "127.0.0.1:8405:8405" # Localhost metrics access
+    env_file:
+      - .env
     environment:
       # Here are some typical environment variables you want to set
       # see openremote/profile/deploy.yml for details
@@ -137,11 +124,17 @@ services:
       OR_ADDITIONAL_HOSTNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       OR_SSL_PORT: ${OR_SSL_PORT:--1}
       OR_DEV_MODE: ${OR_DEV_MODE:-false}
-      OR_MAP_TILES_PATH: '/efs/europe.mbtiles'
+      #OR_MAP_TILES_PATH: '/efs/europe.mbtiles'
       OR_FORECAST_SOLAR_API_KEY:
       OR_FIREBASE_CONFIG_FILE: /deployment/manager/fcm.json
       OR_KEYCLOAK_PUBLIC_URI:
-    <<: *awslogs
+      OR_MAP_SETTINGS_PATH: ${OR_MAP_SETTINGS_PATH:-/deployment/map/mapsettings.json}
+      WEBSERVER_LISTEN_HOST: 0.0.0.0
+      IDENTITY_NETWORK_WEBSERVER_PORT: 443
+      #IDENTITY_NETWORK_SECURE: true
+      #OR_DATA_POINTS_MAX_AGE_DAYS: 1460
+      #OR_OPEN_WEATHER_API_APP_ID: ${OR_OPEN_WEATHER_API_APP_ID}
+      #OR_FIREBASE_CONFIG_FILE: /deployment/manager/fcm.json
 
   ml-forecast:
     image: openremote/service-ml-forecast:${ML_FORECAST_VERSION:-latest}
@@ -153,9 +146,8 @@ services:
       ML_OR_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}
       ML_OR_KEYCLOAK_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}/auth
       ML_OR_SERVICE_USER: mlforecast
-      ML_OR_SERVICE_USER_SECRET: ${ML_OR_SERVICE_USER_SECRET?ML_OR_SERVICE_USER_SECRET must be set}
+      ML_OR_SERVICE_USER_SECRET: ${ML_OR_SERVICE_USER_SECRET:-secretml}
       ML_OR_SERVICE_URL: https://${OR_HOSTNAME?OR_HOSTNAME must be set}
       ML_API_PUBLISH_DOCS: false
     volumes:
       - ml-forecast-data:/app/deployment/data
-    <<: *awslogs
