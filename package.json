@@ -8,6 +8,12 @@
     "format:check": "cd ui && prettier . --check"
   },
   "resolutions": {
+    "@openremote/core": "1.28.1",
+    "@openremote/model": "1.28.1",
+    "@openremote/or-icon": "1.28.1",
+    "@openremote/or-mwc-components": "1.28.1",
+    "@openremote/or-translate": "1.28.1",
+    "@openremote/rest": "1.28.1",
     "axios": "1.18.1"
   },
   "workspaces": [
