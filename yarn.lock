@@ -8832,6 +8832,8 @@ __metadata:
     "@openremote/model": "npm:1.28.1"
     "@openremote/rest": "npm:1.28.1"
     "@openremote/util": "npm:1.28.1"
+    "@rspack/cli": "npm:~1.7.10"
+    "@rspack/core": "npm:~1.7.10"
     "@types/qs": "npm:^6.9.7"
     axios: "npm:1.18.1"
     model: "workspace:*"

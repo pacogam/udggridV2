@@ -15,9 +15,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "npx tsc -b",
     "test": "echo \"No tests\" && exit 0",
-    "prepublishOnly": "webpack"
+    "prepublishOnly": "npx rspack"
   },
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",
@@ -30,6 +30,8 @@
   },
   "devDependencies": {
     "@openremote/util": "1.28.1",
+    "@rspack/cli": "~1.7.10",
+    "@rspack/core": "~1.7.10",
     "@types/qs": "^6.9.7",
     "typescript": "5.8.3",
     "webpack": "^5.108.3"

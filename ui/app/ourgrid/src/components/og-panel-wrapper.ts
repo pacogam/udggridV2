@@ -1,14 +1,32 @@
-import {css, html, LitElement, PropertyValues, TemplateResult } from 'lit';
-import {customElement, property, state } from 'lit/decorators.js';
-import { map } from 'lit/directives/map.js';
-import {OgPanel} from './og-panel';
-import {Asset, User} from '@openremote/model';
-import {OgDataPanel} from './og-data-panel';
-import {getAppStyle} from '../styles';
-import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { when } from 'lit/directives/when.js';
-import { until } from 'lit/directives/until.js';
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { css, html, LitElement, type PropertyValues, type TemplateResult } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { map } from "lit/directives/map.js";
+import type { OgPanel } from "./og-panel";
+import type { Asset, User } from "@openremote/model";
+import { OgDataPanel } from "./og-data-panel";
+import { getAppStyle } from "../styles";
+import { classMap } from "lit/directives/class-map.js";
+import { styleMap } from "lit/directives/style-map.js";
+import { when } from "lit/directives/when.js";
+import { until } from "lit/directives/until.js";
 
 const styling = css`
   :host {
@@ -54,7 +72,6 @@ const ANIMATION_MS_MULTIPLIER = 3; // height of panel in pixels * (this value) =
 const ANIMATION_DELAY_DIVIDER = 5; // (animation duration in milliseconds) / (this value) = delay until next animation starts.
 const ANIMATION_FALLBACK_HEIGHT = 1000000;
 
-
 /*
     OG-PANEL-WRAPPER
 
@@ -63,240 +80,248 @@ const ANIMATION_FALLBACK_HEIGHT = 1000000;
     Normally we would've used <slot> elements in some sort of way, but in that case animations wouldn't work either. (since they're loaded by the parent)
 
  */
-@customElement('og-panel-wrapper')
+@customElement("og-panel-wrapper")
 export class OgPanelWrapper extends LitElement {
+  @property() // list of unique HTML strings that will load as panels. Required to be extending on OgPanel.
+  public panels: Set<string> = new Set<string>();
 
-    @property() // list of unique HTML strings that will load as panels. Required to be extending on OgPanel.
-    public panels: Set<string> = new Set<string>();
+  @property({ type: Object })
+  public user: User;
 
-    @property({type: Object})
-    public user: User;
+  @property({ type: Object })
+  public meterAsset: Asset;
 
-    @property({type: Object})
-    public meterAsset: Asset;
+  @property({ type: Object })
+  public batteryAsset: Asset;
 
-    @property({type: Object})
-    public batteryAsset: Asset;
+  @property({ type: Object })
+  public vehicleAsset: Asset;
 
-    @property({type: Object})
-    public vehicleAsset: Asset;
+  @property({ type: Object })
+  public challengeAsset: Asset;
 
-    @property({type: Object})
-    public challengeAsset: Asset;
+  @property({ type: Object })
+  public districtAsset: Asset;
 
-    @property({type: Object})
-    public districtAsset: Asset;
+  @property({ type: Object })
+  public peakPointsAsset: Asset;
 
-    @property({type: Object})
-    public peakPointsAsset: Asset;
+  @property({ type: Boolean })
+  public dark = false;
 
-    @property({type: Boolean})
-    public dark = false;
+  @state()
+  protected loadedPanels: Map<string, OgPanel> = new Map<string, OgPanel>();
 
-    @state()
-    protected loadedPanels: Map<string, OgPanel> = new Map<string, OgPanel>();
+  // Key of the action panel, that always updates even if set to the same value.
+  // This is an easy fix for "automatically updating the wrapper once the child action changes".
+  @state({
+    hasChanged(_oldVal, _newVal) {
+      return true;
+    },
+  })
+  protected actionPanelKey: string;
 
-    // Key of the action panel, that always updates even if set to the same value.
-    // This is an easy fix for "automatically updating the wrapper once the child action changes".
-    @state({ hasChanged(_oldVal, _newVal) { return true; }})
-    protected actionPanelKey: string;
+  protected renderEventHandlers: Map<string, (ev) => Promise<void>> = new Map<string, (ev) => Promise<void>>();
 
-    protected renderEventHandlers: Map<string, (ev) => Promise<void>> = new Map<string, (ev) => Promise<void>>();
+  /* -------------------- */
 
-    /* -------------------- */
+  static get styles() {
+    return [getAppStyle(), styling];
+  }
 
-    static get styles() {
-        return [getAppStyle(), styling];
+  // On component removal, remove the EventListeners
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.renderEventHandlers.forEach((value, key) => {
+      this.loadedPanels.get(key)?.removeEventListener("actionUpdate", value);
+    });
+  }
+
+  protected willUpdate(changedProps: PropertyValues) {
+    // Add or remove panels based on variable changes
+    if (changedProps.has("panels") && this.panels) {
+      this.processPanelChanges(this.panels);
+
+      // Correct properties of child panels
+      this.loadedPanels.forEach((panel) => {
+        panel.dark = true;
+        panel.slotted = true;
+      });
     }
 
-    // On component removal, remove the EventListeners
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.renderEventHandlers.forEach((value, key) => {
-            this.loadedPanels.get(key)?.removeEventListener('actionUpdate', value);
-        });
+    if (changedProps.has("loadedPanels") && this.loadedPanels) {
+      const actionPanelIndex = Array.from(this.loadedPanels.values())
+        .reverse()
+        .findIndex((p) => p.action !== undefined);
+      this.actionPanelKey = this.loadedPanels.keys()[actionPanelIndex];
     }
 
-    protected willUpdate(changedProps: PropertyValues) {
-
-        // Add or remove panels based on variable changes
-        if(changedProps.has('panels') && this.panels) {
-            this.processPanelChanges(this.panels);
-
-            // Correct properties of child panels
-            this.loadedPanels.forEach(panel => {
-                panel.dark = true;
-                panel.slotted = true;
-            });
+    // If meter-, battery-, or challenge data has changed, we also set the respective variables for data panels.
+    if (
+      changedProps.has("meterAsset") ||
+      changedProps.has("batteryAsset") ||
+      changedProps.has("vehicleAsset") ||
+      changedProps.has("challengeAsset")
+    ) {
+      this.loadedPanels.forEach((panel) => {
+        if (panel instanceof OgDataPanel) {
+          panel
+            .setUser(this.user)
+            .setMeterAsset(this.meterAsset)
+            .setBatteryAsset(this.batteryAsset)
+            .setVehicleAsset(this.vehicleAsset)
+            .setChallengeAsset(this.challengeAsset)
+            .setDistrictAsset(this.districtAsset)
+            .setPeakPointsAsset(this.peakPointsAsset);
         }
-
-        if(changedProps.has('loadedPanels') && this.loadedPanels) {
-            const actionPanelIndex = Array.from(this.loadedPanels.values()).reverse().findIndex(p => p.action !== undefined);
-            this.actionPanelKey = this.loadedPanels.keys()[actionPanelIndex];
-        }
-
-        // If meter-, battery-, or challenge data has changed, we also set the respective variables for data panels.
-        if(changedProps.has('meterAsset') || changedProps.has('batteryAsset') || changedProps.has('vehicleAsset') || changedProps.has('challengeAsset')) {
-            this.loadedPanels.forEach(panel => {
-                if(panel instanceof OgDataPanel) {
-                    panel.setUser(this.user).setMeterAsset(this.meterAsset).setBatteryAsset(this.batteryAsset).setVehicleAsset(this.vehicleAsset).setChallengeAsset(this.challengeAsset).setDistrictAsset(this.districtAsset).setPeakPointsAsset(this.peakPointsAsset);
-                }
-            });
-        }
-
-        return super.willUpdate(changedProps);
+      });
     }
 
+    return super.willUpdate(changedProps);
+  }
 
-    // Method that adds or removes panels by comparing it to the loadedPanels.
-    protected async processPanelChanges(panels: Set<string>) {
-        const panelsArray = Array.from(panels);
-        const addedPanels = panelsArray.filter(p => !this.loadedPanels.has(p));
-        const removedPanels = Array.from(this.loadedPanels.keys()).filter(lp => !panelsArray.includes(lp));
-        if(removedPanels.length > 0) {
-            await this.removePanels(...removedPanels);
+  // Method that adds or removes panels by comparing it to the loadedPanels.
+  protected async processPanelChanges(panels: Set<string>) {
+    const panelsArray = Array.from(panels);
+    const addedPanels = panelsArray.filter((p) => !this.loadedPanels.has(p));
+    const removedPanels = Array.from(this.loadedPanels.keys()).filter((lp) => !panelsArray.includes(lp));
+    if (removedPanels.length > 0) {
+      await this.removePanels(...removedPanels);
+    }
+    if (addedPanels.length > 0) {
+      this.addPanels(...addedPanels);
+    }
+  }
+
+  // Creates HTML elements based on the list of strings provided.
+  // It will only load panels that are not present, and will automatically set asset data if inheriting from OgDataPanel.
+  public addPanels(...panelNames: string[]): OgPanel | OgPanel[] {
+    console.log(`Adding ${panelNames.length} panels...`);
+    const addedPanels = panelNames
+      .filter((p) => !this.loadedPanels.has(p))
+      .map((p) => {
+        let panel: OgPanel = document.createElement(p) as OgPanel;
+        if (panel instanceof OgDataPanel) {
+          panel = panel
+            .setUser(this.user)
+            .setMeterAsset(this.meterAsset)
+            .setBatteryAsset(this.batteryAsset)
+            .setVehicleAsset(this.vehicleAsset)
+            .setChallengeAsset(this.challengeAsset)
+            .setDistrictAsset(this.districtAsset)
+            .setPeakPointsAsset(this.peakPointsAsset);
         }
-        if(addedPanels.length > 0) {
-            this.addPanels(...addedPanels);
-        }
-    }
+        this.loadedPanels.set(p, panel);
 
-    // Creates HTML elements based on the list of strings provided.
-    // It will only load panels that are not present, and will automatically set asset data if inheriting from OgDataPanel.
-    public addPanels(...panelNames: string[]): OgPanel | OgPanel[] {
-        console.log(`Adding ${panelNames.length} panels...`);
-        const addedPanels = panelNames
-            .filter(p => !this.loadedPanels.has(p))
-            .map(p => {
-                let panel: OgPanel = document.createElement(p) as OgPanel;
-                if(panel instanceof OgDataPanel) {
-                    panel = panel
-                        .setUser(this.user)
-                        .setMeterAsset(this.meterAsset)
-                        .setBatteryAsset(this.batteryAsset)
-                        .setVehicleAsset(this.vehicleAsset)
-                        .setChallengeAsset(this.challengeAsset)
-                        .setDistrictAsset(this.districtAsset)
-                        .setPeakPointsAsset(this.peakPointsAsset);
-                }
-                this.loadedPanels.set(p, panel);
-
-                // Adding listener for action updates
-                const func = async (_ev) => { this.actionPanelKey = p; };
-                this.renderEventHandlers.set(p, func);
-                panel.addEventListener('actionUpdate', func);
-
-                return panel;
-        });
-        this.requestUpdate('loadedPanels');
-
-        // After UI is rendered, wait for X amount of seconds, and do enter animation after.
-        this.updateComplete.then(() => {
-            setTimeout(() => { 
-                this.doPanelEnterAnimation(...addedPanels);
-            }, ANIMATION_DELAY);
-        });
-        return addedPanels;
-    }
-
-
-    public async removePanels(...panelNames: string[]) {
-        console.log(`Removing ${panelNames.length} panels...`);
-        const removedNames = panelNames.filter(key => this.loadedPanels.has(key));
-        const removedPanels = panelNames.map(key => this.loadedPanels.get(key));
-
-        // Before removing them from loadedPanels, do exit animation
-        await this.doPanelExitAnimation(...removedPanels);
-
-        // Remove panels
-        removedNames.forEach(p => {
-            this.loadedPanels.delete(p);
-            this.renderEventHandlers.delete(p);
-        });
-        this.requestUpdate('loadedPanels');
-
-        return removedPanels;
-    }
-
-    protected render(): TemplateResult {
-        const classes = {
-            'panel': true,
-            'panel-dark': this.dark
+        // Adding listener for action updates
+        const func = async (_ev) => {
+          this.actionPanelKey = p;
         };
-        const actionPanel = this.loadedPanels.get(this.actionPanelKey);
-        return html`
-            <div style="position: relative;">
-                <div class="panel-group">
-                    ${map(this.loadedPanels, (panel, index) => {
-                        const panelStyles: {} = {
-                            'margin-bottom': index !== (this.loadedPanels.size - 1) ? '-12px' : undefined
-                        };
-                        return html`
-                            <div class=${classMap(classes)} style=${styleMap(panelStyles)}>
-                                ${panel[1]}
-                            </div>
-                        `;
-                    })}
-                </div>
-                ${when(actionPanel, () => {
-                    return html`
-                        ${until(actionPanel.getActionTemplate())}
-                        <div style="margin-bottom: 48px;"></div>
-                    `;
-                })}
-            </div>
-        `;
+        this.renderEventHandlers.set(p, func);
+        panel.addEventListener("actionUpdate", func);
+
+        return panel;
+      });
+    this.requestUpdate("loadedPanels");
+
+    // After UI is rendered, wait for X amount of seconds, and do enter animation after.
+    this.updateComplete.then(() => {
+      setTimeout(() => {
+        this.doPanelEnterAnimation(...addedPanels);
+      }, ANIMATION_DELAY);
+    });
+    return addedPanels;
+  }
+
+  public async removePanels(...panelNames: string[]) {
+    console.log(`Removing ${panelNames.length} panels...`);
+    const removedNames = panelNames.filter((key) => this.loadedPanels.has(key));
+    const removedPanels = panelNames.map((key) => this.loadedPanels.get(key));
+
+    // Before removing them from loadedPanels, do exit animation
+    await this.doPanelExitAnimation(...removedPanels);
+
+    // Remove panels
+    removedNames.forEach((p) => {
+      this.loadedPanels.delete(p);
+      this.renderEventHandlers.delete(p);
+    });
+    this.requestUpdate("loadedPanels");
+
+    return removedPanels;
+  }
+
+  protected render(): TemplateResult {
+    const classes = {
+      panel: true,
+      "panel-dark": this.dark,
+    };
+    const actionPanel = this.loadedPanels.get(this.actionPanelKey);
+    return html`
+      <div style="position: relative;">
+        <div class="panel-group">
+          ${map(this.loadedPanels, (panel, index) => {
+            const panelStyles: {} = {
+              "margin-bottom": index !== this.loadedPanels.size - 1 ? "-12px" : undefined,
+            };
+            return html` <div class=${classMap(classes)} style=${styleMap(panelStyles)}>${panel[1]}</div> `;
+          })}
+        </div>
+        ${when(actionPanel, () => {
+          return html`
+            ${until(actionPanel.getActionTemplate())}
+            <div style="margin-bottom: 48px;"></div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  protected getAnimationDuration(elementHeight?: number): number {
+    return Math.max((elementHeight || MIN_ANIMATION_DURATION) * ANIMATION_MS_MULTIPLIER, MIN_ANIMATION_DURATION);
+  }
+
+  protected async doPanelEnterAnimation(...panels: OgPanel[]) {
+    // Get longest duration
+    const sortedPanels = panels.sort((a, b) => b.offsetHeight - a.offsetHeight);
+    const longestDuration = this.getAnimationDuration(sortedPanels[0].offsetHeight);
+
+    // Set max-height to the height the panel has currently
+    for (const p of sortedPanels) {
+      const duration = this.getAnimationDuration(p.offsetHeight);
+      p.parentElement.style.transitionDuration = `${duration}ms`;
+      p.parentElement.style.maxHeight = (p.offsetHeight || ANIMATION_FALLBACK_HEIGHT) + "px";
+      await new Promise((resolve) => setTimeout(resolve, duration / ANIMATION_DELAY_DIVIDER));
+      setTimeout(() => {
+        p.parentElement.style.overflow = "visible"; // allow overflow after animation is done
+      }, duration);
     }
 
+    // make sure all animations are done
+    await new Promise((resolve) => setTimeout(resolve, longestDuration));
 
-    protected getAnimationDuration(elementHeight?: number): number {
-        return Math.max((elementHeight || MIN_ANIMATION_DURATION) * ANIMATION_MS_MULTIPLIER, MIN_ANIMATION_DURATION);
-    }
+    // Set max-height to 100%, to allow height growth of the panel and responsive behavior
+    // Set max-height to the height the panel has currently
+    panels.forEach((p) => {
+      p.parentElement.style.maxHeight = "100%";
+    });
+    await new Promise((resolve) => setTimeout(resolve, longestDuration)); // wait until animation is done
+  }
 
-    protected async doPanelEnterAnimation(...panels: OgPanel[]) {
+  protected async doPanelExitAnimation(...panels: OgPanel[]) {
+    // Get longest duration
+    const sortedPanels = panels.sort((a, b) => b.offsetHeight - a.offsetHeight);
+    const longestDuration = this.getAnimationDuration(sortedPanels[0].offsetHeight);
 
-        // Get longest duration
-        const sortedPanels = panels.sort((a, b) => b.offsetHeight - a.offsetHeight);
-        const longestDuration = this.getAnimationDuration(sortedPanels[0].offsetHeight);
+    // Set max-height to the height the panel has currently
+    panels.forEach((p) => (p.parentElement.style.maxHeight = (p.offsetHeight || ANIMATION_FALLBACK_HEIGHT) + "px"));
+    await new Promise((resolve) => setTimeout(resolve, longestDuration)); // wait until animation is done
 
-        // Set max-height to the height the panel has currently
-        for(const p of sortedPanels) {
-            const duration = this.getAnimationDuration(p.offsetHeight);
-            p.parentElement.style.transitionDuration = `${duration}ms`;
-            p.parentElement.style.maxHeight = (p.offsetHeight || ANIMATION_FALLBACK_HEIGHT) + 'px';
-            await new Promise(resolve => setTimeout(resolve, duration / ANIMATION_DELAY_DIVIDER));
-            setTimeout(() => {
-                p.parentElement.style.overflow = 'visible'; // allow overflow after animation is done
-            }, duration);
-        }
-
-        // make sure all animations are done
-        await new Promise(resolve => setTimeout(resolve, longestDuration));
-
-        // Set max-height to 100%, to allow height growth of the panel and responsive behavior
-        // Set max-height to the height the panel has currently
-        panels.forEach(p => {
-            p.parentElement.style.maxHeight = '100%';
-        });
-        await new Promise(resolve => setTimeout(resolve, longestDuration)); // wait until animation is done
-    }
-
-
-    protected async doPanelExitAnimation(...panels: OgPanel[]) {
-
-        // Get longest duration
-        const sortedPanels = panels.sort((a, b) => b.offsetHeight - a.offsetHeight);
-        const longestDuration = this.getAnimationDuration(sortedPanels[0].offsetHeight);
-
-        // Set max-height to the height the panel has currently
-        panels.forEach(p => p.parentElement.style.maxHeight = (p.offsetHeight || ANIMATION_FALLBACK_HEIGHT) + 'px');
-        await new Promise(resolve => setTimeout(resolve, longestDuration)); // wait until animation is done
-
-        // Set max-height to 0px
-        panels.forEach(p => {
-            p.parentElement.style.overflow = 'hidden';
-            p.parentElement.style.maxHeight = '0px';
-        });
-        await new Promise(resolve => setTimeout(resolve, longestDuration)); // wait until animation is done
-    }
+    // Set max-height to 0px
+    panels.forEach((p) => {
+      p.parentElement.style.overflow = "hidden";
+      p.parentElement.style.maxHeight = "0px";
+    });
+    await new Promise((resolve) => setTimeout(resolve, longestDuration)); // wait until animation is done
+  }
 }

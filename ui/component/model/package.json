@@ -15,9 +15,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b --force",
+    "build": "npx tsc -b --force",
     "test": "echo \"No tests\" && exit 0",
-    "prepublishOnly": "tsc -b"
+    "prepublishOnly": "npx tsc -b"
   },
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",

@@ -1,28 +1,45 @@
-import {css, html, LitElement, PropertyValues, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import {OgBatteryBrand, OgHeatPumpBrand, OgVehicleBrand, OgVehicleChargerBrand} from '../util/util';
-import {OgInputButtonGroupOption, OgSpecialInputType} from '../components/og-input';
-import {i18next} from '@openremote/or-translate';
-import {DeviceCharacteristic, WellknownCharacteristics} from 'model';
-import { InputType } from '@openremote/or-mwc-components/or-mwc-input';
-import {getAppStyle} from "../styles";
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { css, html, LitElement, type PropertyValues, type TemplateResult } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { OgBatteryBrand, OgHeatPumpBrand, OgVehicleBrand, OgVehicleChargerBrand } from "../util/util";
+import { type OgInputButtonGroupOption, OgSpecialInputType } from "../components/og-input";
+import { i18next } from "@openremote/or-translate";
+import { type DeviceCharacteristic, WellknownCharacteristics } from "model";
+import { InputType } from "@openremote/or-mwc-components/or-mwc-input";
+import { getAppStyle } from "../styles";
 
 export interface OgCharacteristicsUpdateEventDetail {
-    characteristics: DeviceCharacteristic[],
-    valid: boolean
+  characteristics: DeviceCharacteristic[];
+  valid: boolean;
 }
 
 export class OgCharacteristicsUpdateEvent extends CustomEvent<OgCharacteristicsUpdateEventDetail> {
+  public static readonly NAME = "characteristics-changed";
 
-    public static readonly NAME = 'characteristics-changed';
-
-    constructor(detail: OgCharacteristicsUpdateEventDetail) {
-        super(OgCharacteristicsUpdateEvent.NAME, {
-            bubbles: true,
-            composed: true,
-            detail
-        });
-    }
+  constructor(detail: OgCharacteristicsUpdateEventDetail) {
+    super(OgCharacteristicsUpdateEvent.NAME, {
+      bubbles: true,
+      composed: true,
+      detail,
+    });
+  }
 }
 
 const styling = css`
@@ -48,244 +65,296 @@ const styling = css`
     align-items: center;
     gap: 9px;
   }
-    
+
   .characteristic-item > span {
     overflow: hidden;
     text-align: start;
   }
 `;
 
-@customElement('og-characteristics-settings')
+@customElement("og-characteristics-settings")
 export class OgCharacteristicsSettings extends LitElement {
+  @property()
+  public characteristics: DeviceCharacteristic[];
 
-    @property()
-    public characteristics: DeviceCharacteristic[];
+  @state()
+  public solarState: number = undefined; // undefined, 0 = NO, 1 = YES.
 
-    @state()
-    public solarState: number = undefined; // undefined, 0 = NO, 1 = YES.
+  @state()
+  public electricCarState: number = undefined; // undefined, 0 = NO, 1 = YES.
 
-    @state()
-    public electricCarState: number = undefined; // undefined, 0 = NO, 1 = YES.
+  @state()
+  public electricCarBrand: OgVehicleBrand = undefined;
 
-    @state()
-    public electricCarBrand: OgVehicleBrand = undefined;
+  @state()
+  public vehicleChargerState: number = undefined; // undefined, 0 = NO, 1 = YES.
 
-    @state()
-    public vehicleChargerState: number = undefined; // undefined, 0 = NO, 1 = YES.
+  /* @state()
+    public vehicleChargerBrand: OgVehicleChargerBrand = undefined; */
 
-    /*@state()
-    public vehicleChargerBrand: OgVehicleChargerBrand = undefined;*/
+  @state()
+  public heatPumpState: number = undefined; // undefined, 0 = NO, 1 = YES.
 
-    @state()
-    public heatPumpState: number = undefined; // undefined, 0 = NO, 1 = YES.
+  @state()
+  public heatPumpBrand: OgHeatPumpBrand = undefined;
 
-    @state()
-    public heatPumpBrand: OgHeatPumpBrand = undefined;
+  @state()
+  public batteryState: number = undefined; // undefined, 0 = NO, 1 = YES.
 
-    @state()
-    public batteryState: number = undefined; // undefined, 0 = NO, 1 = YES.
+  @state()
+  public batteryBrand: OgBatteryBrand = undefined;
 
-    @state()
-    public batteryBrand: OgBatteryBrand = undefined;
+  protected options: OgInputButtonGroupOption[] = [
+    {
+      icon: "close",
+      iconColors: { active: "var(--og-color-primary)", inactive: "var(--og-color-warning)" },
+      borderColors: { active: "var(--og-color-warning)", inactive: "var(--og-color-warning)" },
+      fillColors: { active: "var(--og-color-warning)" },
+    },
+    {
+      icon: "check",
+      iconColors: { active: "var(--og-color-primary)", inactive: "var(--og-color-success)" },
+      borderColors: { active: "var(--og-color-success)", inactive: "var(--og-color-success)" },
+      fillColors: { active: "var(--og-color-success)" },
+    },
+  ];
 
-    protected options: OgInputButtonGroupOption[] = [
-        {icon: 'close', iconColors: {active: 'var(--og-color-primary)', inactive: 'var(--og-color-warning)'}, borderColors: {active: 'var(--og-color-warning)', inactive: 'var(--og-color-warning)'}, fillColors: {active: 'var(--og-color-warning)'}},
-        {icon: 'check', iconColors: {active: 'var(--og-color-primary)', inactive: 'var(--og-color-success)'}, borderColors: {active: 'var(--og-color-success)', inactive: 'var(--og-color-success)'}, fillColors: {active: 'var(--og-color-success)'}}
-    ];
-
-    protected willUpdate(changedProps: PropertyValues) {
-        super.willUpdate(changedProps);
-        if(changedProps.has('characteristics') && this.characteristics) {
-            const solar = this.characteristics.find(c => c.id === WellknownCharacteristics.SOLAR_PANELS);
-            if(solar) {
-                this.solarState = solar.shown ? 1 : 0;
-            }
-            const electricCar = this.characteristics.find(c => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
-            if(electricCar) {
-                this.electricCarState = electricCar.shown ? 1 : 0;
-                this.electricCarBrand = electricCar.brand as OgVehicleBrand | undefined;
-            }
-            const vehicleCharger = this.characteristics.find(c => c.id === WellknownCharacteristics.VEHICLE_CHARGER);
-            if(vehicleCharger) {
-                this.vehicleChargerState = vehicleCharger.shown ? 1 : 0;
-                /*this.vehicleChargerBrand = vehicleCharger.brand as OgVehicleChargerBrand | undefined;*/
-            }
-            const heatPump = this.characteristics.find(c => c.id === WellknownCharacteristics.HEAT_PUMP);
-            if(heatPump) {
-                this.heatPumpState = heatPump.shown ? 1 : 0;
-                this.heatPumpBrand = heatPump.brand as OgHeatPumpBrand | undefined;
-            }
-            const battery = this.characteristics.find(c => c.id === WellknownCharacteristics.BATTERY);
-            if(battery) {
-                this.batteryState = battery.shown ? 1 : 0;
-                this.batteryBrand = battery.brand as OgBatteryBrand | undefined;
-            }
-        }
-
-        if(!changedProps.has('characteristics') || changedProps.size > 1) {
-            this.dispatchEvent(new OgCharacteristicsUpdateEvent({
-                characteristics: [
-                    { id: WellknownCharacteristics.SOLAR_PANELS, shown: this.solarState === 1 },
-                    { id: WellknownCharacteristics.ELECTRIC_VEHICLE, brand: this.electricCarBrand, shown: this.electricCarState === 1 },
-                    { id: WellknownCharacteristics.VEHICLE_CHARGER, /*brand: this.vehicleChargerBrand,*/ shown: this.vehicleChargerState === 1 },
-                    { id: WellknownCharacteristics.HEAT_PUMP, brand: this.heatPumpBrand, shown: this.heatPumpState === 1 },
-                    { id: WellknownCharacteristics.BATTERY, brand: this.batteryBrand, shown: this.batteryState === 1 }
-                ],
-                valid: this.isFormValid()
-            }));
-        }
+  protected willUpdate(changedProps: PropertyValues) {
+    super.willUpdate(changedProps);
+    if (changedProps.has("characteristics") && this.characteristics) {
+      const solar = this.characteristics.find((c) => c.id === WellknownCharacteristics.SOLAR_PANELS);
+      if (solar) {
+        this.solarState = solar.shown ? 1 : 0;
+      }
+      const electricCar = this.characteristics.find((c) => c.id === WellknownCharacteristics.ELECTRIC_VEHICLE);
+      if (electricCar) {
+        this.electricCarState = electricCar.shown ? 1 : 0;
+        this.electricCarBrand = electricCar.brand as OgVehicleBrand | undefined;
+      }
+      const vehicleCharger = this.characteristics.find((c) => c.id === WellknownCharacteristics.VEHICLE_CHARGER);
+      if (vehicleCharger) {
+        this.vehicleChargerState = vehicleCharger.shown ? 1 : 0;
+        /* this.vehicleChargerBrand = vehicleCharger.brand as OgVehicleChargerBrand | undefined; */
+      }
+      const heatPump = this.characteristics.find((c) => c.id === WellknownCharacteristics.HEAT_PUMP);
+      if (heatPump) {
+        this.heatPumpState = heatPump.shown ? 1 : 0;
+        this.heatPumpBrand = heatPump.brand as OgHeatPumpBrand | undefined;
+      }
+      const battery = this.characteristics.find((c) => c.id === WellknownCharacteristics.BATTERY);
+      if (battery) {
+        this.batteryState = battery.shown ? 1 : 0;
+        this.batteryBrand = battery.brand as OgBatteryBrand | undefined;
+      }
     }
 
-    protected isFormValid(): boolean {
-        return (this.solarState !== undefined
-            && this.electricCarState !== undefined
-            && (this.electricCarState === 0 || this.electricCarBrand !== undefined)
-            && this.vehicleChargerState !== undefined
-            && this.heatPumpState !== undefined
-            && (this.heatPumpState === 0 || this.heatPumpBrand !== undefined)
-            && this.batteryState !== undefined
-            && (this.batteryState === 0 || this.batteryBrand !== undefined)
-        );
+    if (!changedProps.has("characteristics") || changedProps.size > 1) {
+      this.dispatchEvent(
+        new OgCharacteristicsUpdateEvent({
+          characteristics: [
+            { id: WellknownCharacteristics.SOLAR_PANELS, shown: this.solarState === 1 },
+            {
+              id: WellknownCharacteristics.ELECTRIC_VEHICLE,
+              brand: this.electricCarBrand,
+              shown: this.electricCarState === 1,
+            },
+            {
+              id: WellknownCharacteristics.VEHICLE_CHARGER,
+              /* brand: this.vehicleChargerBrand, */ shown: this.vehicleChargerState === 1,
+            },
+            { id: WellknownCharacteristics.HEAT_PUMP, brand: this.heatPumpBrand, shown: this.heatPumpState === 1 },
+            { id: WellknownCharacteristics.BATTERY, brand: this.batteryBrand, shown: this.batteryState === 1 },
+          ],
+          valid: this.isFormValid(),
+        })
+      );
     }
+  }
 
-    static get styles(): any[] {
-        return [getAppStyle(), styling];
-    }
+  protected isFormValid(): boolean {
+    return (
+      this.solarState !== undefined &&
+      this.electricCarState !== undefined &&
+      (this.electricCarState === 0 || this.electricCarBrand !== undefined) &&
+      this.vehicleChargerState !== undefined &&
+      this.heatPumpState !== undefined &&
+      (this.heatPumpState === 0 || this.heatPumpBrand !== undefined) &&
+      this.batteryState !== undefined &&
+      (this.batteryState === 0 || this.batteryBrand !== undefined)
+    );
+  }
 
-    protected render(): TemplateResult {
-        return html`
-            <div class="characteristic-wrapper">
-                <div class="characteristic-container">
+  static get styles(): any[] {
+    return [getAppStyle(), styling];
+  }
 
-                    <!-- Solar panels -->
-                    <div class="characteristic-item">
-                        <span class="text-secondary bold"><or-translate value="panel_characteristics.question_solarPanels"/></span>
-                        <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.solarState}" .options="${this.options}"
-                                  @or-mwc-input-changed="${ev => this.onSolarUpdate(ev)}"></og-input>
-                    </div>
+  protected render(): TemplateResult {
+    return html`
+      <div class="characteristic-wrapper">
+        <div class="characteristic-container">
+          <!-- Solar panels -->
+          <div class="characteristic-item">
+            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_solarPanels" /></span>
+            <og-input
+              .type=${OgSpecialInputType.BUTTON_GROUP}
+              .value="${this.solarState}"
+              .options="${this.options}"
+              @or-mwc-input-changed="${(ev) => this.onSolarUpdate(ev)}"
+            ></og-input>
+          </div>
 
-                    <!-- Electric vehicle -->
-                    <div class="characteristic-item-group">
-                        <div class="characteristic-item">
-                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_electricVehicle"/></span>
-                            <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.electricCarState}" .options="${this.options}"
-                                      @or-mwc-input-changed="${ev => this.onElectricCarUpdate(ev)}"></og-input>
-                        </div>
-                        <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" ?disabled="${this.electricCarState === 0}" style="width: 100%;"
-                                      label="${this.electricCarState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_electricVehicleBrand')}"
-                                      .options="${[OgVehicleBrand.AUDI, OgVehicleBrand.HYUNDAI, OgVehicleBrand.KIA, OgVehicleBrand.OPEL, OgVehicleBrand.PEUGEOT, OgVehicleBrand.RENAULT, OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.VOLVO, OgVehicleBrand.OTHER]}" .value="${this.electricCarBrand}"
-                                      @or-mwc-input-changed="${ev => this.onElectricCarBrandUpdate(ev)}"
-                            ></og-input>
-                        </div>
-                    </div>
-
-                    <!-- Charging station -->
-                    <div class="characteristic-item-group">
-                        <div class="characteristic-item">
-                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_vehicleCharger"/></span>
-                            <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.vehicleChargerState}" .options="${this.options}"
-                                      @or-mwc-input-changed="${ev => this.onVehicleChargerUpdate(ev)}"></og-input>
-                        </div>
-                    </div>
-
-                    <!-- Heat pump -->
-                    <div class="characteristic-item-group">
-                        <div class="characteristic-item">
-                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_heatPump"/></span>
-                            <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.heatPumpState}" .options="${this.options}"
-                                      @or-mwc-input-changed="${ev => this.onHeatPumpUpdate(ev)}"></og-input>
-                        </div>
-                        <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" ?disabled="${this.heatPumpState === 0}" style="width: 100%; position: relative; display: block;"
-                                      label="${this.heatPumpState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_heatPumpBrand')}"
-                                      .options="${[OgHeatPumpBrand.RESIDEO_HONEYWELL, OgHeatPumpBrand.TOON, OgHeatPumpBrand.NEST, OgHeatPumpBrand.OTHER]}" .value="${this.heatPumpBrand}"
-                                      @or-mwc-input-changed="${ev => this.onHeatPumpBrandUpdate(ev)}"
-                            ></og-input>
-                        </div>
-                    </div>
-                    
-                    <!-- Battery -->
-                    <div class="characteristic-item-group">
-                        <div class="characteristic-item">
-                            <span class="text-secondary bold"><or-translate value="panel_characteristics.question_battery"/></span>
-                            <og-input .type=${OgSpecialInputType.BUTTON_GROUP} .value="${this.batteryState}" .options="${this.options}"
-                                      @or-mwc-input-changed="${ev => this.onBatteryUpdate(ev)}"></og-input>
-                        </div>
-                        <div class="characteristic-item">
-                            <og-input .type="${InputType.SELECT}" ?disabled="${this.batteryState === 0}" style="width: 100%; position: relative; display: block;"
-                                      label="${this.batteryState === 0 ? i18next.t('panel_characteristics.notApplicable') : i18next.t('panel_characteristics.select_batteryBrand')}"
-                                      .options="${[OgBatteryBrand.MYGRID, OgBatteryBrand.LG, OgBatteryBrand.SONNEN_BATTERIE, OgBatteryBrand.TESLA_POWERWALL, OgBatteryBrand.OTHER]}" .value="${this.batteryBrand}"
-                                      @or-mwc-input-changed="${ev => this.onBatteryBrandUpdate(ev)}"
-                            ></og-input>
-                        </div>
-                    </div>
-                    
-                    <div></div>
-                    
-                </div>
+          <!-- Electric vehicle -->
+          <div class="characteristic-item-group">
+            <div class="characteristic-item">
+              <span class="text-secondary bold"
+                ><or-translate value="panel_characteristics.question_electricVehicle"
+              /></span>
+              <og-input
+                .type=${OgSpecialInputType.BUTTON_GROUP}
+                .value="${this.electricCarState}"
+                .options="${this.options}"
+                @or-mwc-input-changed="${(ev) => this.onElectricCarUpdate(ev)}"
+              ></og-input>
             </div>
-        `;
-    }
+            <div class="characteristic-item">
+              <og-input
+                .type="${InputType.SELECT}"
+                ?disabled="${this.electricCarState === 0}"
+                style="width: 100%;"
+                label="${this.electricCarState === 0 ? i18next.t("panel_characteristics.notApplicable") : i18next.t("panel_characteristics.select_electricVehicleBrand")}"
+                .options="${[OgVehicleBrand.AUDI, OgVehicleBrand.HYUNDAI, OgVehicleBrand.KIA, OgVehicleBrand.OPEL, OgVehicleBrand.PEUGEOT, OgVehicleBrand.RENAULT, OgVehicleBrand.TESLA, OgVehicleBrand.VOLKSWAGEN_ID, OgVehicleBrand.VOLVO, OgVehicleBrand.OTHER]}"
+                .value="${this.electricCarBrand}"
+                @or-mwc-input-changed="${(ev) => this.onElectricCarBrandUpdate(ev)}"
+              ></og-input>
+            </div>
+          </div>
 
-    protected onSolarUpdate(ev: CustomEvent) {
-        this.solarState = ev.detail.value;
-    }
+          <!-- Charging station -->
+          <div class="characteristic-item-group">
+            <div class="characteristic-item">
+              <span class="text-secondary bold"
+                ><or-translate value="panel_characteristics.question_vehicleCharger"
+              /></span>
+              <og-input
+                .type=${OgSpecialInputType.BUTTON_GROUP}
+                .value="${this.vehicleChargerState}"
+                .options="${this.options}"
+                @or-mwc-input-changed="${(ev) => this.onVehicleChargerUpdate(ev)}"
+              ></og-input>
+            </div>
+          </div>
 
-    protected onElectricCarUpdate(ev: CustomEvent) {
-        if (ev.detail.value === 0) {
-            this.electricCarBrand = undefined;
-        }
-        this.electricCarState = ev.detail.value;
-    }
+          <!-- Heat pump -->
+          <div class="characteristic-item-group">
+            <div class="characteristic-item">
+              <span class="text-secondary bold"><or-translate value="panel_characteristics.question_heatPump" /></span>
+              <og-input
+                .type=${OgSpecialInputType.BUTTON_GROUP}
+                .value="${this.heatPumpState}"
+                .options="${this.options}"
+                @or-mwc-input-changed="${(ev) => this.onHeatPumpUpdate(ev)}"
+              ></og-input>
+            </div>
+            <div class="characteristic-item">
+              <og-input
+                .type="${InputType.SELECT}"
+                ?disabled="${this.heatPumpState === 0}"
+                style="width: 100%; position: relative; display: block;"
+                label="${this.heatPumpState === 0 ? i18next.t("panel_characteristics.notApplicable") : i18next.t("panel_characteristics.select_heatPumpBrand")}"
+                .options="${[OgHeatPumpBrand.RESIDEO_HONEYWELL, OgHeatPumpBrand.TOON, OgHeatPumpBrand.NEST, OgHeatPumpBrand.OTHER]}"
+                .value="${this.heatPumpBrand}"
+                @or-mwc-input-changed="${(ev) => this.onHeatPumpBrandUpdate(ev)}"
+              ></og-input>
+            </div>
+          </div>
 
-    protected onElectricCarBrandUpdate(ev: CustomEvent) {
-        if (this.electricCarState === undefined) {
-            this.electricCarState = 1;
-        }
-        this.electricCarBrand = ev.detail.value as OgVehicleBrand;
-    }
+          <!-- Battery -->
+          <div class="characteristic-item-group">
+            <div class="characteristic-item">
+              <span class="text-secondary bold"><or-translate value="panel_characteristics.question_battery" /></span>
+              <og-input
+                .type=${OgSpecialInputType.BUTTON_GROUP}
+                .value="${this.batteryState}"
+                .options="${this.options}"
+                @or-mwc-input-changed="${(ev) => this.onBatteryUpdate(ev)}"
+              ></og-input>
+            </div>
+            <div class="characteristic-item">
+              <og-input
+                .type="${InputType.SELECT}"
+                ?disabled="${this.batteryState === 0}"
+                style="width: 100%; position: relative; display: block;"
+                label="${this.batteryState === 0 ? i18next.t("panel_characteristics.notApplicable") : i18next.t("panel_characteristics.select_batteryBrand")}"
+                .options="${[OgBatteryBrand.MYGRID, OgBatteryBrand.LG, OgBatteryBrand.SONNEN_BATTERIE, OgBatteryBrand.TESLA_POWERWALL, OgBatteryBrand.OTHER]}"
+                .value="${this.batteryBrand}"
+                @or-mwc-input-changed="${(ev) => this.onBatteryBrandUpdate(ev)}"
+              ></og-input>
+            </div>
+          </div>
 
-    protected onVehicleChargerUpdate(ev: CustomEvent) {
-        /*if (ev.detail.value === 0) {
+          <div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  protected onSolarUpdate(ev: CustomEvent) {
+    this.solarState = ev.detail.value;
+  }
+
+  protected onElectricCarUpdate(ev: CustomEvent) {
+    if (ev.detail.value === 0) {
+      this.electricCarBrand = undefined;
+    }
+    this.electricCarState = ev.detail.value;
+  }
+
+  protected onElectricCarBrandUpdate(ev: CustomEvent) {
+    if (this.electricCarState === undefined) {
+      this.electricCarState = 1;
+    }
+    this.electricCarBrand = ev.detail.value as OgVehicleBrand;
+  }
+
+  protected onVehicleChargerUpdate(ev: CustomEvent) {
+    /* if (ev.detail.value === 0) {
             this.vehicleChargerBrand = undefined;
-        }*/
-        this.vehicleChargerState = ev.detail.value;
-    }
+        } */
+    this.vehicleChargerState = ev.detail.value;
+  }
 
-    /*protected onVehicleChargerBrandUpdate(ev: CustomEvent) {
+  /* protected onVehicleChargerBrandUpdate(ev: CustomEvent) {
         if (this.vehicleChargerState === undefined) {
             this.vehicleChargerState = 1;
         }
         this.vehicleChargerBrand = ev.detail.value as OgVehicleChargerBrand;
-    }*/
+    } */
 
-    protected onHeatPumpUpdate(ev: CustomEvent) {
-        if (ev.detail.value === 0) {
-            this.heatPumpBrand = undefined;
-        }
-        this.heatPumpState = ev.detail.value;
+  protected onHeatPumpUpdate(ev: CustomEvent) {
+    if (ev.detail.value === 0) {
+      this.heatPumpBrand = undefined;
     }
+    this.heatPumpState = ev.detail.value;
+  }
 
-    protected onHeatPumpBrandUpdate(ev: CustomEvent) {
-        if (this.heatPumpState === undefined) {
-            this.heatPumpState = 1;
-        }
-        this.heatPumpBrand = ev.detail.value as OgHeatPumpBrand;
+  protected onHeatPumpBrandUpdate(ev: CustomEvent) {
+    if (this.heatPumpState === undefined) {
+      this.heatPumpState = 1;
     }
+    this.heatPumpBrand = ev.detail.value as OgHeatPumpBrand;
+  }
 
-    protected onBatteryUpdate(ev: CustomEvent) {
-        if (ev.detail.value === 0) {
-            this.batteryBrand = undefined;
-        }
-        this.batteryState = ev.detail.value;
+  protected onBatteryUpdate(ev: CustomEvent) {
+    if (ev.detail.value === 0) {
+      this.batteryBrand = undefined;
     }
+    this.batteryState = ev.detail.value;
+  }
 
-    protected onBatteryBrandUpdate(ev: CustomEvent) {
-        if (this.batteryState === undefined) {
-            this.batteryState = 1;
-        }
-        this.batteryBrand = ev.detail.value as OgBatteryBrand;
+  protected onBatteryBrandUpdate(ev: CustomEvent) {
+    if (this.batteryState === undefined) {
+      this.batteryState = 1;
     }
-
+    this.batteryBrand = ev.detail.value as OgBatteryBrand;
+  }
 }
