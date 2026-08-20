@@ -20,13 +20,13 @@
   },
   "dependencies": {
     "@lit/task": "^1.0.0",
-    "@openremote/or-mwc-components": "~1.26.1",
+    "@openremote/or-mwc-components": "~1.28.1",
     "lit": "^3.3.2",
     "model": "workspace:*",
     "rest": "workspace:*"
   },
   "devDependencies": {
-    "@openremote/util": "~1.26.1",
+    "@openremote/util": "~1.28.1",
     "@rspack/cli": "~1.7.10",
     "@rspack/core": "~1.7.10",
     "cross-env": "^10.1.0",
