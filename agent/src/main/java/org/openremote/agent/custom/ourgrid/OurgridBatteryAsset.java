@@ -1,4 +1,24 @@
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 package org.openremote.agent.custom.ourgrid;
+
+import static org.openremote.agent.custom.ourgrid.OurgridAssetUtil.withAddedMeta;
 
 import jakarta.persistence.Entity;
 import org.openremote.extension.energy.model.ElectricityBatteryAsset;
@@ -9,108 +29,185 @@ import org.openremote.model.value.AttributeDescriptor;
 import org.openremote.model.value.MetaItemType;
 import org.openremote.model.value.ValueType;
 
-import static org.openremote.agent.custom.ourgrid.OurgridAssetUtil.withAddedMeta;
-
 @Entity
 public class OurgridBatteryAsset extends ElectricityBatteryAsset {
-    // New attributes
-    public static final AttributeDescriptor<Boolean> ALLOW_AUTOMATIC_CONTROL_BUTTON = new AttributeDescriptor<>("allowAutomaticControlButton", ValueType.BOOLEAN,
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_WRITE),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    );
+  // New attributes
+  public static final AttributeDescriptor<Boolean> ALLOW_AUTOMATIC_CONTROL_BUTTON =
+      new AttributeDescriptor<>(
+          "allowAutomaticControlButton",
+          ValueType.BOOLEAN,
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_WRITE),
+          new MetaItem<>(MetaItemType.RULE_STATE));
 
-    public static final AttributeDescriptor<Boolean> ALLOW_DISCHARGING_BUTTON = new AttributeDescriptor<>("allowDischargingButton", ValueType.BOOLEAN,
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_WRITE),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    );
+  public static final AttributeDescriptor<Boolean> ALLOW_DISCHARGING_BUTTON =
+      new AttributeDescriptor<>(
+          "allowDischargingButton",
+          ValueType.BOOLEAN,
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_WRITE),
+          new MetaItem<>(MetaItemType.RULE_STATE));
 
-    public static final AttributeDescriptor<String> DEVICE_ID = new AttributeDescriptor<>("deviceId", ValueType.TEXT,
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.READ_ONLY)
-    );
+  public static final AttributeDescriptor<String> DEVICE_ID =
+      new AttributeDescriptor<>(
+          "deviceId",
+          ValueType.TEXT,
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+          new MetaItem<>(MetaItemType.READ_ONLY));
 
-    public static final AttributeDescriptor<String> SOFTWARE_VERSION = new AttributeDescriptor<>("softwareVersion", ValueType.TEXT,
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.READ_ONLY)
-    );
+  public static final AttributeDescriptor<String> SOFTWARE_VERSION =
+      new AttributeDescriptor<>(
+          "softwareVersion",
+          ValueType.TEXT,
+          new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+          new MetaItem<>(MetaItemType.READ_ONLY));
 
+  // Updated attributes
+  public static final AttributeDescriptor<Double> ENERGY_CAPACITY =
+      ElectricityBatteryAsset.ENERGY_CAPACITY.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_CAPACITY.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    // Updated attributes
-    public static final AttributeDescriptor<Double> ENERGY_CAPACITY = ElectricityBatteryAsset.ENERGY_CAPACITY.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_CAPACITY.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE =
+      ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE = ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE_MAX =
+      ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE_MAX = ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MAX.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Double> POWER_EXPORT_MAX =
+      ElectricityBatteryAsset.POWER_EXPORT_MAX.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER_EXPORT_MAX.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Double> POWER_EXPORT_MAX = ElectricityBatteryAsset.POWER_EXPORT_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_EXPORT_MAX.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Double> POWER_IMPORT_MAX =
+      ElectricityBatteryAsset.POWER_IMPORT_MAX.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER_IMPORT_MAX.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Double> POWER_IMPORT_MAX = ElectricityBatteryAsset.POWER_IMPORT_MAX.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_IMPORT_MAX.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE_MIN =
+      ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Integer> ENERGY_LEVEL_PERCENTAGE_MIN = ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_LEVEL_PERCENTAGE_MIN.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  public static final AttributeDescriptor<Double> POWER =
+      ElectricityBatteryAsset.POWER.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.RULE_STATE),
+              new MetaItem<>(MetaItemType.STORE_DATA_POINTS)));
 
-    public static final AttributeDescriptor<Double> POWER = ElectricityBatteryAsset.POWER.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.RULE_STATE),
-            new MetaItem<>(MetaItemType.STORE_DATA_POINTS)));
+  public static final AttributeDescriptor<Double> POWER_SETPOINT =
+      ElectricityBatteryAsset.POWER_SETPOINT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER_SETPOINT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
+              new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
+              new MetaItem<>(MetaItemType.READ_ONLY),
+              new MetaItem<>(MetaItemType.RULE_STATE)));
 
-    public static final AttributeDescriptor<Double> POWER_SETPOINT = ElectricityBatteryAsset.POWER_SETPOINT.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_SETPOINT.getMeta(),
-            new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
-            new MetaItem<>(MetaItemType.STORE_DATA_POINTS),
-            new MetaItem<>(MetaItemType.READ_ONLY),
-            new MetaItem<>(MetaItemType.RULE_STATE)
-    ));
+  /*
+   * Regex used to pull the attributes, by following the parent tree and pasting to a new file: (?s)(^\s*public\s+static\s+final\s+AttributeDescriptor<[^>]+>\s+)(\w+)\s*=.*?;
+   * Replacement string used in IntelliJ: $1$2 = ElectricityBatteryAsset.$2.withMeta(withAddedMeta(ElectricityBatteryAsset.$2.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ, true)));
+   */
+  public static final AttributeDescriptor<Integer> CHARGE_CYCLES =
+      ElectricityBatteryAsset.CHARGE_CYCLES.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.CHARGE_CYCLES.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Boolean> SUPPORTS_EXPORT =
+      ElectricityBatteryAsset.SUPPORTS_EXPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.SUPPORTS_EXPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Boolean> SUPPORTS_IMPORT =
+      ElectricityBatteryAsset.SUPPORTS_IMPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.SUPPORTS_IMPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> ENERGY_LEVEL =
+      ElectricityBatteryAsset.ENERGY_LEVEL.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_LEVEL.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Integer[][]> ENERGY_LEVEL_SCHEDULE =
+      ElectricityBatteryAsset.ENERGY_LEVEL_SCHEDULE.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_LEVEL_SCHEDULE.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<AttributeExecuteStatus> FORCE_CHARGE =
+      ElectricityBatteryAsset.FORCE_CHARGE.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.FORCE_CHARGE.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> POWER_IMPORT_MIN =
+      ElectricityBatteryAsset.POWER_IMPORT_MIN.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER_IMPORT_MIN.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> POWER_EXPORT_MIN =
+      ElectricityBatteryAsset.POWER_EXPORT_MIN.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.POWER_EXPORT_MIN.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> CARBON_IMPORT =
+      ElectricityBatteryAsset.CARBON_IMPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.CARBON_IMPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> ENERGY_IMPORT_TOTAL =
+      ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> ENERGY_EXPORT_TOTAL =
+      ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Integer> EFFICIENCY_IMPORT =
+      ElectricityBatteryAsset.EFFICIENCY_IMPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.EFFICIENCY_IMPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Integer> EFFICIENCY_EXPORT =
+      ElectricityBatteryAsset.EFFICIENCY_EXPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.EFFICIENCY_EXPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> TARIFF_IMPORT =
+      ElectricityBatteryAsset.TARIFF_IMPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.TARIFF_IMPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  public static final AttributeDescriptor<Double> TARIFF_EXPORT =
+      ElectricityBatteryAsset.TARIFF_EXPORT.withMeta(
+          withAddedMeta(
+              ElectricityBatteryAsset.TARIFF_EXPORT.getMeta(),
+              new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
 
+  public static final AssetDescriptor<OurgridBatteryAsset> DESCRIPTOR =
+      new AssetDescriptor<>("numeric-1-circle", "00ed85", OurgridBatteryAsset.class);
 
-    /*
-     * Regex used to pull the attributes, by following the parent tree and pasting to a new file: (?s)(^\s*public\s+static\s+final\s+AttributeDescriptor<[^>]+>\s+)(\w+)\s*=.*?;
-     * Replacement string used in IntelliJ: $1$2 = ElectricityBatteryAsset.$2.withMeta(withAddedMeta(ElectricityBatteryAsset.$2.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ, true)));
-     */
-    public static final AttributeDescriptor<Integer> CHARGE_CYCLES = ElectricityBatteryAsset.CHARGE_CYCLES.withMeta(withAddedMeta(ElectricityBatteryAsset.CHARGE_CYCLES.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Boolean> SUPPORTS_EXPORT = ElectricityBatteryAsset.SUPPORTS_EXPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.SUPPORTS_EXPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Boolean> SUPPORTS_IMPORT = ElectricityBatteryAsset.SUPPORTS_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.SUPPORTS_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> ENERGY_LEVEL = ElectricityBatteryAsset.ENERGY_LEVEL.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_LEVEL.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Integer[][]> ENERGY_LEVEL_SCHEDULE = ElectricityBatteryAsset.ENERGY_LEVEL_SCHEDULE.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_LEVEL_SCHEDULE.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<AttributeExecuteStatus> FORCE_CHARGE = ElectricityBatteryAsset.FORCE_CHARGE.withMeta(withAddedMeta(ElectricityBatteryAsset.FORCE_CHARGE.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> POWER_IMPORT_MIN = ElectricityBatteryAsset.POWER_IMPORT_MIN.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_IMPORT_MIN.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> POWER_EXPORT_MIN = ElectricityBatteryAsset.POWER_EXPORT_MIN.withMeta(withAddedMeta(ElectricityBatteryAsset.POWER_EXPORT_MIN.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> CARBON_IMPORT = ElectricityBatteryAsset.CARBON_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.CARBON_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> ENERGY_IMPORT_TOTAL = ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_IMPORT_TOTAL.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> ENERGY_EXPORT_TOTAL = ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.withMeta(withAddedMeta(ElectricityBatteryAsset.ENERGY_EXPORT_TOTAL.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Integer> EFFICIENCY_IMPORT = ElectricityBatteryAsset.EFFICIENCY_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.EFFICIENCY_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Integer> EFFICIENCY_EXPORT = ElectricityBatteryAsset.EFFICIENCY_EXPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.EFFICIENCY_EXPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> TARIFF_IMPORT = ElectricityBatteryAsset.TARIFF_IMPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.TARIFF_IMPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
-    public static final AttributeDescriptor<Double> TARIFF_EXPORT = ElectricityBatteryAsset.TARIFF_EXPORT.withMeta(withAddedMeta(ElectricityBatteryAsset.TARIFF_EXPORT.getMeta(), new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ)));
+  protected OurgridBatteryAsset() {}
 
-
-    public static final AssetDescriptor<OurgridBatteryAsset> DESCRIPTOR = new AssetDescriptor<>("numeric-1-circle", "00ed85", OurgridBatteryAsset.class);
-
-    protected OurgridBatteryAsset() {
-    }
-
-    public OurgridBatteryAsset(String name) {
-        super(name);
-    }
-
-
+  public OurgridBatteryAsset(String name) {
+    super(name);
+  }
 }
-

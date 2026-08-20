@@ -1,4 +1,5 @@
 ## Introductie
+
 OurGrid laat je weten wanneer er netcongestie is in jouw buurt. Als je dan minder stroom verbruikt, kun je punten verdienen—en daarmee ook geld.
 
 Koppel je Home Assistant en laat je slimme apparaten automatisch reageren op uitdagingen. Je krijgt alle info die nodig is om het stroomdoel te halen en de uitdaging te voltooien.
@@ -25,21 +26,21 @@ Voordat je begint, open de Home Assistant gebruikersinterface in je browser.
 1. Selecteer bij de prompt **Handmatig de MQTT broker verbindingsgegevens opgeven**
 2. Schakel de **Geavanceerde opties** in (dit is vereist voor de juiste configuratie)
 3. Voer de volgende verbindingsgegevens in:
-    ```
-    - Broker: {{hostname}}
-    - Poort: 8883
-    - Gebruikersnaam: {{realm}}:{{client_id}}
-    - Wachtwoord: {{client_secret}}
-    ```
+   ```
+   - Broker: {{hostname}}
+   - Poort: 8883
+   - Gebruikersnaam: {{realm}}:{{client_id}}
+   - Wachtwoord: {{client_secret}}
+   ```
 4. Klik op **Verzenden** om door te gaan naar de geavanceerde opties
 
 ### 4. Geavanceerde MQTT Configuratie
 
 1. In de geavanceerde opties hoef je alleen het volgende in te stellen:
-    ```
-    - Client ID: {{client_id}}
-    - Broker certificaat validatie: Automatisch
-    ```
+   ```
+   - Client ID: {{client_id}}
+   - Broker certificaat validatie: Automatisch
+   ```
 2. Klik op **Verzenden** om de configuratie op te slaan
 
 ### 5. File Editor Addon Installeren
@@ -61,57 +62,57 @@ Voordat je begint, open de Home Assistant gebruikersinterface in je browser.
 2. Klik op het **Folder icoontje** in de linkerbovenhoek van de file editor
 3. Selecteer het **configuration.yaml** bestand
 4. Kopieer en plak het volgende gedeelte in je **configuration.yaml** bestand:
-    ```yaml
-    mqtt:
-        sensor:
-          # Meter sensoren
-          - name: "OurGrid Meter Power"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/power/{{meter_asset_id}}"
-            unit_of_measurement: "W"
-            device_class: "power"
-            state_class: "measurement"
-            suggested_display_precision: 0
-            icon: "mdi:lightning-bolt"
+   ```yaml
+   mqtt:
+     sensor:
+       # Meter sensoren
+       - name: "OurGrid Meter Power"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/power/{{meter_asset_id}}"
+         unit_of_measurement: "W"
+         device_class: "power"
+         state_class: "measurement"
+         suggested_display_precision: 0
+         icon: "mdi:lightning-bolt"
 
-          - name: "OurGrid Challenge Status"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeStatus/{{meter_asset_id}}"
-            icon: "mdi:information-outline"
-            value_template: "{{ value | default('unknown') }}"
-              
-          - name: "OurGrid Challenge Vermogenslimiet"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengePowerLimit/{{meter_asset_id}}"
-            unit_of_measurement: "W"
-            device_class: "power"
-            state_class: "measurement"
-            suggested_display_precision: 0
-            icon: "mdi:lightning-bolt"
+       - name: "OurGrid Challenge Status"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeStatus/{{meter_asset_id}}"
+         icon: "mdi:information-outline"
+         value_template: "{{ value | default('unknown') }}"
 
-          # Challenge sensoren
-          - name: "OurGrid Challenge Punten Wisselkoers"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengePointsExchangeRate/{{challenge_asset_id}}"
-            state_class: "measurement"
-            suggested_display_precision: 2
-            icon: "mdi:currency-eur"
+       - name: "OurGrid Challenge Vermogenslimiet"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengePowerLimit/{{meter_asset_id}}"
+         unit_of_measurement: "W"
+         device_class: "power"
+         state_class: "measurement"
+         suggested_display_precision: 0
+         icon: "mdi:lightning-bolt"
 
-          - name: "OurGrid Challenge Start"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeStart/{{challenge_asset_id}}"
-            icon: "mdi:flag-checkered"
+       # Challenge sensoren
+       - name: "OurGrid Challenge Punten Wisselkoers"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengePointsExchangeRate/{{challenge_asset_id}}"
+         state_class: "measurement"
+         suggested_display_precision: 2
+         icon: "mdi:currency-eur"
 
-          - name: "OurGrid Challenge Eind"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeEnd/{{challenge_asset_id}}"
-            icon: "mdi:flag-checkered"
+       - name: "OurGrid Challenge Start"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeStart/{{challenge_asset_id}}"
+         icon: "mdi:flag-checkered"
 
-        switch:
-          # Challenge schakelaar
-          - name: "OurGrid Challenge Deelnemen Knop"
-            state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeJoinButton/{{meter_asset_id}}"
-            command_topic: "{{realm}}/{{client_id}}/writeattributevalue/challengeJoinButton/{{meter_asset_id}}"
-            payload_on: "true"
-            payload_off: "false"
-            state_on: "true"
-            state_off: "false"
-            retain: true
-    ```
+       - name: "OurGrid Challenge Eind"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeEnd/{{challenge_asset_id}}"
+         icon: "mdi:flag-checkered"
+
+     switch:
+       # Challenge schakelaar
+       - name: "OurGrid Challenge Deelnemen Knop"
+         state_topic: "{{realm}}/{{client_id}}/attributevalue/challengeJoinButton/{{meter_asset_id}}"
+         command_topic: "{{realm}}/{{client_id}}/writeattributevalue/challengeJoinButton/{{meter_asset_id}}"
+         payload_on: "true"
+         payload_off: "false"
+         state_on: "true"
+         state_off: "false"
+         retain: true
+   ```
 5. Klik op de **Opslaan** knop in de rechterbovenhoek van de file editor
 6. Ga naar **Ontwikkelhulpmiddelen** in de linkersidebar
 7. Klik onder het **YAML-configuratie herladen** gedeelte op de **ALLE YAML CONFIGURATIE** knop
@@ -120,9 +121,11 @@ Voordat je begint, open de Home Assistant gebruikersinterface in je browser.
 > **Let op:** Als je problemen ondervindt met het toevoegen van de entiteiten, controleer dan de logs op eventuele fouten. In sommige gevallen kan het nodig zijn om Home Assistant opnieuw op te starten.
 
 ### Einde van de installatie
+
 De entiteiten zouden nu allemaal aanwezig moeten zijn in je Home Assistant installatie. Je kunt deze nu toevoegen aan je dashboards of andere onderdelen van je Home Assistant installatie.
 
 ## Reageren op een uitdaging
+
 Gebruik de volgende attributen van OurGrid om je automatiseringsregels in te stellen:
 
 | Asset     | Attribute                        | Gebruik                                                  |

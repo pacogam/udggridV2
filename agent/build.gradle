@@ -1,23 +1,23 @@
 plugins {
-    id 'java-library'
+  id 'java-library'
 }
 
 dependencies {
-    api project(":model")
-    api libs.openremote.agent
-    api libs.openremote.manager
-    api libs.openremote.energy.extension
+  api project(":model")
+  api libs.openremote.agent
+  api libs.openremote.manager
+  api libs.openremote.energy.extension
 
-    implementation libs.rabbitmq.amqp.client
-    implementation libs.jackson.datatype.jsr310
+  implementation libs.rabbitmq.amqp.client
+  implementation libs.jackson.datatype.jsr310
 
-    testImplementation libs.junit.jupiter.api
-    testImplementation libs.mockito.core
-    testImplementation libs.mockito.junit.jupiter
-    testRuntimeOnly libs.junit.jupiter.engine
-    testRuntimeOnly libs.junit.platform.launcher
+  testImplementation libs.junit.jupiter.api
+  testImplementation libs.mockito.core
+  testImplementation libs.mockito.junit.jupiter
+  testRuntimeOnly libs.junit.jupiter.engine
+  testRuntimeOnly libs.junit.platform.launcher
 }
 
 tasks.register('installDist') {
-    dependsOn jar
+  dependsOn jar
 }

@@ -47,11 +47,10 @@ x-logging: &awslogs
     options:
       awslogs-region: ${AWS_REGION:-eu-west-1}
       awslogs-group: ${OR_HOSTNAME}
-      awslogs-create-group: 'true'
+      awslogs-create-group: "true"
       tag: "{{.Name}}/{{.ID}}"
 
 services:
-
   # This service will only populate an empty volume on startup and then exit.
   # If the volume already contains data, it exits immediately.
   deployment:
@@ -78,7 +77,7 @@ services:
       DOMAINNAME: ${OR_HOSTNAME?OR_HOSTNAME must be set}
       DOMAINNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       # USE A CUSTOM PROXY CONFIG - COPY FROM https://github.com/openremote/proxy/blob/main/haproxy.cfg
-      HAPROXY_CONFIG: '/data/proxy/haproxy.cfg'
+      HAPROXY_CONFIG: "/data/proxy/haproxy.cfg"
     <<: *awslogs
 
   postgresql:
@@ -137,7 +136,7 @@ services:
       OR_ADDITIONAL_HOSTNAMES: ${OR_ADDITIONAL_HOSTNAMES:-}
       OR_SSL_PORT: ${OR_SSL_PORT:--1}
       OR_DEV_MODE: ${OR_DEV_MODE:-false}
-      OR_MAP_TILES_PATH: '/efs/europe.mbtiles'
+      OR_MAP_TILES_PATH: "/efs/europe.mbtiles"
       OR_FORECAST_SOLAR_API_KEY:
       OR_FIREBASE_CONFIG_FILE: /deployment/manager/fcm.json
       OR_KEYCLOAK_PUBLIC_URI:

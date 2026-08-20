@@ -149,12 +149,12 @@ export abstract class OgOnboardingPage extends OgPage<GridAppStateKeyed> {
                             })}
                         </div>
                     `)}
-                    
+
                     <!-- Main content with one or multiple pages using og-swipable -->
                     <div id="onboarding-content" style="${styleMap(contentStyling)}">
                         ${this.getOnboardingContent(this.pages, this.currentPageIndex)}
                     </div>
-                    
+
                     <!-- Optional footer content with action button and/or graphic. -->
                     ${when(!page.noBottomGraphic || !!page.getActionText, () => html`
                         <div id="onboarding-footer" style="${styleMap(footerStyling)}">

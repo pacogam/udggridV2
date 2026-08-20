@@ -1,9 +1,6 @@
 /*
  * Copyright 2025, OpenRemote Inc.
  *
- * See the CONTRIBUTORS.txt file in the distribution for a
- * full listing of individual contributors.
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -15,40 +12,42 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 package org.openremote.agent.custom.earne;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.time.Instant;
 import java.util.StringJoiner;
 
 /**
- * The {@link EarneEnodeControlResponseMessage} is sent as response to a {@link EarneEnodeControlRequestMessage}.
+ * The {@link EarneEnodeControlResponseMessage} is sent as response to a {@link
+ * EarneEnodeControlRequestMessage}.
  */
 public class EarneEnodeControlResponseMessage {
 
-    public String userId;
-    public Instant timeStamp;
-    public String response;
-    public JsonNode payload;
+  public String userId;
+  public Instant timeStamp;
+  public String response;
+  public JsonNode payload;
 
-    boolean isSuccess() {
-        return "SUCCESS".equals(response);
-    }
+  boolean isSuccess() {
+    return "SUCCESS".equals(response);
+  }
 
-    EarneEnodeControlRequestMessage getPayload() {
-        return EarneEnodeControlRequestMessage.fromJsonNode(payload);
-    }
+  EarneEnodeControlRequestMessage getPayload() {
+    return EarneEnodeControlRequestMessage.fromJsonNode(payload);
+  }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", EarneEnodeControlResponseMessage.class.getSimpleName() + "[", "]")
-                .add("userId='" + userId + "'")
-                .add("timeStamp=" + timeStamp)
-                .add("response='" + response + "'")
-                .add("payload='" + getPayload() + "'")
-                .toString();
-    }
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", EarneEnodeControlResponseMessage.class.getSimpleName() + "[", "]")
+        .add("userId='" + userId + "'")
+        .add("timeStamp=" + timeStamp)
+        .add("response='" + response + "'")
+        .add("payload='" + getPayload() + "'")
+        .toString();
+  }
 }

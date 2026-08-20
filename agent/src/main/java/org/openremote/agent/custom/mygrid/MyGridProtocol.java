@@ -1,5 +1,29 @@
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 package org.openremote.agent.custom.mygrid;
 
+import static org.openremote.container.web.WebTargetBuilder.createClient;
+import static org.openremote.model.syslog.SyslogCategory.PROTOCOL;
+import static org.openremote.model.value.MetaItemType.AGENT_LINK;
+
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -7,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.openremote.agent.custom.ourgrid.OurgridBatteryAsset;
 import org.openremote.agent.protocol.mqtt.MQTTAgent;
@@ -30,572 +53,618 @@ import org.openremote.model.query.AssetQuery;
 import org.openremote.model.syslog.SyslogCategory;
 import org.openremote.model.util.ValueUtil;
 
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.client.Entity;
-
-import static org.openremote.model.value.MetaItemType.AGENT_LINK;
-import static org.openremote.model.syslog.SyslogCategory.PROTOCOL;
-import static org.openremote.container.web.WebTargetBuilder.createClient;
-
 /**
- * Integrates MyGrid {@code ModuleOneAsset} and {@code ModuleTwoAsset}
- * batteries as {@link OurgridBatteryAsset}s.
+ * Integrates MyGrid {@code ModuleOneAsset} and {@code ModuleTwoAsset} batteries as {@link
+ * OurgridBatteryAsset}s.
  *
- * <p>
- * The protocol syncs/provisions supported MyGrid assets, tracks their source
- * asset type by id, forwards subscribed telemetry attributes, and configures
- * MQTT links for writable attributes. Asset create/update events refresh the
- * local asset and type tracking; delete events remove both.
- * </p>
+ * <p>The protocol syncs/provisions supported MyGrid assets, tracks their source asset type by id,
+ * forwards subscribed telemetry attributes, and configures MQTT links for writable attributes.
+ * Asset create/update events refresh the local asset and type tracking; delete events remove both.
  *
- * <p>
- * Writes to {@link OurgridBatteryAsset#ALLOW_AUTOMATIC_CONTROL_BUTTON} map
- * {@code false} to {@code controlSource=MyGrid} and {@code true} to
- * {@code controlSource=OurGrid}. {@code ModuleOneAsset} receives both the
- * legacy {@code externalControl} boolean and the new {@code controlSource}
- * enum value; {@code ModuleTwoAsset} receives only {@code controlSource}.
- * Writes are ignored when the source MyGrid asset type is unknown.
- * </p>
+ * <p>Writes to {@link OurgridBatteryAsset#ALLOW_AUTOMATIC_CONTROL_BUTTON} map {@code false} to
+ * {@code controlSource=MyGrid} and {@code true} to {@code controlSource=OurGrid}. {@code
+ * ModuleOneAsset} receives both the legacy {@code externalControl} boolean and the new {@code
+ * controlSource} enum value; {@code ModuleTwoAsset} receives only {@code controlSource}. Writes are
+ * ignored when the source MyGrid asset type is unknown.
  *
  * @see MyGridAgent
  * @see MyGridMQTTProtocol
  */
 public class MyGridProtocol implements Protocol<MyGridAgent> {
 
-    public static final String PROTOCOL_DISPLAY_NAME = "MyGrid";
-    public static final String MYGRID_MODULE_ONE_ASSET_TYPE = "ModuleOneAsset";
-    public static final String MYGRID_MODULE_TWO_ASSET_TYPE = "ModuleTwoAsset";
+  public static final String PROTOCOL_DISPLAY_NAME = "MyGrid";
+  public static final String MYGRID_MODULE_ONE_ASSET_TYPE = "ModuleOneAsset";
+  public static final String MYGRID_MODULE_TWO_ASSET_TYPE = "ModuleTwoAsset";
 
-    private static final Set<String> MYGRID_ASSET_TYPES = Set.of(
-            MYGRID_MODULE_ONE_ASSET_TYPE,
-            MYGRID_MODULE_TWO_ASSET_TYPE);
-    private static final String EXTERNAL_CONTROL_ATTRIBUTE = "externalControl";
-    private static final String CONTROL_SOURCE_ATTRIBUTE = "controlSource";
-    private static final String CONTROL_SOURCE_MYGRID = "MyGrid";
-    private static final String CONTROL_SOURCE_OURGRID = "OurGrid";
+  private static final Set<String> MYGRID_ASSET_TYPES =
+      Set.of(MYGRID_MODULE_ONE_ASSET_TYPE, MYGRID_MODULE_TWO_ASSET_TYPE);
+  private static final String EXTERNAL_CONTROL_ATTRIBUTE = "externalControl";
+  private static final String CONTROL_SOURCE_ATTRIBUTE = "controlSource";
+  private static final String CONTROL_SOURCE_MYGRID = "MyGrid";
+  private static final String CONTROL_SOURCE_OURGRID = "OurGrid";
 
-    private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, MyGridProtocol.class);
+  private static final Logger LOG = SyslogCategory.getLogger(PROTOCOL, MyGridProtocol.class);
 
-    // Attribute names to process locally when received from the MyGrid MQTT broker
-    private static final String[] SUBSCRIBED_ATTRIBUTES = {
-            "power",
-            "energyLevel",
-            "powerSetpoint",
-            "energyLevelPercentage",
-    };
+  // Attribute names to process locally when received from the MyGrid MQTT broker
+  private static final String[] SUBSCRIBED_ATTRIBUTES = {
+    "power", "energyLevel", "powerSetpoint", "energyLevelPercentage",
+  };
 
-    protected MyGridAgent agent;
-    protected MyGridMQTTProtocol mqttProtocol;
-    protected MQTT_IOClient mqttClient;
-    protected Container container;
-    protected ScheduledExecutorService scheduledExecutor;
-    protected ProtocolAssetService protocolAssetService;
-    protected static final AtomicReference<ResteasyClient> resteasyClient = new AtomicReference<>();
+  protected MyGridAgent agent;
+  protected MyGridMQTTProtocol mqttProtocol;
+  protected MQTT_IOClient mqttClient;
+  protected Container container;
+  protected ScheduledExecutorService scheduledExecutor;
+  protected ProtocolAssetService protocolAssetService;
+  protected static final AtomicReference<ResteasyClient> resteasyClient = new AtomicReference<>();
 
-    // Timestamp of the last executed sync
-    protected long lastSyncTimestamp = 0;
+  // Timestamp of the last executed sync
+  protected long lastSyncTimestamp = 0;
 
-    // Interval used to prevent constant syncs when the client gets disconnected and
-    // re-connected due to connection issues
-    protected static final long MIN_INTERVAL_BETWEEN_SYNCS = 5000; // 5 seconds
+  // Interval used to prevent constant syncs when the client gets disconnected and
+  // re-connected due to connection issues
+  protected static final long MIN_INTERVAL_BETWEEN_SYNCS = 5000; // 5 seconds
 
-    // Subscribed topics
-    protected final Set<String> subscribedTopics = ConcurrentHashMap.newKeySet();
-    protected final Map<String, String> myGridAssetTypes = new ConcurrentHashMap<>();
+  // Subscribed topics
+  protected final Set<String> subscribedTopics = ConcurrentHashMap.newKeySet();
+  protected final Map<String, String> myGridAssetTypes = new ConcurrentHashMap<>();
 
-    public MyGridProtocol(MyGridAgent agent) {
-        this.agent = agent;
+  public MyGridProtocol(MyGridAgent agent) {
+    this.agent = agent;
 
-        // Create the MQTT agent instance
-        MQTTAgent mqttAgent = new MQTTAgent(agent.getName());
-        mqttAgent.setId(agent.getId());
+    // Create the MQTT agent instance
+    MQTTAgent mqttAgent = new MQTTAgent(agent.getName());
+    mqttAgent.setId(agent.getId());
 
-        agent.getHost().ifPresent(mqttAgent::setHost);
-        agent.getPort().ifPresent(mqttAgent::setPort);
-        agent.getClientId().ifPresent(mqttAgent::setClientId);
-        agent.isSecureMode().ifPresent(mqttAgent::setSecureMode);
-        agent.getCertificateAlias().ifPresent(mqttAgent::setCertificateAlias);
-        agent.getUsernamePassword().ifPresent(mqttAgent::setUsernamePassword);
+    agent.getHost().ifPresent(mqttAgent::setHost);
+    agent.getPort().ifPresent(mqttAgent::setPort);
+    agent.getClientId().ifPresent(mqttAgent::setClientId);
+    agent.isSecureMode().ifPresent(mqttAgent::setSecureMode);
+    agent.getCertificateAlias().ifPresent(mqttAgent::setCertificateAlias);
+    agent.getUsernamePassword().ifPresent(mqttAgent::setUsernamePassword);
 
-        // Create the MQTT protocol instance
-        this.mqttProtocol = new MyGridMQTTProtocol(mqttAgent);
+    // Create the MQTT protocol instance
+    this.mqttProtocol = new MyGridMQTTProtocol(mqttAgent);
+  }
+
+  @Override
+  public String getProtocolName() {
+    return PROTOCOL_DISPLAY_NAME;
+  }
+
+  @Override
+  public String getProtocolInstanceUri() {
+    return "mygrid://"
+        + getAgent().getHost().orElse("-")
+        + ":"
+        + getAgent().getPort().map(Object::toString).orElse("-");
+  }
+
+  @Override
+  public Map<AttributeRef, Attribute<?>> getLinkedAttributes() {
+    return mqttProtocol.getLinkedAttributes();
+  }
+
+  @Override
+  public void linkAttribute(String assetId, Attribute<?> attribute) throws Exception {
+    mqttProtocol.linkAttribute(assetId, attribute);
+  }
+
+  @Override
+  public void unlinkAttribute(String assetId, Attribute<?> attribute) throws Exception {
+    mqttProtocol.unlinkAttribute(assetId, attribute);
+  }
+
+  @Override
+  public MyGridAgent getAgent() {
+    return agent;
+  }
+
+  @Override
+  public void updateLinkedAttribute(AttributeRef attributeRef, Object value, long timestamp) {
+    mqttProtocol.updateLinkedAttribute(attributeRef, value, timestamp);
+  }
+
+  @Override
+  public void updateLinkedAttribute(AttributeRef attributeRef, Object value) {
+    mqttProtocol.updateLinkedAttribute(attributeRef, value);
+  }
+
+  @Override
+  public void setAssetService(ProtocolAssetService assetService) {
+    this.protocolAssetService = assetService;
+    mqttProtocol.setAssetService(assetService);
+  }
+
+  @Override
+  public void processLinkedAttributeWrite(AttributeEvent event) {
+    LOG.info(
+        "MyGrid protocol processing linked attribute write: "
+            + event.getName()
+            + " for asset "
+            + event.getId());
+
+    if (OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName().equals(event.getName())) {
+      processAllowAutomaticControlButtonWrite(event);
+      return;
     }
 
-    @Override
-    public String getProtocolName() {
-        return PROTOCOL_DISPLAY_NAME;
+    mqttProtocol.processLinkedAttributeWrite(event);
+  }
+
+  @Override
+  public boolean onAgentAttributeChanged(AttributeEvent event) {
+    return mqttProtocol.onAgentAttributeChanged(event);
+  }
+
+  protected void onConnectionStatusChanged(ConnectionStatus status) {
+    LOG.info("MyGrid protocol connection status changed: " + status);
+
+    // (Re)Subscribe to asset and attribute events when the MQTT connection is
+    // established
+    if (status == ConnectionStatus.CONNECTED) {
+      LOG.info("MyGrid protocol connection established, subscribing to asset and attribute events");
+
+      // Subscribe to asset and attribute events with an active retry mechanism
+      tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 10, 5000);
+      tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 10, 5000);
+
+      // Syncing the assets from MyGrid if the last sync was more
+      // than MIN_INTERVAL_BETWEEN_SYNCS ago
+      // This is to prevent constant syncs when the client gets disconnected and
+      // re-connected.
+      // Note: The client gets disconnected when UserAssetLinks change, thats why we
+      // resync on reconnect.
+      if (System.currentTimeMillis() - lastSyncTimestamp > MIN_INTERVAL_BETWEEN_SYNCS) {
+        syncMyGridAssets();
+        lastSyncTimestamp = System.currentTimeMillis();
+      }
+
+    } else {
+      LOG.info("MyGrid protocol connection lost, unsubscribing from asset and attribute events");
+      if (mqttClient != null) {
+        mqttClient.removeAllMessageConsumers();
+        subscribedTopics.clear();
+      }
+    }
+  }
+
+  @Override
+  public void start(Container container) throws Exception {
+    LOG.info("MyGrid protocol starting");
+    mqttProtocol.start(container);
+
+    this.container = container;
+    this.scheduledExecutor = container.getScheduledExecutor();
+
+    this.mqttClient = this.mqttProtocol.getMQTTClient();
+
+    if (mqttClient != null) {
+      mqttClient.addConnectionStatusConsumer(this::onConnectionStatusChanged);
     }
 
-    @Override
-    public String getProtocolInstanceUri() {
-        return "mygrid://" + getAgent().getHost().orElse("-") + ":"
-                + getAgent().getPort().map(Object::toString).orElse("-");
+    // Initialize the RESTEasy client for HTTP requests
+    initResteasyClient();
+
+    LOG.info("MyGrid protocol started");
+  }
+
+  @Override
+  public void stop(Container container) throws Exception {
+    LOG.info("MyGrid protocol stopping");
+
+    // Cleanup the MQTT client subscriptions
+    if (mqttClient != null) {
+      mqttClient.removeAllMessageConsumers();
+      subscribedTopics.clear();
     }
 
-    @Override
-    public Map<AttributeRef, Attribute<?>> getLinkedAttributes() {
-        return mqttProtocol.getLinkedAttributes();
+    // Remove status consumer from the MQTT client
+    if (mqttClient != null) {
+      LOG.info("Removing connection status consumers from the MQTT client");
+      mqttClient.removeAllConnectionStatusConsumers();
     }
 
-    @Override
-    public void linkAttribute(String assetId, Attribute<?> attribute) throws Exception {
-        mqttProtocol.linkAttribute(assetId, attribute);
+    mqttProtocol.stop(container);
+
+    LOG.info("MyGrid protocol stopped");
+  }
+
+  protected static void initResteasyClient() {
+    synchronized (resteasyClient) {
+      if (resteasyClient.get() == null) {
+        resteasyClient.set(createClient(org.openremote.container.Container.SCHEDULED_EXECUTOR));
+      }
+    }
+  }
+
+  // Get all OurgridBatteryAssets from the local OpenRemote instance
+  protected List<OurgridBatteryAsset> getBatteryAssets() {
+    return protocolAssetService
+        .findAssets(new AssetQuery().types(OurgridBatteryAsset.class))
+        .stream()
+        .map(OurgridBatteryAsset.class::cast)
+        .toList();
+  }
+
+  // Provision a new OurgridBatteryAsset with the respective MQTT Agent links
+  protected void provisionBatteryAsset(Asset<?> asset) {
+    if (asset.getId() == null) {
+      LOG.warning("Cannot build asset due to missing ID value");
+      return;
     }
 
-    @Override
-    public void unlinkAttribute(String assetId, Attribute<?> attribute) throws Exception {
-        mqttProtocol.unlinkAttribute(assetId, attribute);
+    myGridAssetTypes.put(asset.getId(), asset.getType());
+
+    // Update the existing asset with new agent links if it exists
+    var existingAsset =
+        getBatteryAssets().stream()
+            .filter(a -> a.getId().equals(asset.getId()))
+            .findFirst()
+            .orElse(null);
+    if (existingAsset != null) {
+      LOG.info("Updating agent links for existing battery asset: " + existingAsset.getId());
+
+      // Add or replace the agent links
+      addOrReplaceAgentLinks(existingAsset);
+
+      try {
+        protocolAssetService.mergeAsset(existingAsset);
+        LOG.info(
+            "Successfully updated agent links for existing battery asset: "
+                + existingAsset.getId());
+      } catch (Exception e) {
+        LOG.warning("Failed to merge battery asset with new agent links: " + existingAsset.getId());
+      }
+      return;
     }
 
-    @Override
-    public MyGridAgent getAgent() {
-        return agent;
-    }
+    OurgridBatteryAsset batteryAsset = new OurgridBatteryAsset(asset.getId());
+    batteryAsset.setId(asset.getId());
+    batteryAsset.setParentId(this.agent.getId());
 
-    @Override
-    public void updateLinkedAttribute(AttributeRef attributeRef, Object value, long timestamp) {
-        mqttProtocol.updateLinkedAttribute(attributeRef, value, timestamp);
-    }
-
-    @Override
-    public void updateLinkedAttribute(AttributeRef attributeRef, Object value) {
-        mqttProtocol.updateLinkedAttribute(attributeRef, value);
-    }
-
-    @Override
-    public void setAssetService(ProtocolAssetService assetService) {
-        this.protocolAssetService = assetService;
-        mqttProtocol.setAssetService(assetService);
-    }
-
-    @Override
-    public void processLinkedAttributeWrite(AttributeEvent event) {
-        LOG.info("MyGrid protocol processing linked attribute write: " + event.getName() + " for asset "
-                + event.getId());
-
-        if (OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName().equals(event.getName())) {
-            processAllowAutomaticControlButtonWrite(event);
-            return;
-        }
-
-        mqttProtocol.processLinkedAttributeWrite(event);
-    }
-
-    @Override
-    public boolean onAgentAttributeChanged(AttributeEvent event) {
-        return mqttProtocol.onAgentAttributeChanged(event);
-    }
-
-    protected void onConnectionStatusChanged(ConnectionStatus status) {
-        LOG.info("MyGrid protocol connection status changed: " + status);
-
-        // (Re)Subscribe to asset and attribute events when the MQTT connection is
-        // established
-        if (status == ConnectionStatus.CONNECTED) {
-            LOG.info("MyGrid protocol connection established, subscribing to asset and attribute events");
-
-            // Subscribe to asset and attribute events with an active retry mechanism
-            tryAddMQTTMessageConsumer(getAssetEventsTopic(), this::onMyGridAssetEvent, 10, 5000);
-            tryAddMQTTMessageConsumer(getAttributeEventsTopic(), this::onMyGridAttributeEvent, 10, 5000);
-
-            // Syncing the assets from MyGrid if the last sync was more
-            // than MIN_INTERVAL_BETWEEN_SYNCS ago
-            // This is to prevent constant syncs when the client gets disconnected and
-            // re-connected.
-            // Note: The client gets disconnected when UserAssetLinks change, thats why we
-            // resync on reconnect.
-            if (System.currentTimeMillis() - lastSyncTimestamp > MIN_INTERVAL_BETWEEN_SYNCS) {
-                syncMyGridAssets();
-                lastSyncTimestamp = System.currentTimeMillis();
-            }
-
-        } else {
-            LOG.info("MyGrid protocol connection lost, unsubscribing from asset and attribute events");
-            if (mqttClient != null) {
-                mqttClient.removeAllMessageConsumers();
-                subscribedTopics.clear();
-            }
-        }
-    }
-
-    @Override
-    public void start(Container container) throws Exception {
-        LOG.info("MyGrid protocol starting");
-        mqttProtocol.start(container);
-
-        this.container = container;
-        this.scheduledExecutor = container.getScheduledExecutor();
-
-        this.mqttClient = this.mqttProtocol.getMQTTClient();
-
-        if (mqttClient != null) {
-            mqttClient.addConnectionStatusConsumer(this::onConnectionStatusChanged);
-        }
-
-        // Initialize the RESTEasy client for HTTP requests
-        initResteasyClient();
-
-        LOG.info("MyGrid protocol started");
-    }
-
-    @Override
-    public void stop(Container container) throws Exception {
-        LOG.info("MyGrid protocol stopping");
-
-        // Cleanup the MQTT client subscriptions
-        if (mqttClient != null) {
-            mqttClient.removeAllMessageConsumers();
-            subscribedTopics.clear();
-        }
-
-        // Remove status consumer from the MQTT client
-        if (mqttClient != null) {
-            LOG.info("Removing connection status consumers from the MQTT client");
-            mqttClient.removeAllConnectionStatusConsumers();
-        }
-
-        mqttProtocol.stop(container);
-
-        LOG.info("MyGrid protocol stopped");
-    }
-
-    protected static void initResteasyClient() {
-        synchronized (resteasyClient) {
-            if (resteasyClient.get() == null) {
-                resteasyClient.set(createClient(org.openremote.container.Container.SCHEDULED_EXECUTOR));
-            }
-        }
-    }
-
-    // Get all OurgridBatteryAssets from the local OpenRemote instance
-    protected List<OurgridBatteryAsset> getBatteryAssets() {
-        return protocolAssetService.findAssets(new AssetQuery().types(OurgridBatteryAsset.class))
-                .stream()
-                .map(OurgridBatteryAsset.class::cast)
-                .toList();
-    }
-
-    // Provision a new OurgridBatteryAsset with the respective MQTT Agent links
-    protected void provisionBatteryAsset(Asset<?> asset) {
-        if (asset.getId() == null) {
-            LOG.warning("Cannot build asset due to missing ID value");
-            return;
-        }
-
-        myGridAssetTypes.put(asset.getId(), asset.getType());
-
-        // Update the existing asset with new agent links if it exists
-        var existingAsset = getBatteryAssets().stream().filter(a -> a.getId().equals(asset.getId())).findFirst()
-                .orElse(null);
-        if (existingAsset != null) {
-            LOG.info("Updating agent links for existing battery asset: " + existingAsset.getId());
-
-            // Add or replace the agent links
-            addOrReplaceAgentLinks(existingAsset);
-
-            try {
-                protocolAssetService.mergeAsset(existingAsset);
-                LOG.info("Successfully updated agent links for existing battery asset: " + existingAsset.getId());
-            } catch (Exception e) {
-                LOG.warning("Failed to merge battery asset with new agent links: " + existingAsset.getId());
-            }
-            return;
-        }
-
-        OurgridBatteryAsset batteryAsset = new OurgridBatteryAsset(asset.getId());
-        batteryAsset.setId(asset.getId());
-        batteryAsset.setParentId(this.agent.getId());
-
-        // Update any existing attributes with the new values from the MyGrid asset
-        Arrays.stream(SUBSCRIBED_ATTRIBUTES)
-                .filter(attributeName -> batteryAsset.hasAttribute(attributeName) && asset.hasAttribute(attributeName))
-                .forEach(attributeName -> asset.getAttribute(attributeName).flatMap(Attribute::getValue)
-                        .ifPresent(value -> batteryAsset.getAttribute(attributeName)
+    // Update any existing attributes with the new values from the MyGrid asset
+    Arrays.stream(SUBSCRIBED_ATTRIBUTES)
+        .filter(
+            attributeName ->
+                batteryAsset.hasAttribute(attributeName) && asset.hasAttribute(attributeName))
+        .forEach(
+            attributeName ->
+                asset
+                    .getAttribute(attributeName)
+                    .flatMap(Attribute::getValue)
+                    .ifPresent(
+                        value ->
+                            batteryAsset
+                                .getAttribute(attributeName)
                                 .ifPresent(attribute -> attribute.setValue(value))));
 
-        // Add or replace the agent links
-        addOrReplaceAgentLinks(batteryAsset);
+    // Add or replace the agent links
+    addOrReplaceAgentLinks(batteryAsset);
 
-        // Merge the OurgridBatteryAsset into the local OpenRemote instance
-        try {
-            LOG.info("Provisioning new battery asset: " + batteryAsset.getId());
-            protocolAssetService.mergeAsset(batteryAsset);
-            LOG.info("Successfully provisioned new battery asset: " + batteryAsset.getId());
-        } catch (Exception e) {
-            LOG.warning("Failed to merge battery asset: " + batteryAsset.getId());
-        }
+    // Merge the OurgridBatteryAsset into the local OpenRemote instance
+    try {
+      LOG.info("Provisioning new battery asset: " + batteryAsset.getId());
+      protocolAssetService.mergeAsset(batteryAsset);
+      LOG.info("Successfully provisioned new battery asset: " + batteryAsset.getId());
+    } catch (Exception e) {
+      LOG.warning("Failed to merge battery asset: " + batteryAsset.getId());
+    }
+  }
+
+  // Add or replace the agent links for the given asset
+  protected void addOrReplaceAgentLinks(OurgridBatteryAsset batteryAsset) {
+
+    // power setpoint
+    var powerSetpointAttribute = batteryAsset.getAttribute(OurgridBatteryAsset.POWER_SETPOINT);
+    if (powerSetpointAttribute.isPresent()) {
+      var powerSetpointAttributePublishTopic =
+          getAttributePublishTopic(
+              batteryAsset.getId(), OurgridBatteryAsset.POWER_SETPOINT.getName());
+      powerSetpointAttribute
+          .get()
+          .addOrReplaceMeta(
+              new MetaItem<>(
+                  AGENT_LINK,
+                  new MQTTAgentLink(this.agent.getId())
+                      .setPublishTopic(powerSetpointAttributePublishTopic)));
     }
 
-    // Add or replace the agent links for the given asset
-    protected void addOrReplaceAgentLinks(OurgridBatteryAsset batteryAsset) {
+    // allowAutomaticControlButton
+    var allowAutomaticControlButtonAttribute =
+        batteryAsset.getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON);
+    if (allowAutomaticControlButtonAttribute.isPresent()) {
+      var allowAutomaticControlButtonAttributePublishTopic =
+          getAttributePublishTopic(batteryAsset.getId(), CONTROL_SOURCE_ATTRIBUTE);
+      allowAutomaticControlButtonAttribute
+          .get()
+          .addOrReplaceMeta(
+              new MetaItem<>(
+                  AGENT_LINK,
+                  new MQTTAgentLink(this.agent.getId())
+                      .setPublishTopic(allowAutomaticControlButtonAttributePublishTopic)
+                      .setUpdateOnWrite(true)));
+    }
+  }
 
-        // power setpoint
-        var powerSetpointAttribute = batteryAsset.getAttribute(OurgridBatteryAsset.POWER_SETPOINT);
-        if (powerSetpointAttribute.isPresent()) {
-            var powerSetpointAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
-                    OurgridBatteryAsset.POWER_SETPOINT.getName());
-            powerSetpointAttribute.get().addOrReplaceMeta(
-                    new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
-                            .setPublishTopic(powerSetpointAttributePublishTopic)));
-        }
+  // Construct the initial topic prefix based on the agent's config (example:
+  // mygrid/serviceuser)
+  protected String getTopicPrefix() {
+    String realm =
+        this.getAgent()
+            .getMyGridRealm()
+            .orElseThrow(() -> new IllegalArgumentException("MyGrid realm was not configured"));
+    String clientId =
+        this.getAgent()
+            .getClientId()
+            .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
+    return realm + "/" + clientId;
+  }
 
-        // allowAutomaticControlButton
-        var allowAutomaticControlButtonAttribute = batteryAsset
-                .getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON);
-        if (allowAutomaticControlButtonAttribute.isPresent()) {
-            var allowAutomaticControlButtonAttributePublishTopic = getAttributePublishTopic(batteryAsset.getId(),
-                    CONTROL_SOURCE_ATTRIBUTE);
-            allowAutomaticControlButtonAttribute.get().addOrReplaceMeta(
-                    new MetaItem<>(AGENT_LINK, new MQTTAgentLink(this.agent.getId())
-                            .setPublishTopic(allowAutomaticControlButtonAttributePublishTopic).setUpdateOnWrite(true)));
+  // Return the wildcard topic for asset events (example:
+  // mygrid/serviceuser/asset/#)
+  protected String getAssetEventsTopic() {
+    return getTopicPrefix() + "/asset/#";
+  }
 
-        }
+  // Return the wildcard topic for attribute events (example:
+  // mygrid/serviceuser/attribute/+/#)
+  protected String getAttributeEventsTopic() {
+    return getTopicPrefix() + "/attribute/+/#";
+  }
 
+  // Return the topic for publishing a specific attribute value
+  protected String getAttributePublishTopic(String assetId, String attributeName) {
+    return getTopicPrefix() + "/writeattributevalue/" + attributeName + "/" + assetId;
+  }
+
+  protected boolean isSupportedMyGridAssetType(String assetType) {
+    return assetType != null && MYGRID_ASSET_TYPES.contains(assetType);
+  }
+
+  protected void processAllowAutomaticControlButtonWrite(AttributeEvent event) {
+    Boolean externalControl = event.getValue(Boolean.class).orElse(null);
+    if (externalControl == null) {
+      LOG.warning(
+          "Ignoring allowAutomaticControlButton write with non-boolean value for asset "
+              + event.getId());
+      return;
     }
 
-    // Construct the initial topic prefix based on the agent's config (example:
-    // mygrid/serviceuser)
-    protected String getTopicPrefix() {
-        String realm = this.getAgent().getMyGridRealm()
-                .orElseThrow(() -> new IllegalArgumentException("MyGrid realm was not configured"));
-        String clientId = this.getAgent().getClientId()
-                .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
-        return realm + "/" + clientId;
+    String assetType = myGridAssetTypes.get(event.getId());
+    if (!isSupportedMyGridAssetType(assetType)) {
+      LOG.warning(
+          "Ignoring allowAutomaticControlButton write for asset "
+              + event.getId()
+              + " with unknown MyGrid asset type");
+      return;
     }
 
-    // Return the wildcard topic for asset events (example:
-    // mygrid/serviceuser/asset/#)
-    protected String getAssetEventsTopic() {
-        return getTopicPrefix() + "/asset/#";
+    if (mqttClient == null) {
+      LOG.warning(
+          "Ignoring allowAutomaticControlButton write because the MQTT client is not available");
+      return;
     }
 
-    // Return the wildcard topic for attribute events (example:
-    // mygrid/serviceuser/attribute/+/#)
-    protected String getAttributeEventsTopic() {
-        return getTopicPrefix() + "/attribute/+/#";
+    if (MYGRID_MODULE_ONE_ASSET_TYPE.equals(assetType)) {
+      publishMyGridAttribute(event.getId(), EXTERNAL_CONTROL_ATTRIBUTE, externalControl);
     }
 
-    // Return the topic for publishing a specific attribute value
-    protected String getAttributePublishTopic(String assetId, String attributeName) {
-        return getTopicPrefix() + "/writeattributevalue/" + attributeName + "/" + assetId;
+    publishMyGridAttribute(
+        event.getId(),
+        CONTROL_SOURCE_ATTRIBUTE,
+        externalControl ? CONTROL_SOURCE_OURGRID : CONTROL_SOURCE_MYGRID);
+    mqttProtocol.updateLinkedAttribute(event.getRef(), externalControl);
+  }
+
+  protected void publishMyGridAttribute(String assetId, String attributeName, Object value) {
+    String topic = getAttributePublishTopic(assetId, attributeName);
+    String payload = ValueUtil.asJSON(value).orElse(String.valueOf(value));
+
+    LOG.info(
+        "Publishing MyGrid attribute write: "
+            + attributeName
+            + " for asset "
+            + assetId
+            + " with payload "
+            + payload);
+    mqttClient.sendMessage(new MQTTMessage<>(topic, payload));
+  }
+
+  // Sync the relevant assets from MyGrid to the local OpenRemote
+  // instance
+  protected void syncMyGridAssets() {
+    LOG.info("Syncing battery assets (ModuleOneAsset, ModuleTwoAsset) from MyGrid");
+
+    String myGridRealm =
+        this.agent
+            .getMyGridRealm()
+            .orElseThrow(
+                () -> new IllegalArgumentException("Agent mygrid realm was not configured"));
+    String url =
+        "https://"
+            + this.agent
+                .getHost()
+                .orElseThrow(() -> new IllegalArgumentException("Agent host was not configured"));
+
+    // Get the token before querying the assets
+    Map<String, String> oAuthResponse = getMyGridOAuthToken(url, myGridRealm);
+
+    if (oAuthResponse.isEmpty()) {
+      LOG.severe("Failed to get auth token response while syncing battery assets from MyGrid");
+      return;
     }
 
-    protected boolean isSupportedMyGridAssetType(String assetType) {
-        return assetType != null && MYGRID_ASSET_TYPES.contains(assetType);
+    String accessToken = oAuthResponse.get("access_token");
+
+    if (accessToken == null) {
+      LOG.severe(
+          "Failed to get access token from OAuth response while syncing battery assets from MyGrid");
+      return;
     }
 
-    protected void processAllowAutomaticControlButtonWrite(AttributeEvent event) {
-        Boolean externalControl = event.getValue(Boolean.class).orElse(null);
-        if (externalControl == null) {
-            LOG.warning("Ignoring allowAutomaticControlButton write with non-boolean value for asset " + event.getId());
-            return;
-        }
+    // Query the assets
+    List<Asset<?>> mygridAssets = getMyGridAssets(url, myGridRealm, accessToken);
 
-        String assetType = myGridAssetTypes.get(event.getId());
-        if (!isSupportedMyGridAssetType(assetType)) {
-            LOG.warning("Ignoring allowAutomaticControlButton write for asset " + event.getId()
-                    + " with unknown MyGrid asset type");
-            return;
-        }
+    // Provision each asset
+    mygridAssets.forEach(this::provisionBatteryAsset);
+  }
 
-        if (mqttClient == null) {
-            LOG.warning("Ignoring allowAutomaticControlButton write because the MQTT client is not available");
-            return;
-        }
+  // Query the MyGrid OpenRemote API for the supported battery asset types
+  protected List<Asset<?>> getMyGridAssets(String url, String realm, String accessToken) {
+    String assetQueryUrl = url + "/api/" + realm + "/asset/query";
 
-        if (MYGRID_MODULE_ONE_ASSET_TYPE.equals(assetType)) {
-            publishMyGridAttribute(event.getId(), EXTERNAL_CONTROL_ATTRIBUTE, externalControl);
-        }
+    ResteasyClient client = resteasyClient.get();
+    Map<String, Object> assetQuery = new HashMap<>();
 
-        publishMyGridAttribute(event.getId(), CONTROL_SOURCE_ATTRIBUTE,
-                externalControl ? CONTROL_SOURCE_OURGRID : CONTROL_SOURCE_MYGRID);
-        mqttProtocol.updateLinkedAttribute(event.getRef(), externalControl);
+    assetQuery.put("types", List.of(MYGRID_MODULE_ONE_ASSET_TYPE, MYGRID_MODULE_TWO_ASSET_TYPE));
+
+    try (Response response =
+        client
+            .target(assetQueryUrl)
+            .request()
+            .header("Authorization", "Bearer " + accessToken)
+            .build("POST", Entity.json(assetQuery))
+            .invoke()) {
+
+      if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+        return response.readEntity(new jakarta.ws.rs.core.GenericType<>() {});
+      }
+      return Collections.emptyList();
+    } catch (Exception e) {
+      LOG.severe("Failed to query assets: " + e.getMessage());
+      return Collections.emptyList();
+    }
+  }
+
+  // Get the OAuth token from the MyGrid Keycloak instance
+  protected Map<String, String> getMyGridOAuthToken(String url, String realm) {
+    UsernamePassword usernamePassword =
+        this.agent
+            .getUsernamePassword()
+            .orElseThrow(() -> new IllegalArgumentException("Client secret was not configured"));
+    String serviceUser =
+        this.agent
+            .getClientId()
+            .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
+    String serviceUserSecret = usernamePassword.getPassword();
+
+    Map<String, String> data = new HashMap<>();
+    data.put("grant_type", "client_credentials");
+    data.put("client_id", serviceUser);
+    data.put("client_secret", serviceUserSecret);
+
+    ResteasyClient client = resteasyClient.get();
+    jakarta.ws.rs.core.MultivaluedHashMap<String, String> formData =
+        new jakarta.ws.rs.core.MultivaluedHashMap<>();
+    data.forEach(formData::add);
+
+    try (Response response =
+        client
+            .target(url + "/auth/realms/" + realm + "/protocol/openid-connect/token")
+            .request()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .build("POST", Entity.form(formData))
+            .invoke()) {
+
+      if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+        return response.readEntity(new jakarta.ws.rs.core.GenericType<Map<String, String>>() {});
+      }
+      return Collections.emptyMap();
+    } catch (Exception e) {
+      LOG.severe("Failed to get auth token: " + e.getMessage());
+      return Collections.emptyMap();
+    }
+  }
+
+  /*
+   * Retry mechanism for subscribing to a MQTT topic with a delay between retries
+   * and a max number of retries.
+   * Prevents double subscriptions to the same topic.
+   */
+  protected void tryAddMQTTMessageConsumer(
+      String topic, Consumer<MQTTMessage<String>> consumer, int maxRetries, long delayMs) {
+
+    if (maxRetries <= 0) {
+      LOG.warning("Max retries reached for subscribing to " + topic);
+      return;
     }
 
-    protected void publishMyGridAttribute(String assetId, String attributeName, Object value) {
-        String topic = getAttributePublishTopic(assetId, attributeName);
-        String payload = ValueUtil.asJSON(value).orElse(String.valueOf(value));
-
-        LOG.info("Publishing MyGrid attribute write: " + attributeName + " for asset " + assetId
-                + " with payload " + payload);
-        mqttClient.sendMessage(new MQTTMessage<>(topic, payload));
-    }
-
-    // Sync the relevant assets from MyGrid to the local OpenRemote
-    // instance
-    protected void syncMyGridAssets() {
-        LOG.info("Syncing battery assets (ModuleOneAsset, ModuleTwoAsset) from MyGrid");
-
-        String myGridRealm = this.agent.getMyGridRealm()
-                .orElseThrow(() -> new IllegalArgumentException("Agent mygrid realm was not configured"));
-        String url = "https://"
-                + this.agent.getHost().orElseThrow(() -> new IllegalArgumentException("Agent host was not configured"));
-
-        // Get the token before querying the assets
-        Map<String, String> oAuthResponse = getMyGridOAuthToken(url, myGridRealm);
-
-        if (oAuthResponse.isEmpty()) {
-            LOG.severe("Failed to get auth token response while syncing battery assets from MyGrid");
-            return;
-        }
-
-        String accessToken = oAuthResponse.get("access_token");
-
-        if (accessToken == null) {
-            LOG.severe(
-                    "Failed to get access token from OAuth response while syncing battery assets from MyGrid");
-            return;
-        }
-
-        // Query the assets
-        List<Asset<?>> mygridAssets = getMyGridAssets(url, myGridRealm, accessToken);
-
-        // Provision each asset
-        mygridAssets.forEach(this::provisionBatteryAsset);
-    }
-
-    // Query the MyGrid OpenRemote API for the supported battery asset types
-    protected List<Asset<?>> getMyGridAssets(String url, String realm, String accessToken) {
-        String assetQueryUrl = url + "/api/" + realm + "/asset/query";
-
-        ResteasyClient client = resteasyClient.get();
-        Map<String, Object> assetQuery = new HashMap<>();
-
-        assetQuery.put("types", List.of(MYGRID_MODULE_ONE_ASSET_TYPE, MYGRID_MODULE_TWO_ASSET_TYPE));
-
-        try (Response response = client.target(assetQueryUrl)
-                .request()
-                .header("Authorization", "Bearer " + accessToken)
-                .build("POST", Entity.json(assetQuery))
-                .invoke()) {
-
-            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return response.readEntity(new jakarta.ws.rs.core.GenericType<>() {
-                });
+    scheduledExecutor.schedule(
+        () -> {
+          try {
+            if (subscribedTopics.contains(topic)) {
+              LOG.info("Already subscribed to " + topic);
+              return;
             }
-            return Collections.emptyList();
-        } catch (Exception e) {
-            LOG.severe("Failed to query assets: " + e.getMessage());
-            return Collections.emptyList();
-        }
+
+            mqttClient.addMessageConsumer(topic, consumer);
+            subscribedTopics.add(topic);
+            LOG.info("Successfully subscribed to " + topic);
+            LOG.info("Subscribed topics: " + subscribedTopics);
+          } catch (Exception e) {
+            LOG.warning("Error subscribing to " + topic + ": " + e.getMessage());
+            tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
+          }
+        },
+        delayMs,
+        TimeUnit.MILLISECONDS);
+  }
+
+  /*
+   * Asset Event Consumer
+   * Process the asset events from the MyGrid MQTT broker
+   * CREATE/UPDATE: provision or refresh the battery asset and source type
+   * DELETE: delete the battery asset and remove the source type
+   */
+  protected void onMyGridAssetEvent(MQTTMessage<String> msg) {
+    SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
+
+    if (event instanceof AssetEvent assetEvent) {
+      if (!isSupportedMyGridAssetType(assetEvent.getAssetType())) {
+        return; // Don't process unrelated asset types.
+      }
+
+      // Handle battery asset lifecycle events
+      switch (assetEvent.getCause()) {
+        case CREATE:
+        case UPDATE:
+          provisionBatteryAsset(assetEvent.getAsset());
+          break;
+        case DELETE:
+          myGridAssetTypes.remove(assetEvent.getAsset().getId());
+          protocolAssetService.deleteAssets(assetEvent.getAsset().getId());
+          break;
+        default:
+          break;
+      }
     }
+  }
 
-    // Get the OAuth token from the MyGrid Keycloak instance
-    protected Map<String, String> getMyGridOAuthToken(String url, String realm) {
-        UsernamePassword usernamePassword = this.agent.getUsernamePassword()
-                .orElseThrow(() -> new IllegalArgumentException("Client secret was not configured"));
-        String serviceUser = this.agent.getClientId()
-                .orElseThrow(() -> new IllegalArgumentException("Client ID was not configured"));
-        String serviceUserSecret = usernamePassword.getPassword();
+  /*
+   * Attribute Event Consumer
+   * Process the attribute events from the MyGrid MQTT broker
+   * Forward the attribute event to the internal message broker for processing
+   * after mapping the attribute name to the equivalent Ourgrid attribute name
+   */
+  protected void onMyGridAttributeEvent(MQTTMessage<String> msg) {
+    SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
 
-        Map<String, String> data = new HashMap<>();
-        data.put("grant_type", "client_credentials");
-        data.put("client_id", serviceUser);
-        data.put("client_secret", serviceUserSecret);
+    // Forward the attribute event to the internal message broker
+    if (event instanceof AttributeEvent attributeEvent
+        && Arrays.asList(SUBSCRIBED_ATTRIBUTES).contains(attributeEvent.getName())) {
 
-        ResteasyClient client = resteasyClient.get();
-        jakarta.ws.rs.core.MultivaluedHashMap<String, String> formData = new jakarta.ws.rs.core.MultivaluedHashMap<>();
-        data.forEach(formData::add);
+      LOG.info(
+          "Processing external attribute event: "
+              + attributeEvent.getName()
+              + " for asset "
+              + attributeEvent.getId()
+              + " with new value "
+              + attributeEvent.getValue());
 
-        try (Response response = client.target(url + "/auth/realms/" + realm + "/protocol/openid-connect/token")
-                .request()
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .build("POST", Entity.form(formData))
-                .invoke()) {
-
-            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return response.readEntity(new jakarta.ws.rs.core.GenericType<Map<String, String>>() {
-                });
-            }
-            return Collections.emptyMap();
-        } catch (Exception e) {
-            LOG.severe("Failed to get auth token: " + e.getMessage());
-            return Collections.emptyMap();
-        }
+      // Ensure the attribute event is updated to the agent's realm
+      attributeEvent.setRealm(this.agent.getRealm());
+      protocolAssetService.sendAttributeEvent(attributeEvent);
     }
-
-    /*
-     * Retry mechanism for subscribing to a MQTT topic with a delay between retries
-     * and a max number of retries.
-     * Prevents double subscriptions to the same topic.
-     */
-    protected void tryAddMQTTMessageConsumer(String topic, Consumer<MQTTMessage<String>> consumer, int maxRetries,
-            long delayMs) {
-
-        if (maxRetries <= 0) {
-            LOG.warning("Max retries reached for subscribing to " + topic);
-            return;
-        }
-
-        scheduledExecutor.schedule(() -> {
-            try {
-                if (subscribedTopics.contains(topic)) {
-                    LOG.info("Already subscribed to " + topic);
-                    return;
-                }
-
-                mqttClient.addMessageConsumer(topic, consumer);
-                subscribedTopics.add(topic);
-                LOG.info("Successfully subscribed to " + topic);
-                LOG.info("Subscribed topics: " + subscribedTopics);
-            } catch (Exception e) {
-                LOG.warning("Error subscribing to " + topic + ": " + e.getMessage());
-                tryAddMQTTMessageConsumer(topic, consumer, maxRetries - 1, delayMs);
-            }
-        }, delayMs, TimeUnit.MILLISECONDS);
-    }
-
-    /*
-     * Asset Event Consumer
-     * Process the asset events from the MyGrid MQTT broker
-     * CREATE/UPDATE: provision or refresh the battery asset and source type
-     * DELETE: delete the battery asset and remove the source type
-     */
-    protected void onMyGridAssetEvent(MQTTMessage<String> msg) {
-        SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
-
-        if (event instanceof AssetEvent assetEvent) {
-            if (!isSupportedMyGridAssetType(assetEvent.getAssetType())) {
-                return; // Don't process unrelated asset types.
-            }
-
-            // Handle battery asset lifecycle events
-            switch (assetEvent.getCause()) {
-                case CREATE:
-                case UPDATE:
-                    provisionBatteryAsset(assetEvent.getAsset());
-                    break;
-                case DELETE:
-                    myGridAssetTypes.remove(assetEvent.getAsset().getId());
-                    protocolAssetService.deleteAssets(assetEvent.getAsset().getId());
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    /*
-     * Attribute Event Consumer
-     * Process the attribute events from the MyGrid MQTT broker
-     * Forward the attribute event to the internal message broker for processing
-     * after mapping the attribute name to the equivalent Ourgrid attribute name
-     */
-    protected void onMyGridAttributeEvent(MQTTMessage<String> msg) {
-        SharedEvent event = ValueUtil.parse(msg.getPayload(), SharedEvent.class).orElse(null);
-
-        // Forward the attribute event to the internal message broker
-        if (event instanceof AttributeEvent attributeEvent
-                && Arrays.asList(SUBSCRIBED_ATTRIBUTES).contains(attributeEvent.getName())) {
-
-            LOG.info("Processing external attribute event: " + attributeEvent.getName() + " for asset "
-                    + attributeEvent.getId() + " with new value " + attributeEvent.getValue());
-
-            // Ensure the attribute event is updated to the agent's realm
-            attributeEvent.setRealm(this.agent.getRealm());
-            protocolAssetService.sendAttributeEvent(attributeEvent);
-
-        }
-    }
-
+  }
 }
