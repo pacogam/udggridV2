@@ -19,8 +19,14 @@ dependencies {
   implementation libs.rabbitmq.amqp.client
   implementation libs.jackson.datatype.jsr310
 
-  testImplementation libs.openremote.test
+  testImplementation libs.junit.jupiter.api
+  testImplementation libs.junit.jupiter.engine
+  testImplementation libs.junit.platform.launcher
   testImplementation libs.mockito.core
+
+  mockitoAgent(libs.mockito.core) {
+    transitive = false
+  }
 }
 
 tasks.register('installDist') {
