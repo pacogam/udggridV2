@@ -15,14 +15,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "npx tsc -b --force",
+    "build": "tsc -b --force",
     "test": "echo \"No tests\" && exit 0",
-    "prepublishOnly": "npx tsc -b"
+    "prepublishOnly": "tsc -b"
   },
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
-    "@openremote/util": "~1.26.1"
+    "@openremote/util": "~1.26.1",
+    "typescript": "5.8.3"
   },
   "publishConfig": {
     "access": "restricted"

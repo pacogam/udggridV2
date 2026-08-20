@@ -15,20 +15,24 @@
     "dist"
   ],
   "scripts": {
-    "build": "npx tsc -b",
+    "build": "tsc -b",
     "test": "echo \"No tests\" && exit 0",
-    "prepublishOnly": "npx webpack"
+    "prepublishOnly": "webpack"
   },
   "author": "OpenRemote",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "@openremote/model": "~1.26.1",
     "@openremote/rest": "~1.26.1",
+    "axios": "1.18.1",
     "model": "workspace:*",
     "qs": "^6.8.0"
   },
   "devDependencies": {
     "@openremote/util": "~1.26.1",
-    "@types/qs": "^6.9.7"
+    "@types/qs": "^6.9.7",
+    "typescript": "5.8.3",
+    "webpack": "^5.108.3"
   },
   "publishConfig": {
     "access": "restricted"
