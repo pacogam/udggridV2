@@ -55,6 +55,10 @@ public class OurgridBatteryAsset extends ElectricityBatteryAsset {
           new MetaItem<>(MetaItemType.ACCESS_RESTRICTED_READ),
           new MetaItem<>(MetaItemType.READ_ONLY));
 
+  public static final AttributeDescriptor<Boolean> OURGRID_CONTROL =
+      new AttributeDescriptor<>(
+          "ourgridControl", ValueType.BOOLEAN, new MetaItem<>(MetaItemType.RULE_STATE));
+
   public static final AttributeDescriptor<String> SOFTWARE_VERSION =
       new AttributeDescriptor<>(
           "softwareVersion",

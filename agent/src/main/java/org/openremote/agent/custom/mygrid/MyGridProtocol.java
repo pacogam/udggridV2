@@ -61,11 +61,11 @@ import org.openremote.model.util.ValueUtil;
  * forwards subscribed telemetry attributes, and configures MQTT links for writable attributes.
  * Asset create/update events refresh the local asset and type tracking; delete events remove both.
  *
- * <p>Writes to {@link OurgridBatteryAsset#ALLOW_AUTOMATIC_CONTROL_BUTTON} map {@code false} to
- * {@code controlSource=MyGrid} and {@code true} to {@code controlSource=OurGrid}. {@code
- * ModuleOneAsset} receives both the legacy {@code externalControl} boolean and the new {@code
- * controlSource} enum value; {@code ModuleTwoAsset} receives only {@code controlSource}. Writes are
- * ignored when the source MyGrid asset type is unknown.
+ * <p>Writes to {@link OurgridBatteryAsset#OURGRID_CONTROL} map {@code false} to {@code
+ * controlSource=MyGrid} and {@code true} to {@code controlSource=OurGrid}. {@code ModuleOneAsset}
+ * receives both the legacy {@code externalControl} boolean and the new {@code controlSource} enum
+ * value; {@code ModuleTwoAsset} receives only {@code controlSource}. Writes are ignored when the
+ * source MyGrid asset type is unknown.
  *
  * @see MyGridAgent
  * @see MyGridMQTTProtocol
@@ -184,8 +184,8 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
             + " for asset "
             + event.getId());
 
-    if (OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON.getName().equals(event.getName())) {
-      processAllowAutomaticControlButtonWrite(event);
+    if (OurgridBatteryAsset.OURGRID_CONTROL.getName().equals(event.getName())) {
+      processOurgridControlWrite(event);
       return;
     }
 
@@ -370,19 +370,18 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
                       .setPublishTopic(powerSetpointAttributePublishTopic)));
     }
 
-    // allowAutomaticControlButton
-    var allowAutomaticControlButtonAttribute =
-        batteryAsset.getAttribute(OurgridBatteryAsset.ALLOW_AUTOMATIC_CONTROL_BUTTON);
-    if (allowAutomaticControlButtonAttribute.isPresent()) {
-      var allowAutomaticControlButtonAttributePublishTopic =
+    // Ourgrid control
+    var ourgridControlAttribute = batteryAsset.getAttribute(OurgridBatteryAsset.OURGRID_CONTROL);
+    if (ourgridControlAttribute.isPresent()) {
+      var ourgridControlAttributePublishTopic =
           getAttributePublishTopic(batteryAsset.getId(), CONTROL_SOURCE_ATTRIBUTE);
-      allowAutomaticControlButtonAttribute
+      ourgridControlAttribute
           .get()
           .addOrReplaceMeta(
               new MetaItem<>(
                   AGENT_LINK,
                   new MQTTAgentLink(this.agent.getId())
-                      .setPublishTopic(allowAutomaticControlButtonAttributePublishTopic)
+                      .setPublishTopic(ourgridControlAttributePublishTopic)
                       .setUpdateOnWrite(true)));
     }
   }
@@ -422,27 +421,25 @@ public class MyGridProtocol implements Protocol<MyGridAgent> {
     return assetType != null && MYGRID_ASSET_TYPES.contains(assetType);
   }
 
-  protected void processAllowAutomaticControlButtonWrite(AttributeEvent event) {
+  protected void processOurgridControlWrite(AttributeEvent event) {
     Boolean externalControl = event.getValue(Boolean.class).orElse(null);
     if (externalControl == null) {
       LOG.warning(
-          "Ignoring allowAutomaticControlButton write with non-boolean value for asset "
-              + event.getId());
+          "Ignoring ourgridControl write with non-boolean value for asset " + event.getId());
       return;
     }
 
     String assetType = myGridAssetTypes.get(event.getId());
     if (!isSupportedMyGridAssetType(assetType)) {
       LOG.warning(
-          "Ignoring allowAutomaticControlButton write for asset "
+          "Ignoring ourgridControl write for asset "
               + event.getId()
               + " with unknown MyGrid asset type");
       return;
     }
 
     if (mqttClient == null) {
-      LOG.warning(
-          "Ignoring allowAutomaticControlButton write because the MQTT client is not available");
+      LOG.warning("Ignoring ourgridControl write because the MQTT client is not available");
       return;
     }
 
