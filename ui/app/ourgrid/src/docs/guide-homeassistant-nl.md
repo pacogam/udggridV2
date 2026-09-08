@@ -6,12 +6,12 @@ Verbind je Home Assistant en reageer automatisch op challenges. Je ontvangt alle
 
 ### Vereisten
 
-- Een [GitHub-account](https://github.com) is vereist voor het instellen van de Home Assistant community store.
+- Een <a href="https://github.com" target="_blank">GitHub account</a> is vereist voor het instellen van de Home Assistant community store.
 
 ### 1. Installeer HACS
 
-1. Installeer de [Home Assistant Community Store](https://www.hacs.xyz/docs/use/download/download/) via de installatiehandleiding op hun website.
-2. Stel de [HACS-integratie](https://www.hacs.xyz/docs/use/configuration/basic/) in, zodat community-integraties geïnstalleerd kunnen worden.
+1. Installeer de <a href="https://www.hacs.xyz/docs/use/download/download/" target="_blank">Home Assistant Community Store</a> via de installatiehandleiding op hun website.
+2. Stel de <a href="https://www.hacs.xyz/docs/use/configuration/basic/" target="_blank">HACS-integratie</a> in, zodat community-integraties geïnstalleerd kunnen worden.
 
 ### 2. Download de OurGrid-integratie
 

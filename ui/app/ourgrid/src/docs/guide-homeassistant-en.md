@@ -6,12 +6,12 @@ Connect Home Assistant and respond to challenges automatically. You'll receive a
 
 ### Requirements
 
-- A [GitHub account](https://github.com) is required to set up the Home Assistant Community Store.
+- A <a href="https://github.com" target="_blank">GitHub account</a> is required to set up the Home Assistant Community Store.
 
 ### 1. Install HACS
 
-1. Install the [Home Assistant Community Store](https://www.hacs.xyz/docs/use/download/download/) by following the installation guide on their website.
-2. Set up the [HACS integration](https://www.hacs.xyz/docs/use/configuration/basic/) to allow community integrations to be installed.
+1. Install the <a href="https://www.hacs.xyz/docs/use/download/download/" target="_blank">Home Assistant Community Store</a> by following the installation guide on their website.
+2. Set up the <a href="https://www.hacs.xyz/docs/use/configuration/basic/" target="_blank">HACS integration</a> to allow community integrations to be installed.
 
 ### 2. Download the OurGrid integration
 
