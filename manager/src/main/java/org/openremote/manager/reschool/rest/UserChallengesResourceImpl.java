@@ -1,7 +1,29 @@
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 package org.openremote.manager.reschool.rest;
+
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.Collections;
 import org.openremote.agent.custom.ourgrid.OurgridChallengesAsset;
 import org.openremote.container.timer.TimerService;
 import org.openremote.manager.asset.AssetStorageService;
@@ -14,95 +36,96 @@ import org.openremote.model.query.AssetQuery;
 import org.openremote.model.query.filter.RealmPredicate;
 import org.openremote.model.reschool.UserChallengesResource;
 
-import java.util.Collection;
-import java.util.Collections;
+public class UserChallengesResourceImpl extends ManagerWebResource
+    implements UserChallengesResource {
 
-import static jakarta.ws.rs.core.Response.Status.*;
+  protected final AssetStorageService assetStorageService;
 
-public class UserChallengesResourceImpl extends ManagerWebResource implements UserChallengesResource {
+  public UserChallengesResourceImpl(
+      TimerService timerService,
+      ManagerIdentityService identityService,
+      AssetStorageService assetStorageService) {
+    super(timerService, identityService);
+    this.assetStorageService = assetStorageService;
+  }
 
-    protected final AssetStorageService assetStorageService;
+  @Override
+  public Response verifyChallengesAsset(RequestParams requestParams) {
+    if (!isAuthenticated()) {
+      throw new WebApplicationException(UNAUTHORIZED);
+    }
+    if (!userHasLinkedChallengesAsset(getAuthenticatedRealmName(), getUserId())) {
+      throw new WebApplicationException(NOT_FOUND);
+    } else {
+      return Response.ok().build();
+    }
+  }
 
-    public UserChallengesResourceImpl(TimerService timerService, ManagerIdentityService identityService, AssetStorageService assetStorageService) {
-        super(timerService, identityService);
-        this.assetStorageService = assetStorageService;
+  @Override
+  public Response linkChallengesAsset(RequestParams requestParams, LinkChallengesDetails details) {
+    if (!isAuthenticated()) {
+      throw new WebApplicationException(UNAUTHORIZED);
     }
 
-    @Override
-    public Response verifyChallengesAsset(RequestParams requestParams) {
-        if (!isAuthenticated()) {
-            throw new WebApplicationException(UNAUTHORIZED);
-        }
-        if(!userHasLinkedChallengesAsset(getAuthenticatedRealmName(), getUserId())) {
-            throw new WebApplicationException(NOT_FOUND);
-        } else {
-            return Response.ok().build();
-        }
-    }
-
-    @Override
-    public Response linkChallengesAsset(RequestParams requestParams, LinkChallengesDetails details) {
-        if (!isAuthenticated()) {
-            throw new WebApplicationException(UNAUTHORIZED);
-        }
-
-        // If the asset name exists within the realm
-        Asset<?> asset = assetStorageService.find(new AssetQuery()
+    // If the asset name exists within the realm
+    Asset<?> asset =
+        assetStorageService.find(
+            new AssetQuery()
                 .select(new AssetQuery.Select().excludeAttributes())
                 .realm(new RealmPredicate(getAuthenticatedRealmName()))
                 .types(OurgridChallengesAsset.class)
-                .ids(details.assetId)
-        );
-        if (asset == null) {
-            throw new WebApplicationException("Challenges asset could not be found", NOT_FOUND);
-        }
-
-        // If the user is not already connected to a device...
-        if(userHasLinkedChallengesAsset(asset.getRealm(), getUserId())) {
-            throw new WebApplicationException("User is already linked to a challenges asset", CONFLICT);
-        }
-
-        // Link user to the asset
-        assetStorageService.storeUserAssetLinks(Collections.singletonList(new UserAssetLink(asset.getRealm(), getUserId(), asset.getId())));
-
-        return Response.ok().build();
+                .ids(details.assetId));
+    if (asset == null) {
+      throw new WebApplicationException("Challenges asset could not be found", NOT_FOUND);
     }
 
-    @Override
-    public Response removeChallengesAsset(RequestParams requestParams) {
-        if (!isAuthenticated()) {
-            throw new WebApplicationException(UNAUTHORIZED);
-        }
-
-        Collection<Asset<?>> linkedChallengesAssetsOfUser = getLinkedChallengesAssetsOfUser(getAuthenticatedRealmName(), getUserId());
-        if (linkedChallengesAssetsOfUser.size() == 0) {
-            throw new WebApplicationException("User is not linked to any challenges asset.", NOT_FOUND);
-        }
-
-        linkedChallengesAssetsOfUser.forEach((Asset<?> a) ->
-                assetStorageService.deleteUserAssetLinks(a.getId())
-        );
-
-        return Response.ok().build();
+    // If the user is not already connected to a device...
+    if (userHasLinkedChallengesAsset(asset.getRealm(), getUserId())) {
+      throw new WebApplicationException("User is already linked to a challenges asset", CONFLICT);
     }
 
+    // Link user to the asset
+    assetStorageService.storeUserAssetLinks(
+        Collections.singletonList(new UserAssetLink(asset.getRealm(), getUserId(), asset.getId())));
 
+    return Response.ok().build();
+  }
 
-    /* ----------------------------------------------------- */
-
-    protected boolean userHasLinkedChallengesAsset(String realm, String userId) {
-        return getLinkedChallengesAssetsOfUser(realm, userId).size() > 0;
+  @Override
+  public Response removeChallengesAsset(RequestParams requestParams) {
+    if (!isAuthenticated()) {
+      throw new WebApplicationException(UNAUTHORIZED);
     }
 
-    protected Collection<Asset<?>> getLinkedChallengesAssetsOfUser(String realm, String userId) {
-
-        Collection<UserAssetLink> userAssetLinks = assetStorageService.findUserAssetLinks(realm, userId, null);
-        String[] assetIds = userAssetLinks.stream().map(l -> l.getId().getAssetId()).toArray(String[]::new);
-        return assetStorageService.findAll(new AssetQuery()
-                .select(new AssetQuery.Select().excludeAttributes())
-                .realm(new RealmPredicate(realm))
-                .types(OurgridChallengesAsset.class)
-                .ids(assetIds)
-        );
+    Collection<Asset<?>> linkedChallengesAssetsOfUser =
+        getLinkedChallengesAssetsOfUser(getAuthenticatedRealmName(), getUserId());
+    if (linkedChallengesAssetsOfUser.size() == 0) {
+      throw new WebApplicationException("User is not linked to any challenges asset.", NOT_FOUND);
     }
+
+    linkedChallengesAssetsOfUser.forEach(
+        (Asset<?> a) -> assetStorageService.deleteUserAssetLinks(a.getId()));
+
+    return Response.ok().build();
+  }
+
+  /* ----------------------------------------------------- */
+
+  protected boolean userHasLinkedChallengesAsset(String realm, String userId) {
+    return getLinkedChallengesAssetsOfUser(realm, userId).size() > 0;
+  }
+
+  protected Collection<Asset<?>> getLinkedChallengesAssetsOfUser(String realm, String userId) {
+
+    Collection<UserAssetLink> userAssetLinks =
+        assetStorageService.findUserAssetLinks(realm, userId, null);
+    String[] assetIds =
+        userAssetLinks.stream().map(l -> l.getId().getAssetId()).toArray(String[]::new);
+    return assetStorageService.findAll(
+        new AssetQuery()
+            .select(new AssetQuery.Select().excludeAttributes())
+            .realm(new RealmPredicate(realm))
+            .types(OurgridChallengesAsset.class)
+            .ids(assetIds));
+  }
 }

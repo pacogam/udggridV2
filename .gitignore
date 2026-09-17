@@ -28,6 +28,7 @@ manager/.factorypath/
 Pods/
 xcuserdata/
 node_modules/
+.eslintcache
 .pnp.*
 .yarn/*
 !.yarn/patches

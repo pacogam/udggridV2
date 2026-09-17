@@ -1,33 +1,50 @@
-import {css, html, LitElement, TemplateResult} from "lit";
-import {customElement} from "lit/decorators.js";
-import {getAppStyle} from "./styles";
+/*
+ * Copyright 2026, OpenRemote Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import { css, html, LitElement, type TemplateResult } from "lit";
+import { customElement } from "lit/decorators.js";
+import { getAppStyle } from "./styles";
 import "./components/og-loading";
 
 const styling = css`
-    #wrapper {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 5vh;
-        background: var(--og-color-primary-dark)
-    }
+  #wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5vh;
+    background: var(--og-color-primary-dark);
+  }
 `;
 
 @customElement("city-selector-loader")
 export class CitySelectorLoader extends LitElement {
+  static get styles() {
+    return [getAppStyle(), styling] as any;
+  }
 
-    static get styles() {
-        return [getAppStyle(), styling] as any;
-    }
-
-    protected render(): TemplateResult {
-        return html`
-            <div id="wrapper">
-                <og-loading></og-loading>
-            </div>
-        `;
-    }
+  protected render(): TemplateResult {
+    return html`
+      <div id="wrapper">
+        <og-loading></og-loading>
+      </div>
+    `;
+  }
 }
