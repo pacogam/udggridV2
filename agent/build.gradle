@@ -22,6 +22,7 @@ dependencies {
     //implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
   implementation libs.rabbitmq.amqp.client
   implementation libs.jackson.datatype.jsr310
+  implementation libs.paho.client.mqttv3
 
   testImplementation libs.junit.jupiter.api
   testImplementation libs.junit.jupiter.engine
